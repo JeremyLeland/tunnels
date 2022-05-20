@@ -8,7 +8,7 @@
 <script type="module">
   import { Level } from '../src/Level.js';
 
-  const json = `{
+  const jsonStr = `{
     "lines": [
       [ 100, 100, 100, 400 ],
       [ 100, 400, 400, 400 ],
@@ -30,12 +30,14 @@
 
   // const json = await ( await fetch( '../levels/test1.json' ) ).text();
 
-  const level = Level.fromJson( JSON.parse( json ) );
+  const level = Level.fromJson( jsonStr );
 
   const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
 
   level.draw( ctx );
 
-  console.log( JSON.stringify( level.toJson() ) );
+  console.log( level.closestNodeTo( 400, 200 ) );
+
+  console.log( level.toJson() );
 
 </script>

@@ -4,8 +4,10 @@ export class Level {
   lines = [];
   nodes = [];
 
-  static fromJson( json ) {
+  static fromJson( jsonStr ) {
     const level = new Level();
+
+    const json = JSON.parse( jsonStr );
 
     level.lines = Array.from( json.lines, points => new Line( ...points ) );
     
@@ -30,10 +32,18 @@ export class Level {
       links: node.links.map( link => nodesMap.get( link ) ).filter( e => e != null ) 
     } ) );
 
-    return {
+    return JSON.stringify( {
       lines: lineInfo,
       nodes: nodeInfo,
-    };
+    } );
+  }
+
+  closestNodeTo( x, y ) {
+    return this.nodes.map( 
+      node => ( { node: node, dist: Math.hypot( node.x - x, node.y - y ) } )
+    ).reduce( 
+      ( a, b ) => { return a.dist < b.dist ? a : b } 
+    ).node;
   }
 
   draw( ctx ) {
