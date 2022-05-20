@@ -1,13 +1,13 @@
-import { Line } from '../../src/Line.js';
+import { Line } from './Line.js';
 
 export class Level {
-  loops = [];
+  lines = [];
   nodes = [];
 
   static fromJson( json ) {
     const level = new Level();
 
-    level.loops = Array.from( json.loops, points => Line.getLoopThroughPoints( points ) );
+    level.lines = Array.from( json.lines, points => new Line( ...points ) );
     
     level.nodes = Array.from( json.nodes );
     level.nodes.forEach( node => 
@@ -18,27 +18,27 @@ export class Level {
   }
 
   toJson() {
-    const loopInfo = Array.from( this.loops, loop => loop.map( line => [ line.x1, line.y1 ] ) );
+    const lineInfo = Array.from( this.lines, line => [ line.x1, line.y1, line.x2, line.y2 ] );
 
     const nodesMap = new Map();
     let nodeIndex = 0;
     this.nodes.forEach( node => nodesMap.set( node, nodeIndex ++ ) );
 
-    const nodeInfo = Array.from( this.nodes, node => ( 
-      { x: node.x, y: node.y, links: node.links.map( link => nodesMap.get( link ) ) }
-    ) );
+    const nodeInfo = Array.from( this.nodes, node => ( {
+      x: node.x, 
+      y: node.y,
+      links: node.links.map( link => nodesMap.get( link ) ).filter( e => e != null ) 
+    } ) );
 
     return {
-      loops: loopInfo,
+      lines: lineInfo,
       nodes: nodeInfo,
     };
   }
 
   draw( ctx ) {
     ctx.strokeStyle = 'gray';
-    this.loops.forEach( loop => 
-      loop.forEach( line => line.draw( ctx ) )
-    );
+    this.lines.forEach( line => line.draw( ctx ) );
 
     this.nodes.forEach( node => {
       ctx.beginPath();
@@ -47,13 +47,11 @@ export class Level {
       ctx.fill();
       
       node.links.forEach( link => {
-        if ( link ) {
-          ctx.beginPath();
-          ctx.moveTo( node.x, node.y );
-          ctx.lineTo( link.x, link.y );
-          ctx.strokeStyle = 'green';
-          ctx.stroke();
-        }
+        ctx.beginPath();
+        ctx.moveTo( node.x, node.y );
+        ctx.lineTo( link.x, link.y );
+        ctx.strokeStyle = 'green';
+        ctx.stroke();
       } );
     } );
   }
