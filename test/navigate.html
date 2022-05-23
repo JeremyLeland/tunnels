@@ -63,7 +63,7 @@
       }
 
       if ( this.path && !this.waypoint ) {
-        this.node = this.path.shift();
+        this.node = this.path.shift();        // NOTE: This intentionally skips first waypoint on path
 
         if ( this.path.length > 0 ) {
           this.waypoint = this.path[ 0 ];
@@ -74,8 +74,20 @@
           //   x: ( nextEdge.start.x + nextEdge.end.x ) / 2,
           //   y: ( nextEdge.start.y + nextEdge.end.y ) / 2,
           // };
+
+          // TODO: Never mind on all this, pick better waypoints
+          if ( this.path.length == 1 ) {
+            const toWaypoint = Math.hypot( this.waypoint.x - this.x, this.waypoint.y - this.y );
+            const toTarget = Math.hypot( this.target.x - this.x, this.target.y - this.y );
+
+            if ( toTarget < toWaypoint ) {
+              this.node = this.waypoint;
+              this.waypoint = null;
+            }
+          }
         }
-        else {
+
+        if ( !this.waypoint ) {
           this.path = null;
 
           this.waypoint = {
@@ -83,6 +95,7 @@
             y: this.target.y,
           };
 
+          // TODO: Probably shouldn't set this to null until we're done, in case target moves?
           this.target = null;
         }
       }
@@ -110,7 +123,7 @@
       }
         
       if ( this.path ) {
-        for ( let i = this.path.length - 2; i > 0; i -- ) {
+        for ( let i = this.path.length - 1; i > 0; i -- ) {
           const cell = this.path[ i ];
           ctx.lineTo( cell.x, cell.y );
         }
