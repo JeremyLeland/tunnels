@@ -22,6 +22,16 @@
       [ 200, 300, 200, 200 ]
     ],
     "nodes": [
+      { "x": 150, "y": 150, "links": [ 3, 1 ] },
+      { "x": 350, "y": 150, "links": [ 0, 2 ] },
+      { "x": 350, "y": 350, "links": [ 1, 3 ] },
+      { "x": 150, "y": 350, "links": [ 2, 0 ] }
+    ]
+  }
+  `;
+
+  /*
+  "nodes": [
       { "x": 150, "y": 150, "links": [ 7, 1 ] },
       { "x": 250, "y": 150, "links": [ 0, 2 ] },
       { "x": 350, "y": 150, "links": [ 1, 3 ] },
@@ -31,8 +41,7 @@
       { "x": 150, "y": 350, "links": [ 5, 7 ] },
       { "x": 150, "y": 250, "links": [ 6, 0 ] }
     ]
-  }
-  `;
+  */
   
   class PathfindingActor extends Actor {
     size = 10;
@@ -67,7 +76,7 @@
       }
 
       if ( this.path && !this.waypoint ) {
-        this.node = this.path.shift();        // NOTE: This intentionally skips first waypoint on path
+        this.node = this.path.shift();
 
         if ( this.path.length > 0 ) {
           // this.waypoint = this.path[ 0 ];
@@ -84,15 +93,15 @@
           // };
 
           // TODO: Never mind on all this, pick better waypoints
-          if ( this.path.length == 1 ) {
-            const toWaypoint = Math.hypot( this.waypoint.x - this.x, this.waypoint.y - this.y );
-            const toTarget = Math.hypot( this.target.x - this.x, this.target.y - this.y );
+          // if ( this.path.length == 1 ) {
+          //   const toWaypoint = Math.hypot( this.waypoint.x - this.x, this.waypoint.y - this.y );
+          //   const toTarget = Math.hypot( this.target.x - this.x, this.target.y - this.y );
 
-            if ( toTarget < toWaypoint ) {
-              this.node = this.waypoint;
-              this.waypoint = null;
-            }
-          }
+          //   if ( toTarget < toWaypoint ) {
+          //     this.node = this.waypoint;
+          //     this.waypoint = null;
+          //   }
+          // }
         }
 
         if ( !this.waypoint ) {
