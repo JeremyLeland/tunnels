@@ -16,32 +16,59 @@
       [ 100, 400, 400, 400 ],
       [ 400, 400, 400, 100 ],
       [ 400, 100, 100, 100 ],
-      [ 200, 200, 300, 200 ],
-      [ 300, 200, 300, 300 ],
-      [ 300, 300, 200, 300 ],
-      [ 200, 300, 200, 200 ]
+      [ 200, 250, 250, 200 ],
+      [ 250, 200, 300, 250 ],
+      [ 300, 250, 250, 300 ],
+      [ 250, 300, 200, 250 ]
     ],
-    "nodes": [
-      { "x": 150, "y": 150, "links": [ 3, 1 ] },
-      { "x": 350, "y": 150, "links": [ 0, 2 ] },
-      { "x": 350, "y": 350, "links": [ 1, 3 ] },
-      { "x": 150, "y": 350, "links": [ 2, 0 ] }
+    "cells": [
+      {
+        "x": 150, "y": 150, 
+        "edges": [
+          [ 100, 100, 100, 250 ],
+          [ 100, 250, 200, 250 ],
+          [ 200, 250, 250, 200 ],
+          [ 250, 200, 250, 100 ],
+          [ 250, 100, 100, 100 ]
+        ],
+        "links": [ null, 3, null, 1, null ]
+      },
+      {
+        "x": 350, "y": 150,
+        "edges": [
+          [ 250, 100, 250, 200 ],
+          [ 250, 200, 300, 250 ],
+          [ 300, 250, 400, 250 ],
+          [ 400, 250, 400, 100 ],
+          [ 400, 100, 250, 100 ]
+        ],
+        "links": [ 0, null, 2, null, null ]
+      },
+      {
+        "x": 350, "y": 350,
+        "edges": [
+          [ 300, 250, 250, 300 ],
+          [ 250, 300, 250, 400 ],
+          [ 250, 400, 400, 400 ],
+          [ 400, 400, 400, 250 ],
+          [ 400, 250, 300, 250 ]
+        ],
+        "links": [ null, 3, null, null, 1 ]
+      },
+      {
+        "x": 150, "y": 350,
+        "edges": [
+          [ 100, 250, 100, 400 ],
+          [ 100, 400, 250, 400 ],
+          [ 250, 400, 250, 300 ],
+          [ 250, 300, 200, 250 ],
+          [ 200, 250, 100, 250 ]
+        ],
+        "links": [ null, null, 2, null, 0 ]
+      }
     ]
   }
   `;
-
-  /*
-  "nodes": [
-      { "x": 150, "y": 150, "links": [ 7, 1 ] },
-      { "x": 250, "y": 150, "links": [ 0, 2 ] },
-      { "x": 350, "y": 150, "links": [ 1, 3 ] },
-      { "x": 350, "y": 250, "links": [ 2, 4 ] },
-      { "x": 350, "y": 350, "links": [ 3, 5 ] },
-      { "x": 250, "y": 350, "links": [ 4, 6 ] },
-      { "x": 150, "y": 350, "links": [ 5, 7 ] },
-      { "x": 150, "y": 250, "links": [ 6, 0 ] }
-    ]
-  */
   
   class PathfindingActor extends Actor {
     size = 10;
@@ -50,23 +77,23 @@
 
     target;
 
-    node;
+    cell;
     path;
     waypoint;
 
-    spawnInNode( node ) {
-      this.node = node;
+    spawnInCell( cell ) {
+      this.cell = cell;
 
       // TODO: Pick random spot on random edge, 
       //       random distance between that spot and center?
-      this.x = node.x;
-      this.y = node.y;
+      this.x = cell.x;
+      this.y = cell.y;
     }
 
     update( dt ) {
       if ( this.target ) {
-        if ( !this.path || this.target.node != this.path[ this.path.length - 1 ] ) {
-          this.path = Pathfinding.getPath( this.node, this.target.node );
+        if ( !this.path || this.target.cell != this.path[ this.path.length - 1 ] ) {
+          this.path = Pathfinding.getPath( this.cell, this.target.cell );
           this.waypoint = null;
         }
       }
@@ -76,16 +103,16 @@
       }
 
       if ( this.path && !this.waypoint ) {
-        this.node = this.path.shift();
+        this.cell = this.path.shift();
 
         if ( this.path.length > 0 ) {
           // this.waypoint = this.path[ 0 ];
           this.waypoint = {
-            x: ( this.node.x + this.path[ 0 ].x ) / 2,
-            y: ( this.node.y + this.path[ 0 ].y ) / 2,
+            x: ( this.cell.x + this.path[ 0 ].x ) / 2,
+            y: ( this.cell.y + this.path[ 0 ].y ) / 2,
           };
           // TODO: Nearest point on edge (instead of middle)
-          // const nextEdge = this.path[ 0 ].edges.find( edge => edge.neighbor == this.node );
+          // const nextEdge = this.path[ 0 ].edges.find( edge => edge.neighbor == this.cell );
 
           // this.waypoint = {
           //   x: ( nextEdge.start.x + nextEdge.end.x ) / 2,
@@ -98,7 +125,7 @@
           //   const toTarget = Math.hypot( this.target.x - this.x, this.target.y - this.y );
 
           //   if ( toTarget < toWaypoint ) {
-          //     this.node = this.waypoint;
+          //     this.cell = this.waypoint;
           //     this.waypoint = null;
           //   }
           // }
@@ -162,7 +189,7 @@
   const level = Level.fromJson( levelJsonStr );
   
   const player = new PathfindingActor();
-  player.spawnInNode( level.nodes[ 0 ] );
+  player.spawnInCell( level.cells[ 0 ] );
 
   const game = new Game();
   // game.scroll = { x: 32, y: 32 };
@@ -171,9 +198,9 @@
     if ( game.mouse.down ) {
       const x = game.mouse.x - game.scroll.x;
       const y = game.mouse.y - game.scroll.y;
-      const node = level.closestNodeTo( x, y );
-      if ( node ) {
-        player.target = { x: x, y: y, node: node }
+      const cell = level.closestCellTo( x, y );
+      if ( cell ) {
+        player.target = { x: x, y: y, cell: cell }
       }
     }
 

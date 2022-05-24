@@ -2,7 +2,7 @@ import { Line } from './Line.js';
 
 export class Level {
   lines = [];
-  nodes = [];
+  cells = [];
 
   static fromJson( jsonStr ) {
     const level = new Level();
@@ -11,10 +11,11 @@ export class Level {
 
     level.lines = Array.from( json.lines, points => new Line( ...points ) );
     
-    level.nodes = Array.from( json.nodes );
-    level.nodes.forEach( node => 
-      node.links = node.links.map( index => level.nodes[ index ] ) 
-    );
+    level.cells = Array.from( json.cells );
+    level.cells.forEach( cell => { 
+      cell.edges = cell.edges.map( points => new Line( ...points ) );
+      cell.links = cell.links.map( index => level.cells[ index ] ) 
+    } );
 
     return level;
   }
@@ -24,12 +25,12 @@ export class Level {
 
     const nodesMap = new Map();
     let nodeIndex = 0;
-    this.nodes.forEach( node => nodesMap.set( node, nodeIndex ++ ) );
+    this.cells.forEach( cell => nodesMap.set( cell, nodeIndex ++ ) );
 
-    const nodeInfo = Array.from( this.nodes, node => ( {
-      x: node.x, 
-      y: node.y,
-      links: node.links.map( link => nodesMap.get( link ) ).filter( e => e != null ) 
+    const nodeInfo = Array.from( this.cells, cell => ( {
+      x: cell.x, 
+      y: cell.y,
+      links: cell.links.map( link => nodesMap.get( link ) ) 
     } ) );
 
     return JSON.stringify( {
@@ -38,47 +39,36 @@ export class Level {
     } );
   }
 
-  closestNodeTo( x, y ) {
-    return this.nodes.map( 
-      node => ( { node: node, dist: Math.hypot( node.x - x, node.y - y ) } )
+  closestCellTo( x, y ) {
+    return this.cells.map( 
+      cell => ( { cell: cell, dist: Math.hypot( cell.x - x, cell.y - y ) } )
     ).reduce( 
       ( a, b ) => { return a.dist < b.dist ? a : b } 
-    ).node;
+    ).cell;
   }
 
   draw( ctx ) {
     ctx.strokeStyle = 'gray';
     this.lines.forEach( line => line.draw( ctx ) );
 
-    this.nodes.forEach( node => {
+    this.cells.forEach( cell => {
       ctx.beginPath();
-      ctx.arc( node.x, node.y, 3, 0, Math.PI * 2 );
+      ctx.arc( cell.x, cell.y, 3, 0, Math.PI * 2 );
       ctx.fillStyle = 'red';
       ctx.fill();
+
+      ctx.strokeStyle = 'cyan';
+      cell.edges.forEach( edge => edge.draw( ctx ) );
       
-      node.links.forEach( link => {
-        ctx.beginPath();
-        ctx.moveTo( node.x, node.y );
-        ctx.lineTo( link.x, link.y );
-        ctx.strokeStyle = 'green';
-        ctx.stroke();
+      cell.links.forEach( link => {
+        if ( link ) {
+          ctx.beginPath();
+          ctx.moveTo( cell.x, cell.y );
+          ctx.lineTo( link.x, link.y );
+          ctx.strokeStyle = 'green';
+          ctx.stroke();
+        }
       } );
     } );
   }
 }
-
-/*
-
-level = {
-  loops: [
-    [ x1, y1 ], [ x2, y2 ], [ x3, y3 ], [ x4, y4 ], ... ],
-    [ x1, y1 ], [ x2, y2 ], [ x3, y3 ],
-  ],
-  nodes: [
-    { x: x1, y: y1, links: [ 2 ] },
-    { x: x2, y: y2, links: [ 2 ] },
-    { x: x3, y: y3, links: [ 0, 1 ] }
-  ]
-}
-
-*/
