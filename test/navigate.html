@@ -98,6 +98,7 @@
         }
       }
 
+      // TODO: Detect when we've entered our next cell? (since we might miss waypoint)
       if ( this.waypoint && Math.hypot( this.waypoint.x - this.x, this.waypoint.y - this.y ) < this.speed * dt ) {
         this.waypoint = null;
       }
@@ -106,29 +107,8 @@
         this.cell = this.path.shift();
 
         if ( this.path.length > 0 ) {
-          // this.waypoint = this.path[ 0 ];
-          this.waypoint = {
-            x: ( this.cell.x + this.path[ 0 ].x ) / 2,
-            y: ( this.cell.y + this.path[ 0 ].y ) / 2,
-          };
-          // TODO: Nearest point on edge (instead of middle)
-          // const nextEdge = this.path[ 0 ].edges.find( edge => edge.neighbor == this.cell );
-
-          // this.waypoint = {
-          //   x: ( nextEdge.start.x + nextEdge.end.x ) / 2,
-          //   y: ( nextEdge.start.y + nextEdge.end.y ) / 2,
-          // };
-
-          // TODO: Never mind on all this, pick better waypoints
-          // if ( this.path.length == 1 ) {
-          //   const toWaypoint = Math.hypot( this.waypoint.x - this.x, this.waypoint.y - this.y );
-          //   const toTarget = Math.hypot( this.target.x - this.x, this.target.y - this.y );
-
-          //   if ( toTarget < toWaypoint ) {
-          //     this.cell = this.waypoint;
-          //     this.waypoint = null;
-          //   }
-          // }
+          const nextEdge = this.cell.edges[ this.cell.links.indexOf( this.path[ 0 ] ) ];
+          this.waypoint = nextEdge.getClosestPoint( this.x, this. y );
         }
 
         if ( !this.waypoint ) {
