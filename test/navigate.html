@@ -112,8 +112,16 @@
           }
 
           if ( this.nextEdge ) {
-            const leftAngle  = Math.atan2( this.nextEdge.y2 - this.y, this.nextEdge.x2 - this.x );
-            const rightAngle = Math.atan2( this.nextEdge.y1 - this.y, this.nextEdge.x1 - this.x );
+            const left = { 
+              x: this.nextEdge.x2 - this.nextEdge.slope.x * this.size,
+              y: this.nextEdge.y2 - this.nextEdge.slope.y * this.size,
+            };
+            const right = { 
+              x: this.nextEdge.x1 + this.nextEdge.slope.x * this.size,
+              y: this.nextEdge.y1 + this.nextEdge.slope.y * this.size,
+            };
+            const leftAngle = Math.atan2( left.y - this.y, left.x - this.x );
+            const rightAngle = Math.atan2( right.y - this.y, right.x - this.x );
             
             this.goalAngle = clampAngle( this.goalAngle, leftAngle, rightAngle );
           }
