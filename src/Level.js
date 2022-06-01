@@ -15,6 +15,41 @@ class Cell {
       0 < ( x - edge.x1 ) * edge.normal.x + ( y - edge.y1 ) * edge.normal.y
     );
   }
+
+  drawDebug( ctx ) {
+    ctx.beginPath();
+    ctx.arc( this.x, this.y, 3, 0, Math.PI * 2 );
+    ctx.fillStyle = 'red';
+    ctx.fill();
+
+    ctx.strokeStyle = 'cyan';
+    this.edges.forEach( edge => edge.draw( ctx ) );
+    
+    this.links.forEach( link => {
+      if ( link ) {
+        ctx.beginPath();
+        ctx.moveTo( this.x, this.y );
+        ctx.lineTo( link.x, link.y );
+        ctx.strokeStyle = 'green';
+        ctx.stroke();
+      }
+    } );
+  }
+
+  drawShaded( ctx, color ) {
+    ctx.save();
+      
+    ctx.fillStyle = ctx.strokeStyle = color;
+    ctx.globalAlpha = 0.3;
+    ctx.lineWidth = 2;
+        
+    ctx.beginPath();
+    this.edges.forEach( edge => ctx.lineTo( edge.x1, edge.y1 ) );
+    ctx.fill();
+    ctx.stroke();
+    
+    ctx.restore();
+  }
 }
 
 export class Level {
@@ -67,25 +102,6 @@ export class Level {
   draw( ctx ) {
     ctx.strokeStyle = 'gray';
     this.lines.forEach( line => line.draw( ctx ) );
-
-    this.cells.forEach( cell => {
-      ctx.beginPath();
-      ctx.arc( cell.x, cell.y, 3, 0, Math.PI * 2 );
-      ctx.fillStyle = 'red';
-      ctx.fill();
-
-      ctx.strokeStyle = 'cyan';
-      cell.edges.forEach( edge => edge.draw( ctx ) );
-      
-      cell.links.forEach( link => {
-        if ( link ) {
-          ctx.beginPath();
-          ctx.moveTo( cell.x, cell.y );
-          ctx.lineTo( link.x, link.y );
-          ctx.strokeStyle = 'green';
-          ctx.stroke();
-        }
-      } );
-    } );
+    this.cells.forEach( cell => cell.drawDebug( ctx ) );
   }
 }
