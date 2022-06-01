@@ -118,9 +118,6 @@
             x: this.target.x,
             y: this.target.y,
           };
-
-          // TODO: Probably shouldn't set this to null until we're done, in case target moves?
-          // this.target = null;
         }
       }
 
@@ -141,43 +138,26 @@
       super.draw( ctx );
       
       if ( this.target ) {
+        ctx.save();
+
+        ctx.strokeStyle = 'orange';
+        ctx.setLineDash( [ 4, 2 ] );
+        
         ctx.beginPath();
         ctx.moveTo( this.target.x, this.target.y );
         ctx.lineTo( this.x, this.y );
-        ctx.strokeStyle = 'orange';
-        ctx.setLineDash( [ 4, 2 ] );
         ctx.stroke();
-        ctx.setLineDash( [] );
+        
+        ctx.restore();
+      }
+
+      if ( this.cell ) {
+        shadeCell( this.cell, 'green', ctx );
       }
       
       if ( this.path ) {
-        ctx.save();
-      
-        ctx.fillStyle = '#f935';
-        ctx.lineWidth = 2;
-        
-        this.path.forEach( cell => {
-          ctx.beginPath();
-          cell.edges.forEach( edge => ctx.lineTo( edge.x1, edge.y1 ) );
-          ctx.fill();
-          ctx.stroke();
-        } );
-
-        ctx.restore();
+        this.path.forEach( cell => shadeCell( cell, 'orange', ctx ) );
       }
-      
-
-      // if ( this.path ) {
-      //   for ( let i = this.path.length - 1; i > 0; i -- ) {
-      //     const cell = this.path[ i ];
-      //     ctx.lineTo( cell.x, cell.y );
-      //   }
-      // }
-      
-      // if ( this.waypoint ) {
-      //   ctx.lineTo( this.waypoint.x, this.waypoint.y );
-      //   ctx.lineTo( this.x, this.y );
-      // }
     }
   }
 
@@ -208,5 +188,19 @@
     player.draw( ctx );
   };
 
+  function shadeCell( cell, color, ctx ) {
+    ctx.save();
+      
+    ctx.fillStyle = ctx.strokeStyle = color;
+    ctx.globalAlpha = 0.3;
+    ctx.lineWidth = 2;
+        
+    ctx.beginPath();
+    cell.edges.forEach( edge => ctx.lineTo( edge.x1, edge.y1 ) );
+    ctx.fill();
+    ctx.stroke();
+    
+    ctx.restore();
+  }
 
 </script>
