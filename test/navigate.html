@@ -80,7 +80,6 @@
     cell;
     path;
     nextEdge;
-    waypoint;
 
     spawnInCell( cell ) {
       this.cell = cell;
@@ -92,39 +91,39 @@
     }
 
     update( dt ) {
-      if ( this.target && Math.hypot( this.target.x - this.x, this.target.y - this.y ) > this.speed * dt ) {
-        if ( !this.path || this.target.cell != this.path[ this.path.length - 1 ] ) {
-          this.path = Pathfinding.getPath( this.cell, this.target.cell );
-          this.waypoint = null;
+      if ( this.target ) {
+        if ( Math.hypot( this.target.x - this.x, this.target.y - this.y ) > this.speed * dt ) {
+          this.goalAngle = Math.atan2( this.target.y - this.y, this.target.x - this.x );
+
+          if ( !this.path || this.target.cell != this.path[ this.path.length - 1 ] ) {
+            this.path = Pathfinding.getPath( this.cell, this.target.cell );
+            this.nextEdge = null;
+          }
+
+          if ( this.path && this.path[ 0 ].contains( this.x, this.y ) ) {
+            this.cell = this.path.shift();
+
+            if ( this.path.length == 0 ) {
+              this.path = this.nextEdge = null;
+            }
+            else {
+              this.nextEdge = this.cell.edges[ this.cell.links.indexOf( this.path[ 0 ] ) ];
+            }
+          }
+
+          if ( this.nextEdge ) {
+            const leftAngle  = Math.atan2( this.nextEdge.y2 - this.y, this.nextEdge.x2 - this.x );
+            const rightAngle = Math.atan2( this.nextEdge.y1 - this.y, this.nextEdge.x1 - this.x );
+            
+            
+            if ( !betweenAngles( this.goalAngle, leftAngle, rightAngle ) ) {
+              // TODO: Find closest -- make clamped helper function below?
+              this.goalAngle = leftAngle;
+            }
+          }
+
+          super.update( dt );
         }
-      }
-
-      // TODO: Detect when we've entered our next cell? (since we might miss waypoint)
-      if ( this.waypoint && Math.hypot( this.waypoint.x - this.x, this.waypoint.y - this.y ) < this.speed * dt ) {
-        this.waypoint = null;
-      }
-
-      if ( this.path && !this.waypoint ) {
-        this.cell = this.path.shift();
-
-        if ( this.path.length > 0 ) {
-          this.nextEdge = this.cell.edges[ this.cell.links.indexOf( this.path[ 0 ] ) ];
-          this.waypoint = this.nextEdge.getClosestPoint( this.x, this. y );
-        }
-
-        if ( !this.waypoint ) {
-          this.path = null;
-
-          this.waypoint = {
-            x: this.target.x,
-            y: this.target.y,
-          };
-        }
-      }
-
-      if ( this.waypoint ) {
-        this.goalAngle = Math.atan2( this.waypoint.y - this.y, this.waypoint.x - this.x );
-        super.update( dt );     
       }
     }
 
@@ -159,14 +158,20 @@
       if ( this.path ) {
         this.path.forEach( cell => shadeCell( cell, 'orange', ctx ) );
 
-        ctx.strokeStyle = 'red';
+        
 
         ctx.beginPath();
         ctx.moveTo( this.x, this.y )
         ctx.lineTo( this.nextEdge.x1, this.nextEdge.y1 );
+        ctx.strokeStyle = 'red';
+        ctx.stroke();
+
+        ctx.beginPath();
         ctx.moveTo( this.x, this.y );
         ctx.lineTo( this.nextEdge.x2, this.nextEdge.y2 );
+        ctx.strokeStyle = 'blue';
         ctx.stroke();
+        
       }
     }
   }
@@ -211,6 +216,18 @@
     ctx.stroke();
     
     ctx.restore();
+  }
+
+  export function fixAngle( a ) {
+    return a > Math.PI ? a - Math.PI * 2 : a < -Math.PI ? a + Math.PI * 2 : a;
+  }
+
+  export function deltaAngle( a, b ) {
+    return fixAngle( b - a );
+  }
+
+  export function betweenAngles( angle, lower, upper ) {
+    return 0 < deltaAngle( lower, angle ) && 0 < deltaAngle( angle, upper ); 
   }
 
 </script>
