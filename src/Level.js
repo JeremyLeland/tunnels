@@ -1,5 +1,22 @@
 import { Line } from './Line.js';
 
+class Cell {
+  x;
+  y;
+  edges = [];
+  links = [];
+
+  constructor( cell ) {
+    Object.assign( this, cell );
+  }
+
+  contains( x, y ) {
+    return this.edges.every( edge =>
+      0 < ( x - edge.x1 ) * edge.normal.x + ( y - edge.y1 ) * edge.normal.y
+    );
+  }
+}
+
 export class Level {
   lines = [];
   cells = [];
@@ -11,8 +28,8 @@ export class Level {
 
     level.lines = Array.from( json.lines, points => new Line( ...points ) );
     
-    level.cells = Array.from( json.cells );
-    level.cells.forEach( cell => { 
+    level.cells = Array.from( json.cells, cellInfo => new Cell( cellInfo ) );
+    level.cells.forEach( cell => {
       cell.edges = cell.edges.map( points => new Line( ...points ) );
       cell.links = cell.links.map( index => level.cells[ index ] ) 
     } );

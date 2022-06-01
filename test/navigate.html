@@ -79,6 +79,7 @@
 
     cell;
     path;
+    nextEdge;
     waypoint;
 
     spawnInCell( cell ) {
@@ -107,8 +108,8 @@
         this.cell = this.path.shift();
 
         if ( this.path.length > 0 ) {
-          const nextEdge = this.cell.edges[ this.cell.links.indexOf( this.path[ 0 ] ) ];
-          this.waypoint = nextEdge.getClosestPoint( this.x, this. y );
+          this.nextEdge = this.cell.edges[ this.cell.links.indexOf( this.path[ 0 ] ) ];
+          this.waypoint = this.nextEdge.getClosestPoint( this.x, this. y );
         }
 
         if ( !this.waypoint ) {
@@ -157,6 +158,15 @@
       
       if ( this.path ) {
         this.path.forEach( cell => shadeCell( cell, 'orange', ctx ) );
+
+        ctx.strokeStyle = 'red';
+
+        ctx.beginPath();
+        ctx.moveTo( this.x, this.y )
+        ctx.lineTo( this.nextEdge.x1, this.nextEdge.y1 );
+        ctx.moveTo( this.x, this.y );
+        ctx.lineTo( this.nextEdge.x2, this.nextEdge.y2 );
+        ctx.stroke();
       }
     }
   }
