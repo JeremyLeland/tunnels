@@ -91,7 +91,7 @@
     }
 
     update( dt ) {
-      if ( this.target ) {
+      if ( this.target && Math.hypot( this.target.x - this.x, this.target.y - this.y ) > this.speed * dt ) {
         if ( !this.path || this.target.cell != this.path[ this.path.length - 1 ] ) {
           this.path = Pathfinding.getPath( this.cell, this.target.cell );
           this.waypoint = null;
@@ -120,7 +120,7 @@
           };
 
           // TODO: Probably shouldn't set this to null until we're done, in case target moves?
-          this.target = null;
+          // this.target = null;
         }
       }
 
@@ -140,28 +140,44 @@
     draw( ctx ) {
       super.draw( ctx );
       
-      ctx.beginPath();
-
       if ( this.target ) {
-        ctx.lineTo( this.target.x, this.target.y );
-      }
-        
-      if ( this.path ) {
-        for ( let i = this.path.length - 1; i > 0; i -- ) {
-          const cell = this.path[ i ];
-          ctx.lineTo( cell.x, cell.y );
-        }
+        ctx.beginPath();
+        ctx.moveTo( this.target.x, this.target.y );
+        ctx.lineTo( this.x, this.y );
+        ctx.strokeStyle = 'orange';
+        ctx.setLineDash( [ 4, 2 ] );
+        ctx.stroke();
+        ctx.setLineDash( [] );
       }
       
-      if ( this.waypoint ) {
-        ctx.lineTo( this.waypoint.x, this.waypoint.y );
-        ctx.lineTo( this.x, this.y );
-      }
+      if ( this.path ) {
+        ctx.save();
+      
+        ctx.fillStyle = '#f935';
+        ctx.lineWidth = 2;
+        
+        this.path.forEach( cell => {
+          ctx.beginPath();
+          cell.edges.forEach( edge => ctx.lineTo( edge.x1, edge.y1 ) );
+          ctx.fill();
+          ctx.stroke();
+        } );
 
-      ctx.strokeStyle = 'orange';
-      ctx.setLineDash( [ 4, 2 ] );
-      ctx.stroke();
-      ctx.setLineDash( [] );
+        ctx.restore();
+      }
+      
+
+      // if ( this.path ) {
+      //   for ( let i = this.path.length - 1; i > 0; i -- ) {
+      //     const cell = this.path[ i ];
+      //     ctx.lineTo( cell.x, cell.y );
+      //   }
+      // }
+      
+      // if ( this.waypoint ) {
+      //   ctx.lineTo( this.waypoint.x, this.waypoint.y );
+      //   ctx.lineTo( this.x, this.y );
+      // }
     }
   }
 
