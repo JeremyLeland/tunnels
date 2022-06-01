@@ -115,11 +115,7 @@
             const leftAngle  = Math.atan2( this.nextEdge.y2 - this.y, this.nextEdge.x2 - this.x );
             const rightAngle = Math.atan2( this.nextEdge.y1 - this.y, this.nextEdge.x1 - this.x );
             
-            
-            if ( !betweenAngles( this.goalAngle, leftAngle, rightAngle ) ) {
-              // TODO: Find closest -- make clamped helper function below?
-              this.goalAngle = leftAngle;
-            }
+            this.goalAngle = clampAngle( this.goalAngle, leftAngle, rightAngle );
           }
 
           super.update( dt );
@@ -226,8 +222,11 @@
     return fixAngle( b - a );
   }
 
-  export function betweenAngles( angle, lower, upper ) {
-    return 0 < deltaAngle( lower, angle ) && 0 < deltaAngle( angle, upper ); 
+  function clampAngle( angle, lower, upper ) {
+    const dLower = deltaAngle( lower, angle );
+    const dUpper = deltaAngle( angle, upper );
+
+    return dLower < 0 ? lower : dUpper < 0 ? upper : angle;
   }
 
 </script>
