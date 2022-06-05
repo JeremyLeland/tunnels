@@ -1,0 +1,49 @@
+<title>D3 library usage</title>
+<link rel="stylesheet" href="../../style.css">
+
+<body>
+  <canvas id="canvas" width="800px" height="800px"></canvas>
+</body>
+
+<script type="module">
+  import Delaunay from '../../lib/delaunay/delaunay.js';
+
+  const width = 800, height = 800;
+  const seeds = Array.from( Array( 100 ), _ => ( {
+    x: Math.random() * width, 
+    y: Math.random() * height
+  } ) );
+
+  const delaunay = Delaunay.from( seeds, ( e ) => e.x, ( e ) => e.y );
+  const voronoi = delaunay.voronoi( [ 0, 0, width, height ] );
+
+  const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
+  
+  voronoi.render( ctx );
+  ctx.strokeStyle = 'gray';
+  ctx.stroke();
+
+  const colors = [ 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'brown', 'pink' ];
+  let colorIndex = 0;
+
+  for ( const neighborIndex of voronoi.neighbors( 0 ) ) {
+    ctx.beginPath();
+    voronoi.cellPolygon( neighborIndex ).forEach( point => 
+      ctx.lineTo( point[ 0 ], point[ 1 ] ) 
+    );
+    ctx.strokeStyle = colors[ colorIndex ++ ];
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  ctx.beginPath();
+  voronoi.cellPolygon( 0 ).forEach( point => ctx.lineTo( point[ 0 ], point[ 1 ] ) );
+  ctx.strokeStyle = 'white';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+
+  // TODO: Cell under mouse?
+  // Create our cells from their cells, then figure out linkages?
+  
+</script>
