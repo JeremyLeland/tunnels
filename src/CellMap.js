@@ -29,6 +29,22 @@ export class Cell {
     );
   }
 
+  unlink( index ) {
+    const other = this.links[ index ];
+    if ( other ) {
+      const otherIndex = other.links.findIndex( link => link == this );
+      other.links[ otherIndex ] = null;
+    }
+
+    this.links[ index ] = null;
+  }
+
+  unlinkAll() {
+    for ( let i = 0; i < this.links.length; i ++ ) {
+      this.unlink( i );
+    }
+  }
+
   drawDebug( ctx ) {
     ctx.beginPath();
     ctx.arc( this.x, this.y, 3, 0, Math.PI * 2 );
@@ -87,6 +103,38 @@ export class CellMap {
     return cellMap;
   }
 
+  static fromVoronoi( voronoi ) {
+    const cellMap = new CellMap();
+
+    cellMap.cells = Array.from( voronoi.cellPolygons(), polygon => {
+      const cell = new Cell();
+      
+      for ( let i = polygon.length - 1; i > 0; i -- ) {
+        const current = polygon[ i ], next = polygon[ i - 1 ];
+        cell.edges.push( new Line( ...current, ...next ) );
+      }
+  
+      cell.updateCenter();
+  
+      return cell;
+    } );
+  
+    for ( let cellIndex = 0; cellIndex < cellMap.cells.length; cellIndex ++ ) {
+      const neighbors = Array.from( voronoi.neighbors( cellIndex ), index => cellMap.cells[ index ] );
+  
+      const cell = cellMap.cells[ cellIndex ];
+  
+      cell.links = Array.from( cell.edges, edge => 
+        neighbors.find( other => other.edges.some( otherEdge => 
+          edge.x1 == otherEdge.x2 && edge.y1 == otherEdge.y2 &&
+          edge.x2 == otherEdge.x1 && edge.y2 == otherEdge.y1
+        ) )
+      );
+    }
+
+    return cellMap;
+  }
+
   getCellsInfo() {
     const cellsMap = new Map();
     let nodeIndex = 0;
@@ -105,6 +153,11 @@ export class CellMap {
     ).reduce( 
       ( a, b ) => { return a.dist < b.dist ? a : b } 
     ).cell;
+  }
+
+  removeCell( cell ) {
+    cell.unlinkAll();
+    this.cells = this.cells.filter( c => c != cell );
   }
 
   draw( ctx ) {
