@@ -1,13 +1,26 @@
 import { Line } from './Line.js';
 
-class Cell {
-  x;
-  y;
+export class Cell {
+  x = 0;
+  y = 0;
   edges = [];
   links = [];
 
   constructor( cell ) {
     Object.assign( this, cell );
+  }
+
+  updateCenter() {
+    this.x = 0;
+    this.y = 0;
+
+    this.edges.forEach( edge => {
+      this.x += edge.x1;
+      this.y += edge.y1;
+    } );
+
+    this.x /= this.edges.length;
+    this.y /= this.edges.length;
   }
 
   contains( x, y ) {
