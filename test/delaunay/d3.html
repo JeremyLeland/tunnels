@@ -33,10 +33,16 @@
     return cell;
   } );
 
-  // TODO: Make sure this order matches edges order (probably need to go in reverse)
-  for ( let i = 0; i < cells.length; i ++ ) {
-    cells[ i ].links = Array.from( voronoi.neighbors( i ), 
-      neighborIndex => cells[ neighborIndex ] 
+  for ( let cellIndex = 0; cellIndex < cells.length; cellIndex ++ ) {
+    const neighbors = Array.from( voronoi.neighbors( cellIndex ), index => cells[ index ] );
+
+    const cell = cells[ cellIndex ];
+
+    cell.links = Array.from( cell.edges, edge => 
+      neighbors.find( other => other.edges.some( otherEdge => 
+        edge.x1 == otherEdge.x2 && edge.y1 == otherEdge.y2 &&
+        edge.x2 == otherEdge.x1 && edge.y2 == otherEdge.y1
+      ) )
     );
   }
 
@@ -70,8 +76,8 @@
   ctx.strokeStyle = 'gray';
   ctx.stroke();
 
-  //cells[ 0 ].drawDebug( ctx );
-  cells.forEach( cell => cell.drawDebug( ctx ) );
+  cells[ 0 ].drawDebug( ctx );
+  // cells.forEach( cell => cell.drawDebug( ctx ) );
 
   // const colors = [ 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'brown', 'pink' ];
   // let colorIndex = 0;

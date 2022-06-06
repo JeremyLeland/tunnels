@@ -35,15 +35,25 @@ export class Cell {
     ctx.fillStyle = 'red';
     ctx.fill();
 
-    ctx.strokeStyle = 'cyan';
-    this.edges.forEach( edge => edge.draw( ctx ) );
+    // ctx.strokeStyle = 'cyan';
+
+    const colors = [ 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'brown', 'pink' ];
+    let colorIndex = 0;
+
+    this.edges.forEach( edge => { 
+      ctx.strokeStyle = colors[ colorIndex ++ ];
+      edge.draw( ctx );
+    } );
     
+    colorIndex = 0;
     this.links.forEach( link => {
+      ctx.strokeStyle = colors[ colorIndex ++ ];
+      
       if ( link ) {
         ctx.beginPath();
         ctx.moveTo( this.x, this.y );
         ctx.lineTo( link.x, link.y );
-        ctx.strokeStyle = 'green';
+        // ctx.strokeStyle = 'green';
         ctx.stroke();
       }
     } );
