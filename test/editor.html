@@ -1,0 +1,91 @@
+<title>Cell Maze Editor</title>
+<link rel="stylesheet" href="../style.css">
+
+<body>
+  <canvas id="canvas" width="800px" height="800px"></canvas>
+</body>
+
+<script type="module">
+
+  import Delaunay from '../lib/delaunay/delaunay.js';
+  
+  import { Line } from '../src/Line.js';
+  import { CellMap } from '../src/CellMap.js';
+  import { Level } from '../src/Level.js';
+
+  const width = 800, height = 800;
+  const seeds = Array.from( Array( 100 ), _ => ( {
+    x: Math.random() * width, 
+    y: Math.random() * height
+  } ) );
+
+  const delaunay = Delaunay.from( seeds, ( e ) => e.x, ( e ) => e.y );
+  const voronoi = delaunay.voronoi( [ 0, 0, width, height ] );
+
+  const cellMap = CellMap.fromVoronoi( voronoi );
+
+  const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
+  
+  cellMap.cells.forEach( cell => cell.drawDebug( ctx ) );
+
+
+  let mouseX = 0, mouseY = 0, mouseDown = false;
+  document.addEventListener( 'mousedown', ( e ) => {
+    mouseDown = true;
+    removeUnderMouse();
+    draw();
+  } );
+  document.addEventListener( 'mousemove', ( e ) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+
+    if ( mouseDown ) {
+      removeUnderMouse();
+    }
+
+    draw();
+  } );
+  document.addEventListener( 'mouseup', ( e ) => mouseDown = false );
+
+  document.addEventListener( 'keypress', ( e ) => outputLevel() );
+
+  function removeUnderMouse() {
+    const cell = cellMap.cells.find( cell => cell.contains( mouseX, mouseY ) );
+    if ( cell ) {
+      cellMap.removeCell( cell );
+      draw();
+    }
+  }
+
+  draw();
+  function draw() {
+    ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
+
+    cellMap.cells.forEach( cell => cell.drawDebug( ctx ) );
+
+    // TODO: Make this triggered separately
+    // outputLevel();
+  }
+
+  function outputLevel() {
+    const level = new Level();
+
+    cellMap.getLoops().forEach( points => {
+      const loopPoints = [];
+      
+      Curve.getLoopThroughPoints( points ).forEach( curve => {
+        for ( let t = 0; t <= 1; t += 0.2 ) {
+          loopPoints.push( curve.getPosition( t ) );
+        }
+      } );
+
+      level.loops.push( Line.getLoopThroughPoints( loopPoints ) );
+    } );
+
+    level.nodes = cellMap.cells;
+
+    console.log( JSON.stringify( level.toJson() ) );
+  }
+
+
+</script>
