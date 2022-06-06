@@ -180,7 +180,7 @@
   const level = Level.fromJson( levelJsonStr );
   
   const player = new PathfindingActor();
-  player.spawnInCell( level.cells[ 0 ] );
+  player.spawnInCell( level.cellMap.cells[ 0 ] );
 
   const game = new Game();
   // game.scroll = { x: 32, y: 32 };
@@ -189,7 +189,7 @@
     if ( game.mouse.down ) {
       const x = game.mouse.x - game.scroll.x;
       const y = game.mouse.y - game.scroll.y;
-      const cell = level.closestCellTo( x, y );
+      const cell = level.cellMap.closestCellTo( x, y );
       if ( cell ) {
         player.target = { x: x, y: y, cell: cell }
       }
