@@ -210,6 +210,8 @@ export class CellMap {
   }
 
   draw( ctx ) {
+    ctx.globalAlpha = 0.5;
     this.cells.forEach( cell => cell.drawDebug( ctx ) );
+    ctx.globalAlpha = 1;
   }
 }

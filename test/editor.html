@@ -10,6 +10,7 @@
   import Delaunay from '../lib/delaunay/delaunay.js';
   
   import { Line } from '../src/Line.js';
+  import { Curve } from '../src/Curve.js';
   import { CellMap } from '../src/CellMap.js';
   import { Level } from '../src/Level.js';
 
@@ -61,7 +62,16 @@
   function draw() {
     ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
 
-    cellMap.cells.forEach( cell => cell.drawDebug( ctx ) );
+    cellMap.draw( ctx );
+
+    let colorIndex = 0;
+    cellMap.getEdgeLoops().forEach( loop => {
+      const points = loop.map( edge => [ edge.x1, edge.y1 ] );
+
+      Curve.getLoopThroughPoints( points ).forEach( curve => {
+        curve.draw( ctx );
+      } );
+    } );
 
     // TODO: Make this triggered separately
     // outputLevel();
