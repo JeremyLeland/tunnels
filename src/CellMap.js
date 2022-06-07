@@ -143,6 +143,7 @@ export class CellMap {
     return Array.from( this.cells, cell => ( {
       x: cell.x, 
       y: cell.y,
+      edges: cell.edges.map( edge => [ edge.x1, edge.y1, edge.x2, edge.y2 ] ),
       links: cell.links.map( link => cellsMap.get( link ) ) 
     } ) );
   }

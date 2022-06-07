@@ -70,21 +70,21 @@
   function outputLevel() {
     const level = new Level();
 
-    cellMap.getLoops().forEach( points => {
-      const loopPoints = [];
+    // cellMap.getLoops().forEach( points => {
+    //   const loopPoints = [];
       
-      Curve.getLoopThroughPoints( points ).forEach( curve => {
-        for ( let t = 0; t <= 1; t += 0.2 ) {
-          loopPoints.push( curve.getPosition( t ) );
-        }
-      } );
+    //   Curve.getLoopThroughPoints( points ).forEach( curve => {
+    //     for ( let t = 0; t <= 1; t += 0.2 ) {
+    //       loopPoints.push( curve.getPosition( t ) );
+    //     }
+    //   } );
 
-      level.loops.push( Line.getLoopThroughPoints( loopPoints ) );
-    } );
+    //   level.loops.push( Line.getLoopThroughPoints( loopPoints ) );
+    // } );
 
-    level.nodes = cellMap.cells;
+    level.cellMap = cellMap;
 
-    console.log( JSON.stringify( level.toJson() ) );
+    console.log( level.toJson() );
   }
 
 

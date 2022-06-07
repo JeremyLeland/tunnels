@@ -18,7 +18,7 @@ export class Level {
 
   toJson() {
     return JSON.stringify( {
-      lines:  Array.from( this.lines, line => [ line.x1, line.y1, line.x2, line.y2 ] ),
+      lines: this.lines.map( line => [ line.x1, line.y1, line.x2, line.y2 ] ),
       cells: this.cellMap.getCellsInfo(),
     } );
   }
