@@ -1,0 +1,36 @@
+<title>D3 library usage</title>
+<link rel="stylesheet" href="../../style.css">
+
+<canvas id="canvas" width="400px" height="400px"></canvas>
+
+<script type="module">
+  import Delaunay from '../../lib/delaunay/delaunay.js';
+
+  import { Line } from '../../src/Line.js';
+  import { CellMap } from '../../src/CellMap.js';
+
+  const width = 400, height = 400;
+  const seeds = Array.from( Array( 30 ), _ => ( {
+    x: Math.random() * width, 
+    y: Math.random() * height
+  } ) );
+
+  const delaunay = Delaunay.from( seeds, ( e ) => e.x, ( e ) => e.y );
+  const voronoi = delaunay.voronoi( [ 0, 0, width, height ] );
+
+  const cellMap = CellMap.fromVoronoi( voronoi );
+  for ( let i = 0; i < 5; i ++ ) {
+    cellMap.removeCell( cellMap.cells[ 0 ] );
+  }
+
+  const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
+  cellMap.draw( ctx );
+
+  const colors = [ 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'brown', 'pink' ];
+  let colorIndex = 0;
+  cellMap.getEdgeLoops().forEach( edges => {
+    ctx.strokeStyle = colors[ colorIndex ++ ];
+    edges.forEach( edge => edge.draw( ctx ) );
+  } );
+  
+</script>

@@ -161,6 +161,54 @@ export class CellMap {
     this.cells = this.cells.filter( c => c != cell );
   }
 
+  getEdgeLoops() {
+    const loops = [];
+
+    const unvisited = new Set();
+    const visited = new Set();
+
+    this.cells.forEach( cell => {
+      for ( let i = 0; i < cell.edges.length; i ++ ) {
+        if ( !cell.links[ i ] ) {
+          unvisited.add( cell.edges[ i ] );
+        }
+      }
+    })
+    
+    while ( unvisited.size > 0 ) {
+      const edges = [];
+      let [ edge ] = unvisited;
+
+      let currentCell = this.cells.find( cell => cell.edges.includes( edge ) );
+      let edgeIndex = currentCell.edges.indexOf( edge );
+
+      while ( !visited.has( edge ) ) {
+        visited.add( edge );
+        unvisited.delete( edge );
+
+        edges.push( edge );
+
+        // TODO: Avoid duplicating this chunk of code below
+        edgeIndex = ( edgeIndex + 1 ) % currentCell.edges.length;
+        edge = currentCell.edges[ edgeIndex ];
+        let nextCell = currentCell.links[ edgeIndex ];
+
+        while ( nextCell ) {
+          edgeIndex = nextCell.links.indexOf( currentCell );
+          currentCell = nextCell;
+
+          edgeIndex = ( edgeIndex + 1 ) % currentCell.edges.length;
+          edge = currentCell.edges[ edgeIndex ];
+          nextCell = currentCell.links[ edgeIndex ];
+        }
+      }
+
+      loops.push( edges );
+    }
+
+    return loops;
+  }
+
   draw( ctx ) {
     this.cells.forEach( cell => cell.drawDebug( ctx ) );
   }
