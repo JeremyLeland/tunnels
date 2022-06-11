@@ -5,8 +5,8 @@ export class Line {
   y2;
 
   length;
-  slope;
-  normal;
+  slope = {};
+  normal = {};
 
   static getLoopThroughPoints( points ) {
     return Array.from( points, ( _, i ) => {
@@ -22,14 +22,14 @@ export class Line {
     this.y2 = y2;
 
     this.length = Math.hypot( x2 - x1, y2 - y1 );
-    this.slope = {
-      x: ( x2 - x1 ) / this.length,
-      y: ( y2 - y1 ) / this.length,
-    }
-    this.normal = {
-      x: this.slope.y,
-      y: -this.slope.x,
-    }
+    
+    this.slope.angle = Math.atan2( y2 - y1, x2 - x1 );
+    this.slope.x = Math.cos( this.slope.angle );
+    this.slope.y = Math.sin( this.slope.angle );
+    
+    this.normal.angle = fixAngle( this.slope.angle - Math.PI / 2 );
+    this.normal.x = Math.cos( this.normal.angle );
+    this.normal.y = Math.sin( this.normal.angle );
   }
 
   draw( ctx ) {
@@ -82,4 +82,12 @@ export class Line {
 
     return { x: this.x1 + u * px, y: this.y1 + u * py };
   }
+}
+
+function fixAngle( a ) {
+  return a > Math.PI ? a - Math.PI * 2 : a < -Math.PI ? a + Math.PI * 2 : a;
+}
+
+function deltaAngle( a, b ) {
+  return fixAngle( b - a );
 }
