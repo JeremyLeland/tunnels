@@ -73,6 +73,30 @@ export class Line {
     ctx.stroke();
   }
 
+  getSublines( maxLength ) {
+    const numSegments = Math.ceil( this.length / maxLength );
+    
+    const dx = ( this.x2 - this.x1 ) / numSegments;
+    const dy = ( this.y2 - this.y1 ) / numSegments;
+
+    const sublines = [];
+
+    let x1 = this.x1;
+    let y1 = this.y1;
+
+    for ( let i = 0; i < numSegments; i ++ ) {
+      let x2 = x1 + dx;
+      let y2 = y1 + dy;
+
+      sublines.push( new Line( x1, y1, x2, y2 ) );
+
+      x1 = x2;
+      y1 = y2;
+    }
+
+    return sublines;
+  }
+
   // Based on: https://www.jeffreythompson.org/collision-detection/line-line.php
   getTimeToHit( x, y, dx, dy, radius = 0 ) {
     const D = ( dy * ( this.x2 - this.x1 ) - dx * ( this.y2 - this.y1 ) );
