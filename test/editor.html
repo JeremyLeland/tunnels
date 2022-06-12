@@ -66,7 +66,7 @@
 
     let colorIndex = 0;
     cellMap.getEdgeLoops().forEach( loop => {
-      const loopPoints = [];
+      const points = [];
 
       for ( let i = 0; i < loop.length; i ++ ) {
         const prev = loop.at( i - 1 );
@@ -74,30 +74,33 @@
 
         const midAngle = prev.normal.angle + deltaAngle( prev.normal.angle, curr.normal.angle ) / 2;
 
+        // TODO: Subdivide first before curves?
+
         const offset = -10;
-        loopPoints.push( [
+        points.push( [
           curr.x1 + offset * Math.cos( midAngle ),
           curr.y1 + offset * Math.sin( midAngle ), 
         ] );
-
       }
       
-      // const points = loop.map( edge => [ edge.x1, edge.y1 ] );
-      // Curve.getLoopThroughPoints( points ).forEach( curve => {
-      //   for ( let t = 0; t <= 1; t += 0.2 ) {
+      const loopPoints = [];
+      //const points = loop.map( edge => [ edge.x1, edge.y1 ] );
+      Curve.getLoopThroughPoints( points ).forEach( curve => {
+        for ( let t = 0; t <= 1; t += 0.2 ) {
 
-      //     // TODO: This has all the overlapping line issues that we had before
-      //     //       Dig up some of the old code, like for raytracing from center?
-      //     //       Or take into account next and previous lines when determining offsets (to avoid overlap)
+          // TODO: This has all the overlapping line issues that we had before
+          //       Dig up some of the old code, like for raytracing from center?
+          //       Or take into account next and previous lines when determining offsets (to avoid overlap)
 
-      //     const pos = curve.getPosition( t );
-      //     const norm = curve.getNormal( t );
-      //     loopPoints.push( [ 
-      //       pos[ 0 ] + norm[ 0 ] * 5 * Math.random(), 
-      //       pos[ 1 ] + norm[ 1 ] * 5 * Math.random(),
-      //     ] );
-      //   }
-      // } );
+          const pos = curve.getPosition( t );
+          const norm = curve.getNormal( t );
+          const offset = 5 * Math.sin( t * 100 ); //Math.random();
+          loopPoints.push( [ 
+            pos[ 0 ] + norm[ 0 ] * offset, 
+            pos[ 1 ] + norm[ 1 ] * offset,
+          ] );
+        }
+      } );
 
       ctx.strokeStyle = 'orange';
       Line.getLoopThroughPoints( loopPoints ).forEach( line => line.draw( ctx ) );

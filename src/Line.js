@@ -8,11 +8,35 @@ export class Line {
   slope = {};
   normal = {};
 
-  static getLoopThroughPoints( points ) {
-    return Array.from( points, ( _, i ) => {
-      const current = points[ i ], next = points[ ( i + 1 ) % points.length ];
-      return new Line( current[ 0 ], current[ 1 ], next[ 0 ], next[ 1 ] );
-    } )
+  static getLoopThroughPoints( points, maxLength ) {
+    const loop = [];
+
+    for ( let i = 0; i < points.length; i ++ ) {
+      const a = points[ i ], b = points[ ( i + 1 ) % points.length ];
+
+      const cx = b[ 0 ] - a[ 0 ];
+      const cy = b[ 1 ] - a[ 1 ];
+      const totalLength = Math.hypot( cx, cy );
+      const numSegments = maxLength ? Math.ceil( totalLength / maxLength ) : 1;
+
+      const dx = cx / numSegments;
+      const dy = cy / numSegments;
+
+      let x1 = a[ 0 ];
+      let y1 = a[ 1 ];
+
+      for ( let j = 0; j < numSegments; j ++ ) {
+        let x2 = x1 + dx;
+        let y2 = y1 + dy;
+
+        loop.push( new Line( x1, y1, x2, y2 ) );
+
+        x1 = x2;
+        y1 = y2;
+      }
+    }
+
+    return loop;
   }
 
   constructor( x1, y1, x2, y2 ) {
