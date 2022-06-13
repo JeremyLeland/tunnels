@@ -68,8 +68,10 @@
 
     cellMap.getEdgeLoops().forEach( loop => {
 
-      const sublines = [];
-      loop.forEach( edge => sublines.push( ...edge.getSublines( subLength ) ) );
+      
+
+      const sublines = Line.getOffsetLoop( loop, -10 );
+      // loop.forEach( edge => sublines.push( ...edge.getSublines( subLength ) ) );
 
       
     //   const points = [];
@@ -89,28 +91,28 @@
     //     ] );
     //   }
       
-    const loopPoints = [];
-    const points = sublines.map( line => [ line.x1, line.y1 ] );
-      Curve.getLoopThroughPoints( points ).forEach( curve => {
-        for ( let t = 0; t <= 1; t += 0.1 ) {
+    // const loopPoints = [];
+    // const points = sublines.map( line => [ line.x1, line.y1 ] );
+    //   Curve.getLoopThroughPoints( points ).forEach( curve => {
+    //     for ( let t = 0; t <= 1; t += 0.1 ) {
 
-          // TODO: This has all the overlapping line issues that we had before
-          //       Dig up some of the old code, like for raytracing from center?
-          //       Or take into account next and previous lines when determining offsets (to avoid overlap)
+    //       // TODO: This has all the overlapping line issues that we had before
+    //       //       Dig up some of the old code, like for raytracing from center?
+    //       //       Or take into account next and previous lines when determining offsets (to avoid overlap)
 
-          const pos = curve.getPosition( t );
-          const norm = curve.getNormal( t );
-          const offset = 5 * Math.sin( t * 100 ); //Math.random();
-          loopPoints.push( [ 
-            pos[ 0 ],// + norm[ 0 ] * offset, 
-            pos[ 1 ],// + norm[ 1 ] * offset,
-          ] );
-        }
-      } );
+    //       const pos = curve.getPosition( t );
+    //       const norm = curve.getNormal( t );
+    //       const offset = 5 * Math.sin( t * 100 ); //Math.random();
+    //       loopPoints.push( [ 
+    //         pos[ 0 ],// + norm[ 0 ] * offset, 
+    //         pos[ 1 ],// + norm[ 1 ] * offset,
+    //       ] );
+    //     }
+    //   } );
 
        ctx.strokeStyle = 'orange';
-       Line.getLoopThroughPoints( loopPoints ).forEach( line => line.draw( ctx ) );
-      //  sublines.forEach( line => line.draw( ctx ) );
+      // Line.getLoopThroughPoints( loopPoints ).forEach( line => line.draw( ctx ) );
+        sublines.forEach( line => line.draw( ctx ) );
 
     } );
 

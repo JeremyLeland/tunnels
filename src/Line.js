@@ -15,7 +15,7 @@ export class Line {
     } );
   }
 
-  static getOffsetLoop( loop, offset ) {
+  static getOffsetLoop( loop, offset = 0 ) {
     const offsetLoop = Array.from( loop, line =>
       new Line(
         line.x1 + line.normal.x * offset, 
@@ -26,18 +26,21 @@ export class Line {
     );
 
     // TODO: Clip overlap, maybe even remove some lines?
+    // TODO: Add lines between if offsetting bigger? Or grow? (not in this project)
     for ( let i = 0; i < offsetLoop.length; i ++ ) {
       const current = offsetLoop[ i ];
       const next = offsetLoop[ ( i + 1 ) % offsetLoop.length ];
       const hit = current.getLineHit( next );
 
-      current.x2 = hit.position.x;
-      current.y2 = hit.position.y;
-      next.x1 = hit.position.x;
-      next.y1 = hit.position.y;
-
-      current.update();
-      next.update();
+      if ( hit.time < Infinity ) {
+        current.x2 = hit.position.x;
+        current.y2 = hit.position.y;
+        next.x1 = hit.position.x;
+        next.y1 = hit.position.y;
+  
+        current.update();
+        next.update();
+      }
     }
 
     return offsetLoop;
@@ -106,26 +109,34 @@ export class Line {
   }
 
   getLineHit( other ) {
+    return this.getHit( {
+      x: other.x1,
+      y: other.y1,
+      dx: other.x2 - other.x1,
+      dy: other.y2 - other.y1,
+      radius: 0
+    } );
+  }
+
+  getHit( other ) {
     const thisDX = this.x2 - this.x1;
     const thisDY = this.y2 - this.y1;
-    const otherDX = other.x2 - other.x1;
-    const otherDY = other.y2 - other.y1;
-    const D = otherDY * thisDX - otherDX * thisDY;
-
+    
     // TODO: Need to account for edges with radius -- see how we did this in pong Wall
     // Just return all the info like in pong wall (including time, position, normal)
-
-    const ux = this.x1 - other.x1;// + this.normal.x * radius;
-    const uy = this.y1 - other.y1;// + this.normal.y * radius;
-
-    const us = ( otherDX * uy - otherDY * ux ) / D;
+    
+    const ux = this.x1 - other.x;// + this.normal.x * radius;
+    const uy = this.y1 - other.y;// + this.normal.y * radius;
+    
+    const D = other.dy * thisDX - other.dx * thisDY;
+    const us = ( other.dx * uy - other.dy * ux ) / D;
     if ( 0 <= us && us <= 1 ) {
       const them = ( thisDX * uy - thisDY * ux ) / D;
       return {
         time: them,
         position: {
-          x: other.x1 + them * otherDX,
-          y: other.y1 + them * otherDY,
+          x: other.x + them * other.dx,
+          y: other.y + them * other.dy,
         }
       }
     }
