@@ -1,0 +1,48 @@
+<title>Closest Point on Line</title>
+<link rel="stylesheet" href="../../style.css">
+
+<canvas id="canvas" oncontextmenu="return false;" width="800px" height="800px"></canvas>
+
+<script type="module">
+  
+  import { Line } from '../../src/Line.js';
+
+  let line1 = new Line( 100, 100, 200, 200 );
+  let line2 = new Line( 150, 300, 220, 100 );
+
+  const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
+  draw();
+  
+  document.addEventListener( 'mousedown', ( e ) => {
+    if ( e.button == 0 ) {
+      line2.x1 = e.clientX;
+      line2.y1 = e.clientY;
+    }
+    if ( e.button == 2 ) {
+      line2.x2 = e.clientX;
+      line2.y2 = e.clientY;
+    }
+    line2.update();
+    draw();
+  } );
+
+  function draw() {
+    ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
+
+    ctx.strokeStyle = 'yellow';
+    line1.draw( ctx );
+
+    ctx.strokeStyle = 'orange';
+    line2.draw( ctx );
+
+    const hit = line1.getLineHit( line2 );
+
+    if ( 0 <= hit.time && hit.time <= 1 ) {
+      ctx.beginPath();
+      ctx.arc( hit.position.x, hit.position.y, 2, 0, Math.PI * 2 );
+      ctx.fillStyle = 'red';
+      ctx.fill();
+    }
+  }
+  
+</script>

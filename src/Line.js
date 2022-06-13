@@ -8,35 +8,39 @@ export class Line {
   slope = {};
   normal = {};
 
-  static getLoopThroughPoints( points, maxLength ) {
-    const loop = [];
+  static getLoopThroughPoints( points ) {
+    return Array.from( points, ( _, i ) => {
+      const current = points[ i ], next = points[ ( i + 1 ) % points.length ];
+      return new Line( current[ 0 ], current[ 1 ], next[ 0 ], next[ 1 ] );
+    } );
+  }
 
-    for ( let i = 0; i < points.length; i ++ ) {
-      const a = points[ i ], b = points[ ( i + 1 ) % points.length ];
+  static getOffsetLoop( loop, offset ) {
+    const offsetLoop = Array.from( loop, line =>
+      new Line(
+        line.x1 + line.normal.x * offset, 
+        line.y1 + line.normal.y * offset,
+        line.x2 + line.normal.x * offset,
+        line.y2 + line.normal.y * offset,
+      )
+    );
 
-      const cx = b[ 0 ] - a[ 0 ];
-      const cy = b[ 1 ] - a[ 1 ];
-      const totalLength = Math.hypot( cx, cy );
-      const numSegments = maxLength ? Math.ceil( totalLength / maxLength ) : 1;
+    // TODO: Clip overlap, maybe even remove some lines?
+    for ( let i = 0; i < offsetLoop.length; i ++ ) {
+      const current = offsetLoop[ i ];
+      const next = offsetLoop[ ( i + 1 ) % offsetLoop.length ];
+      const hit = current.getLineHit( next );
 
-      const dx = cx / numSegments;
-      const dy = cy / numSegments;
+      current.x2 = hit.position.x;
+      current.y2 = hit.position.y;
+      next.x1 = hit.position.x;
+      next.y1 = hit.position.y;
 
-      let x1 = a[ 0 ];
-      let y1 = a[ 1 ];
-
-      for ( let j = 0; j < numSegments; j ++ ) {
-        let x2 = x1 + dx;
-        let y2 = y1 + dy;
-
-        loop.push( new Line( x1, y1, x2, y2 ) );
-
-        x1 = x2;
-        y1 = y2;
-      }
+      current.update();
+      next.update();
     }
 
-    return loop;
+    return offsetLoop;
   }
 
   constructor( x1, y1, x2, y2 ) {
@@ -45,9 +49,13 @@ export class Line {
     this.x2 = x2;
     this.y2 = y2;
 
-    this.length = Math.hypot( x2 - x1, y2 - y1 );
+    this.update();
+  }
+
+  update() {
+    this.length = Math.hypot( this.x2 - this.x1, this.y2 - this.y1 );
     
-    this.slope.angle = Math.atan2( y2 - y1, x2 - x1 );
+    this.slope.angle = Math.atan2( this.y2 - this.y1, this.x2 - this.x1 );
     this.slope.x = Math.cos( this.slope.angle );
     this.slope.y = Math.sin( this.slope.angle );
     
@@ -95,6 +103,37 @@ export class Line {
     }
 
     return sublines;
+  }
+
+  getLineHit( other ) {
+    const thisDX = this.x2 - this.x1;
+    const thisDY = this.y2 - this.y1;
+    const otherDX = other.x2 - other.x1;
+    const otherDY = other.y2 - other.y1;
+    const D = otherDY * thisDX - otherDX * thisDY;
+
+    // TODO: Need to account for edges with radius -- see how we did this in pong Wall
+    // Just return all the info like in pong wall (including time, position, normal)
+
+    const ux = this.x1 - other.x1;// + this.normal.x * radius;
+    const uy = this.y1 - other.y1;// + this.normal.y * radius;
+
+    const us = ( otherDX * uy - otherDY * ux ) / D;
+    if ( 0 <= us && us <= 1 ) {
+      const them = ( thisDX * uy - thisDY * ux ) / D;
+      return {
+        time: them,
+        position: {
+          x: other.x1 + them * otherDX,
+          y: other.y1 + them * otherDY,
+        }
+      }
+    }
+    else {
+      return {
+        time: Infinity
+      }
+    }
   }
 
   // Based on: https://www.jeffreythompson.org/collision-detection/line-line.php

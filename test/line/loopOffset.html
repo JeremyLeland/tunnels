@@ -1,0 +1,27 @@
+<title>Closest Point on Line</title>
+<link rel="stylesheet" href="../../style.css">
+
+<canvas id="canvas" width="800px" height="800px"></canvas>
+
+<script type="module">
+  
+  import { Line } from '../../src/Line.js';
+
+  const loop = [
+    new Line( 100, 100, 100, 200 ),
+    new Line( 100, 200, 200, 200 ),
+    new Line( 200, 200, 200, 100 ),
+    new Line( 200, 100, 100, 100 ),
+  ];
+
+  const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
+
+  ctx.strokeStyle = 'gray';
+  loop.forEach( line => line.draw( ctx ) );
+
+  const offsetLoop = Line.getOffsetLoop( loop, 10 );
+
+  ctx.strokeStyle = 'orange';
+  offsetLoop.forEach( line => line.draw( ctx ) );
+  
+</script>
