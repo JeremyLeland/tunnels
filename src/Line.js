@@ -16,10 +16,9 @@ export class Line {
   }
 
   // When shrinking shapes, figuring out which offset edges connect to which looks like it involves scary math
-  // Seems I can mostly avoid this if I throw out edges shorter than offset, but not always -- still seeing weird failures
-  // Doing this right seems like it's going to be hard, and questionably worth it -- easier to avoid with better shapes 
+  // Best to avoid it altogether with better shapes 
   static getOffsetLoop( loop, offset = 0 ) {
-    const offsetLoop = loop.filter( line => line.length > offset ).map( line =>
+    const offsetLoop = loop.map( line =>
       new Line(
         line.x1 + line.normal.x * offset, 
         line.y1 + line.normal.y * offset,
