@@ -8,10 +8,13 @@
   import { Line } from '../../src/Line.js';
 
   const loop = [
-    new Line( 100, 100, 100, 200 ),
-    new Line( 100, 200, 200, 200 ),
-    new Line( 200, 200, 200, 100 ),
-    new Line( 200, 100, 100, 100 ),
+    new Line( 100, 110, 100, 190 ),
+    new Line( 100, 190, 200, 200 ),
+    new Line( 200, 200, 300, 160 ),
+    new Line( 300, 160, 305, 150 ),
+    new Line( 305, 150, 300, 140 ),
+    new Line( 300, 140, 200, 100 ),
+    new Line( 200, 100, 100, 110 ),
   ];
 
   const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
@@ -19,9 +22,16 @@
   ctx.strokeStyle = 'gray';
   loop.forEach( line => line.draw( ctx ) );
 
-  const offsetLoop = Line.getOffsetLoop( loop, -10 );
-
   ctx.strokeStyle = 'orange';
-  offsetLoop.forEach( line => line.draw( ctx ) );
+  Line.getOffsetLoop( loop, -20 ).forEach( line => line.draw( ctx ) );
+
+  ctx.strokeStyle = 'yellow';
+  Line.getOffsetLoop( loop, -10 ).forEach( line => line.draw( ctx ) );
+
+  ctx.strokeStyle = 'green';
+  Line.getOffsetLoop( loop,  10 ).forEach( line => line.draw( ctx ) );
+
+  ctx.strokeStyle = 'blue';
+  Line.getOffsetLoop( loop,  20 ).forEach( line => line.draw( ctx ) );
   
 </script>

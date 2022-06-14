@@ -15,8 +15,11 @@ export class Line {
     } );
   }
 
+  // When shrinking shapes, figuring out which offset edges connect to which looks like it involves scary math
+  // Seems I can mostly avoid this if I throw out edges shorter than offset, but not always -- still seeing weird failures
+  // Doing this right seems like it's going to be hard, and questionably worth it -- easier to avoid with better shapes 
   static getOffsetLoop( loop, offset = 0 ) {
-    const offsetLoop = Array.from( loop, line =>
+    const offsetLoop = loop.filter( line => line.length > offset ).map( line =>
       new Line(
         line.x1 + line.normal.x * offset, 
         line.y1 + line.normal.y * offset,
@@ -25,28 +28,17 @@ export class Line {
       )
     );
 
-    // TODO: Clip overlap, maybe even remove some lines?
     for ( let i = 0; i < offsetLoop.length; i ++ ) {
       const current = offsetLoop[ i ];
       const next = offsetLoop[ ( i + 1 ) % offsetLoop.length ];
 
-      const x1 = current.x1, y1 = current.y1;
-      const x2 = current.x2, y2 = current.y2;
-      const x3 = next.x1, y3 = next.y1;
-      const x4 = next.x2, y4 = next.y2;
+      const lineHit = current.getLineHit( next );
 
-      const D = ( y4 - y3 ) * ( x2 - x1 ) - ( x4 - x3 ) * ( y2 - y1 );
-
-      if ( D != 0 ) {
-        const uA = ( ( x4 - x3 ) * ( y1 - y3 ) - ( y4 - y3 ) * ( x1 - x3 ) ) / D;
-        
-        const hitX = x1 + ( x2 - x1 ) * uA;
-        const hitY = y1 + ( y2 - y1 ) * uA;
-  
-        current.x2 = hitX;
-        current.y2 = hitY;
-        next.x1 = hitX;
-        next.y1 = hitY;
+      if ( lineHit.position ) {
+        current.x2 = lineHit.position.x;
+        current.y2 = lineHit.position.y;
+        next.x1 = lineHit.position.x;
+        next.y1 = lineHit.position.y;
   
         current.update();
         next.update();
@@ -153,6 +145,36 @@ export class Line {
     else {
       return {
         time: Infinity
+      }
+    }
+  }
+
+  // NOTE: I keep deleting and rewriting this, so may as well keep it around for now
+  getLineHit( other ) {
+    const x1 = this.x1, y1 = this.y1;
+    const x2 = this.x2, y2 = this.y2;
+    const x3 = other.x1, y3 = other.y1;
+    const x4 = other.x2, y4 = other.y2;
+
+    const D = ( y4 - y3 ) * ( x2 - x1 ) - ( x4 - x3 ) * ( y2 - y1 );
+
+    if ( D == 0 ) {
+      return {
+        uA: Infinity,
+        uB: Infinity,
+      }
+    }
+    else {
+      const uA = ( ( x4 - x3 ) * ( y1 - y3 ) - ( y4 - y3 ) * ( x1 - x3 ) ) / D;
+      const uB = ( ( x2 - x1 ) * ( y1 - y3 ) - ( y2 - y1 ) * ( x1 - x3 ) ) / D;
+
+      return {
+        uA: uA,
+        uB: uB,
+        position: {
+          x: x1 + ( x2 - x1 ) * uA,
+          y: y1 + ( y2 - y1 ) * uA,
+        }
       }
     }
   }

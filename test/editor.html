@@ -42,9 +42,8 @@
 
     if ( mouseDown ) {
       removeUnderMouse();
+      draw();
     }
-
-    draw();
   } );
   document.addEventListener( 'mouseup', ( e ) => mouseDown = false );
 
