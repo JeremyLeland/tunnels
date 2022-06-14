@@ -26,17 +26,27 @@ export class Line {
     );
 
     // TODO: Clip overlap, maybe even remove some lines?
-    // TODO: Add lines between if offsetting bigger? Or grow? (not in this project)
     for ( let i = 0; i < offsetLoop.length; i ++ ) {
       const current = offsetLoop[ i ];
       const next = offsetLoop[ ( i + 1 ) % offsetLoop.length ];
-      const hit = current.getLineHit( next );
 
-      if ( hit.time < Infinity ) {
-        current.x2 = hit.position.x;
-        current.y2 = hit.position.y;
-        next.x1 = hit.position.x;
-        next.y1 = hit.position.y;
+      const x1 = current.x1, y1 = current.y1;
+      const x2 = current.x2, y2 = current.y2;
+      const x3 = next.x1, y3 = next.y1;
+      const x4 = next.x2, y4 = next.y2;
+
+      const D = ( y4 - y3 ) * ( x2 - x1 ) - ( x4 - x3 ) * ( y2 - y1 );
+
+      if ( D != 0 ) {
+        const uA = ( ( x4 - x3 ) * ( y1 - y3 ) - ( y4 - y3 ) * ( x1 - x3 ) ) / D;
+        
+        const hitX = x1 + ( x2 - x1 ) * uA;
+        const hitY = y1 + ( y2 - y1 ) * uA;
+  
+        current.x2 = hitX;
+        current.y2 = hitY;
+        next.x1 = hitX;
+        next.y1 = hitY;
   
         current.update();
         next.update();
@@ -188,4 +198,8 @@ function fixAngle( a ) {
 
 function deltaAngle( a, b ) {
   return fixAngle( b - a );
+}
+
+function hitTime( x1, y1, x2, y2, x3, y3, x4, y4 ) {
+  return ( ( x4 - x3 ) * ( y1 - y3 ) - ( y4 - y3 ) * ( x1 - x3 ) ) / ( ( y4 - y3 ) * ( x2 - x1 ) - ( x4 - x3 ) * ( y2 - y1 ) );
 }

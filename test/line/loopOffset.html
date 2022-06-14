@@ -19,7 +19,7 @@
   ctx.strokeStyle = 'gray';
   loop.forEach( line => line.draw( ctx ) );
 
-  const offsetLoop = Line.getOffsetLoop( loop, 10 );
+  const offsetLoop = Line.getOffsetLoop( loop, -10 );
 
   ctx.strokeStyle = 'orange';
   offsetLoop.forEach( line => line.draw( ctx ) );
