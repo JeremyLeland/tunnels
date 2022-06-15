@@ -15,7 +15,7 @@
   import { Level } from '../src/Level.js';
 
   const width = 800, height = 800;
-  const seeds = Array.from( Array( 100 ), _ => ( {
+  const seeds = Array.from( Array( 1000 ), _ => ( {
     x: Math.random() * width, 
     y: Math.random() * height
   } ) );
@@ -69,8 +69,8 @@
 
       
 
-      const sublines = Line.getOffsetLoop( loop, -10 );
-      // loop.forEach( edge => sublines.push( ...edge.getSublines( subLength ) ) );
+      //const sublines = [];  //Line.getOffsetLoop( loop, -10 );
+      //loop.forEach( edge => sublines.push( ...edge.getSublines( subLength ) ) );
 
       
     //   const points = [];
@@ -111,7 +111,8 @@
 
        ctx.strokeStyle = 'orange';
       // Line.getLoopThroughPoints( loopPoints ).forEach( line => line.draw( ctx ) );
-        sublines.forEach( line => line.draw( ctx ) );
+        //sublines.forEach( line => line.draw( ctx ) );
+        loop.forEach( line => line.draw( ctx ) );
 
     } );
 

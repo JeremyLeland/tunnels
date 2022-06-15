@@ -8,13 +8,13 @@
   import { Line } from '../../src/Line.js';
 
   const loop = [
-    new Line( 100, 110, 100, 190 ),
-    new Line( 100, 190, 200, 200 ),
+    new Line( 100, 140, 100, 160 ),
+    new Line( 100, 160, 200, 200 ),
     new Line( 200, 200, 300, 160 ),
     new Line( 300, 160, 305, 150 ),
     new Line( 305, 150, 300, 140 ),
     new Line( 300, 140, 200, 100 ),
-    new Line( 200, 100, 100, 110 ),
+    new Line( 200, 100, 100, 140 ),
   ];
 
   const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
@@ -22,16 +22,26 @@
   ctx.strokeStyle = 'gray';
   loop.forEach( line => line.draw( ctx ) );
 
-  ctx.strokeStyle = 'orange';
-  Line.getOffsetLoop( loop, -20 ).forEach( line => line.draw( ctx ) );
+  drawLoop( Line.getOffsetLoop( loop, -20 ), 'orange' );
+  drawLoop( Line.getOffsetLoop( loop, -10 ), 'yellow' );
+  drawLoop( Line.getOffsetLoop( loop,  10 ), 'green' );
+  drawLoop( Line.getOffsetLoop( loop,  20 ), 'blue' );
 
-  ctx.strokeStyle = 'yellow';
-  Line.getOffsetLoop( loop, -10 ).forEach( line => line.draw( ctx ) );
+  function drawLoop( loop, color ) {
+    ctx.strokeStyle = color;
 
-  ctx.strokeStyle = 'green';
-  Line.getOffsetLoop( loop,  10 ).forEach( line => line.draw( ctx ) );
+    for ( let i = 0; i < loop.length; i ++ ) {
+      const current = loop[ i ], next = loop[ ( i + 1 ) % loop.length ];
 
-  ctx.strokeStyle = 'blue';
-  Line.getOffsetLoop( loop,  20 ).forEach( line => line.draw( ctx ) );
+      current.draw( ctx );
+
+      // ctx.beginPath();
+      // ctx.arc( current.x2, current.y2, 3, 0, Math.PI * 2 );
+      // ctx.fillStyle = current.getAngleTo( next ) < 0 ? 'lime' : 'red';
+      // ctx.fill();
+
+      // ctx.fillText( current.getAngleTo( next ), current.x2 + 10, current.y2 );
+    }
+  }
   
 </script>

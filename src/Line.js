@@ -15,8 +15,8 @@ export class Line {
     } );
   }
 
-  // When shrinking shapes, figuring out which offset edges connect to which looks like it involves scary math
-  // Best to avoid it altogether with better shapes 
+  // Apparently this is a lot more complicated than I thought --
+  // See https://stackoverflow.com/questions/1109536/an-algorithm-for-inflating-deflating-offsetting-buffering-polygons
   static getOffsetLoop( loop, offset = 0 ) {
     const offsetLoop = loop.map( line =>
       new Line(
@@ -27,12 +27,32 @@ export class Line {
       )
     );
 
+    const lineHits = [];
+
     for ( let i = 0; i < offsetLoop.length; i ++ ) {
       const current = offsetLoop[ i ];
       const next = offsetLoop[ ( i + 1 ) % offsetLoop.length ];
 
-      const lineHit = current.getLineHit( next );
+      lineHits.push( current.getLineHit( next ) );
+    }
 
+    const validLines = [];
+
+    for ( let i = 0; i < lineHits.length; i ++ ) {
+      const current = lineHits[ i ];
+      const prev = lineHits.at( i - 1 );
+
+      if ( prev.uB < current.uA ) {
+        validLines.push( current.A );
+      }
+    }
+
+    for ( let i = 0; i < validLines.length; i ++ ) {
+      const current = validLines[ i ];
+      const next = validLines[ ( i + 1 ) % validLines.length ];
+
+      const lineHit = current.getLineHit( next );
+    
       if ( lineHit.position ) {
         current.x2 = lineHit.position.x;
         current.y2 = lineHit.position.y;
@@ -44,7 +64,7 @@ export class Line {
       }
     }
 
-    return offsetLoop;
+    return validLines;
   }
 
   constructor( x1, y1, x2, y2 ) {
@@ -85,6 +105,10 @@ export class Line {
     ctx.stroke();
   }
 
+  getAngleTo( other ) {
+    return deltaAngle( this.slope.angle, other.slope.angle );
+  }
+
   getSublines( maxLength ) {
     const numSegments = Math.ceil( this.length / maxLength );
     
@@ -109,15 +133,15 @@ export class Line {
     return sublines;
   }
 
-  getLineHit( other ) {
-    return this.getHit( {
-      x: other.x1,
-      y: other.y1,
-      dx: other.x2 - other.x1,
-      dy: other.y2 - other.y1,
-      radius: 0
-    } );
-  }
+  // getLineHit( other ) {
+  //   return this.getHit( {
+  //     x: other.x1,
+  //     y: other.y1,
+  //     dx: other.x2 - other.x1,
+  //     dy: other.y2 - other.y1,
+  //     radius: 0
+  //   } );
+  // }
 
   getHit( other ) {
     const thisDX = this.x2 - this.x1;
@@ -173,7 +197,9 @@ export class Line {
         position: {
           x: x1 + ( x2 - x1 ) * uA,
           y: y1 + ( y2 - y1 ) * uA,
-        }
+        },
+        A: this,
+        B: other,
       }
     }
   }
