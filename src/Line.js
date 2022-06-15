@@ -38,11 +38,13 @@ export class Line {
 
     const validLines = [];
 
+    // TODO: Rather than treating each line individually, we'd need to group them -- so this would need to 
+    // flag that we were in a bad region until we hit another backwards line
     for ( let i = 0; i < lineHits.length; i ++ ) {
       const current = lineHits[ i ];
       const prev = lineHits.at( i - 1 );
 
-      if ( prev.uB < current.uA ) {
+      if ( current.uA == Infinity || prev.uB < current.uA ) {
         validLines.push( current.A );
       }
     }
@@ -185,6 +187,8 @@ export class Line {
       return {
         uA: Infinity,
         uB: Infinity,
+        A: this,
+        B: other,
       }
     }
     else {

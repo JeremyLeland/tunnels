@@ -15,13 +15,13 @@
   import { Level } from '../src/Level.js';
 
   const width = 800, height = 800;
-  const seeds = Array.from( Array( 1000 ), _ => ( {
+  const seeds = Array.from( Array( 100 ), _ => ( {
     x: Math.random() * width, 
     y: Math.random() * height
   } ) );
 
   const delaunay = Delaunay.from( seeds, ( e ) => e.x, ( e ) => e.y );
-  const voronoi = delaunay.voronoi( [ 0, 0, width, height ] );
+  const voronoi = delaunay.voronoi( [ 20, 20, width - 20, height - 20 ] );
 
   const cellMap = CellMap.fromVoronoi( voronoi );
 
@@ -69,8 +69,8 @@
 
       
 
-      //const sublines = [];  //Line.getOffsetLoop( loop, -10 );
-      //loop.forEach( edge => sublines.push( ...edge.getSublines( subLength ) ) );
+      const sublines = Line.getOffsetLoop( loop, -10 );
+      // loop.forEach( edge => sublines.push( ...edge.getSublines( subLength ) ) );
 
       
     //   const points = [];
@@ -111,8 +111,7 @@
 
        ctx.strokeStyle = 'orange';
       // Line.getLoopThroughPoints( loopPoints ).forEach( line => line.draw( ctx ) );
-        //sublines.forEach( line => line.draw( ctx ) );
-        loop.forEach( line => line.draw( ctx ) );
+        sublines.forEach( line => line.draw( ctx ) );
 
     } );
 
