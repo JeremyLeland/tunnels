@@ -1,0 +1,54 @@
+<title>Lloyds Relaxation</title>
+<link rel="stylesheet" href="../../style.css">
+
+<canvas id="canvas" width="800px" height="800px"></canvas>
+
+<script type="module">
+  import Delaunay from '../../lib/delaunay/delaunay.js';
+
+  import { Line } from '../../src/Line.js';
+  import { CellMap } from '../../src/CellMap.js';
+
+  const width = 800, height = 800;
+  const seeds = Array.from( Array( 500 ), _ => [
+    Math.random() * width, 
+    Math.random() * height
+  ] );
+
+  const delaunay = Delaunay.from( seeds );
+  const voronoi = delaunay.voronoi( [ 0, 0, width, height ] );
+
+  draw();
+  
+  document.addEventListener( 'mousedown', _ => relax() );
+  
+  function relax() {
+
+    for ( let i = 0; i < seeds.length; i ++ ) {
+      let x = 0, y = 0;
+
+      const poly = voronoi.cellPolygon( i );
+      poly.forEach( point => {
+        x += point[ 0 ];
+        y += point[ 1 ];
+      } );
+      x /= poly.length;
+      y /= poly.length;
+
+      voronoi.delaunay.points[ i * 2 ] = x;
+      voronoi.delaunay.points[ i * 2 + 1 ] = y;
+    }
+
+    voronoi.update();
+    draw();
+  }
+  
+  function draw() {
+    const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
+    ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
+    
+    const cellMap = CellMap.fromVoronoi( voronoi );
+    cellMap.cells.forEach( cell => cell.drawDebug( ctx ) );
+  }
+  
+</script>
