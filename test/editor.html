@@ -23,6 +23,7 @@
   const delaunay = Delaunay.from( seeds, ( e ) => e.x, ( e ) => e.y );
   const voronoi = delaunay.voronoi( [ 20, 20, width - 20, height - 20 ] );
 
+  let lines = [];
   const cellMap = CellMap.fromVoronoi( voronoi );
 
   const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
@@ -53,6 +54,7 @@
     const cell = cellMap.cells.find( cell => cell.contains( mouseX, mouseY ) );
     if ( cell ) {
       cellMap.removeCell( cell );
+      lines = getCaveLines( cellMap );
       draw();
     }
   }
@@ -63,77 +65,36 @@
 
     cellMap.draw( ctx );
 
-    const subLength = 100;
+    ctx.strokeStyle = 'orange';
+    lines.forEach( line => line.draw( ctx ) );
+  }
+
+  function getCaveLines( cellMap ) {
+    const lines = [];
 
     cellMap.getEdgeLoops().forEach( loop => {
+      const offset = -10, subLength = 10;
+      const sublines = [];
+      Line.getOffsetLoop( loop, offset ).forEach( 
+        edge => sublines.push( ...edge.getSublines( subLength ) ) 
+      );
 
-      
-
-      const sublines = Line.getOffsetLoop( loop, -10 );
-      // loop.forEach( edge => sublines.push( ...edge.getSublines( subLength ) ) );
-
-      
-    //   const points = [];
-
-    //   for ( let i = 0; i < loop.length; i ++ ) {
-    //     const prev = loop.at( i - 1 );
-    //     const curr = loop.at( i );
-
-    //     const midAngle = prev.normal.angle + deltaAngle( prev.normal.angle, curr.normal.angle ) / 2;
-
-    //     // TODO: Subdivide first before curves?
-
-    //     const offset = -10;
-    //     points.push( [
-    //       curr.x1 + offset * Math.cos( midAngle ),
-    //       curr.y1 + offset * Math.sin( midAngle ), 
-    //     ] );
-    //   }
-      
-    // const loopPoints = [];
-    // const points = sublines.map( line => [ line.x1, line.y1 ] );
-    //   Curve.getLoopThroughPoints( points ).forEach( curve => {
-    //     for ( let t = 0; t <= 1; t += 0.1 ) {
-
-    //       // TODO: This has all the overlapping line issues that we had before
-    //       //       Dig up some of the old code, like for raytracing from center?
-    //       //       Or take into account next and previous lines when determining offsets (to avoid overlap)
-
-    //       const pos = curve.getPosition( t );
-    //       const norm = curve.getNormal( t );
-    //       const offset = 5 * Math.sin( t * 100 ); //Math.random();
-    //       loopPoints.push( [ 
-    //         pos[ 0 ],// + norm[ 0 ] * offset, 
-    //         pos[ 1 ],// + norm[ 1 ] * offset,
-    //       ] );
-    //     }
-    //   } );
-
-       ctx.strokeStyle = 'orange';
-      // Line.getLoopThroughPoints( loopPoints ).forEach( line => line.draw( ctx ) );
-        sublines.forEach( line => line.draw( ctx ) );
-
+      // TODO: Try to do this in a way that avoids overlaps?
+      const perterb = 10;
+      const perterbed = sublines.map( line => [ 
+        line.x1 + perterb * ( Math.random() - 0.5 ), 
+        line.y1 + perterb * ( Math.random() - 0.5 ), 
+      ] );
+      lines.push( ...Line.getLoopThroughPoints( perterbed ) );
     } );
 
-    // TODO: Make this triggered separately
-    // outputLevel();
+    return lines;
   }
 
   function outputLevel() {
     const level = new Level();
 
-    // cellMap.getLoops().forEach( points => {
-    //   const loopPoints = [];
-      
-    //   Curve.getLoopThroughPoints( points ).forEach( curve => {
-    //     for ( let t = 0; t <= 1; t += 0.2 ) {
-    //       loopPoints.push( curve.getPosition( t ) );
-    //     }
-    //   } );
-
-    //   level.loops.push( Line.getLoopThroughPoints( loopPoints ) );
-    // } );
-
+    level.lines = lines;
     level.cellMap = cellMap;
 
     console.log( level.toJson() );
