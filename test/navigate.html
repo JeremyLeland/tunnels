@@ -19,15 +19,6 @@
   // game.scroll = { x: 32, y: 32 };
 
   game.update = ( dt ) => {
-    if ( game.mouse.down ) {
-      const x = game.mouse.x - game.scroll.x;
-      const y = game.mouse.y - game.scroll.y;
-      const cell = level.cellMap.closestCellTo( x, y );
-      if ( cell ) {
-        player.target = { x: x, y: y, cell: cell }
-      }
-    }
-
     player.update( dt );
   };
 
@@ -35,5 +26,14 @@
     level.draw( ctx );
     player.draw( ctx );
   };
+
+  document.addEventListener( 'mousedown', e => {
+    const x = e.clientX - game.scroll.x;
+    const y = e.clientY - game.scroll.y;
+    const cell = level.cellMap.closestCellTo( x, y );
+    if ( cell ) {
+      player.target = { x: x, y: y, cell: cell }
+    }
+  } );
 
 </script>
