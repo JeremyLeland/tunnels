@@ -17,6 +17,10 @@ export class Line {
 
   // Apparently this is a lot more complicated than I thought --
   // See https://stackoverflow.com/questions/1109536/an-algorithm-for-inflating-deflating-offsetting-buffering-polygons
+  // Further reading for later:
+  //  - https://mcmains.me.berkeley.edu/pubs/DAC05OffsetPolygon.pdf
+  //  - https://doc.cgal.org/Manual/3.2/doc_html/cgal_manual/Straight_skeleton_2/Chapter_main.html
+  //  - http://fcacciola.50webs.com/Offseting%20Methods.htm
   static getOffsetLoop( loop, offset = 0 ) {
     const offsetLoop = loop.map( line =>
       new Line(

@@ -116,7 +116,7 @@
     }
   }
 
-  const json = await ( await fetch( '../levels/test2.json' ) ).text();
+  const json = await ( await fetch( '../levels/test3.json' ) ).text();
   const level = Level.fromJson( json );
   
   const player = new PathfindingActor();
