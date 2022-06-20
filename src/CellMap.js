@@ -1,3 +1,4 @@
+import Delaunay from '../lib/delaunay/delaunay.js';
 import { Line } from './Line.js';
 
 export class Cell {
@@ -131,6 +132,42 @@ export class CellMap {
         ) )
       );
     }
+
+    return cellMap;
+  }
+
+  static fromEdges( lines ) {
+    const delaunay = Delaunay.from( lines, e => e.x1, e => e.y1 );
+    const cellMap = new CellMap();
+
+    const numTriangles = delaunay.triangles.length / 3;
+
+    cellMap.cells = Array.from( Array( numTriangles ), _ => new Cell() );
+    
+    for ( let triIndex = 0; triIndex < numTriangles; triIndex ++ ) {
+      const a = lines[ delaunay.triangles[ triIndex * 3 ] ];
+      const b = lines[ delaunay.triangles[ triIndex * 3 + 1 ] ];
+      const c = lines[ delaunay.triangles[ triIndex * 3 + 2 ] ];
+
+      const cell = cellMap.cells[ triIndex ];
+
+      cell.edges.push( new Line( a.x1, a.y1, b.x1, b.y1 ) );
+      cell.edges.push( new Line( b.x1, b.y1, c.x1, c.y1 ) );
+      cell.edges.push( new Line( c.x1, c.y1, a.x1, a.y1 ) );
+
+      cell.updateCenter();
+
+      const AA = delaunay.halfedges[ triIndex * 3 ];
+      const BB = delaunay.halfedges[ triIndex * 3 + 1 ];
+      const CC = delaunay.halfedges[ triIndex * 3 + 2 ];
+
+      cell.links.push( AA == -1 ? null : cellMap.cells[ Math.floor( AA / 3 ) ] );
+      cell.links.push( BB == -1 ? null : cellMap.cells[ Math.floor( BB / 3 ) ] );
+      cell.links.push( CC == -1 ? null : cellMap.cells[ Math.floor( CC / 3 ) ] );
+    }
+
+    // TODO: Make sure links match edges
+    // TODO: Remove cells that are inside of lines
 
     return cellMap;
   }

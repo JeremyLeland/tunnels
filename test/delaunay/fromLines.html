@@ -4,8 +4,6 @@
 <canvas id="canvas" width="800px" height="800px"></canvas>
 
 <script type="module">
-  import Delaunay from '../../lib/delaunay/delaunay.js';
-
   import { Line } from '../../src/Line.js';
   import { CellMap } from '../../src/CellMap.js';
 
@@ -20,33 +18,18 @@
     [ 250, 300, 200, 250 ]
   ].map( e => new Line( ...e ) );
 
-  const delaunay = Delaunay.from( lines, e => e.x1, e => e.y1 );
-  
   draw();
   
   function draw() {
     const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
     ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
-
+    
     ctx.strokeStyle = 'white';
     lines.forEach( line => line.draw( ctx ) );
     
-    ctx.strokeStyle = 'cyan';
-    for ( let t = 0; t < delaunay.triangles.length; ) {
-      const a = lines[ delaunay.triangles[ t ++ ] ];
-      const b = lines[ delaunay.triangles[ t ++ ] ];
-      const c = lines[ delaunay.triangles[ t ++ ] ];
-      
-      ctx.beginPath();
-      ctx.lineTo( a.x1, a.y1 );
-      ctx.lineTo( b.x1, b.y1 );
-      ctx.lineTo( c.x1, c.y1 );
-      ctx.closePath();
-      ctx.stroke();
-    }
-
-    // const cellMap = CellMap.fromVoronoi( voronoi );
-    // cellMap.cells.forEach( cell => cell.drawDebug( ctx ) );
+    const cellMap = CellMap.fromEdges( lines );
+    // cellMap.cells[ 0 ].drawDebug( ctx );
+    cellMap.cells.forEach( cell => cell.drawDebug( ctx ) );
   }
   
 </script>
