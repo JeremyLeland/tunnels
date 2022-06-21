@@ -25,6 +25,7 @@
 
   let lines = [];
   const cellMap = CellMap.fromVoronoi( voronoi );
+  let pathMap;
 
   const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
   
@@ -55,6 +56,11 @@
     if ( cell ) {
       cellMap.removeCell( cell );
       lines = getCaveLines( cellMap );
+
+      const edgeLines = [];
+      cellMap.getEdgeLoops().forEach( loop => edgeLines.push( ...loop ) );
+      pathMap = CellMap.fromEdges( edgeLines );
+
       draw();
     }
   }
@@ -63,7 +69,10 @@
   function draw() {
     ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
 
-    cellMap.draw( ctx );
+    pathMap?.drawDebug( ctx );
+
+    // ctx.strokeStyle = 'yellow';
+    // cellMap.draw( ctx );
 
     ctx.strokeStyle = 'orange';
     lines.forEach( line => line.draw( ctx ) );

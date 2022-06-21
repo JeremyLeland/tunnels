@@ -46,6 +46,12 @@ export class Cell {
     }
   }
 
+  draw( ctx ) {
+    ctx.beginPath();
+    this.edges.forEach( edge => ctx.lineTo( edge.x1, edge.y1 ) );
+    ctx.stroke(); 
+  }
+
   drawDebug( ctx ) {
     ctx.beginPath();
     ctx.arc( this.x, this.y, 3, 0, Math.PI * 2 );
@@ -149,9 +155,12 @@ export class CellMap {
       const b = lines[ delaunay.triangles[ triIndex * 3 + 1 ] ];
       const c = lines[ delaunay.triangles[ triIndex * 3 + 2 ] ];
 
-      if ( a.x2 == b.x1 && a.y2 == b.y1 || 
-           b.x2 == c.x1 && b.y2 == c.y1 ||
-           c.x2 == a.x1 && c.y2 == a.y1 ) {
+      if ( a.x1 == b.x2 && a.y1 == b.y2 || 
+           b.x1 == c.x2 && b.y1 == c.y2 ||
+           c.x1 == a.x2 && c.y1 == a.y2 ) {
+        // inside, skip
+      }
+      else {
         const cell = new Cell();
 
         cell.edges.push( new Line( a.x1, a.y1, b.x1, b.y1 ) );
@@ -252,6 +261,10 @@ export class CellMap {
   }
 
   draw( ctx ) {
+    this.cells.forEach( cell => cell.draw( ctx ) );
+  }
+
+  drawDebug( ctx ) {
     ctx.globalAlpha = 0.5;
     this.cells.forEach( cell => cell.drawDebug( ctx ) );
     ctx.globalAlpha = 1;
