@@ -1,4 +1,4 @@
-<title>Lloyds Relaxation</title>
+<title>Building Cell Map from Lines</title>
 <link rel="stylesheet" href="../../style.css">
 
 <canvas id="canvas" width="800px" height="800px"></canvas>
@@ -8,29 +8,18 @@
   import { CellMap } from '../../src/CellMap.js';
 
   const lines = [
-    // outer
-    [ 100, 100,  50, 200 ],
-    [  50, 200,  50, 300 ],
-    [  50, 300, 100, 400 ],
-    [ 100, 400, 200, 450 ],
-    [ 200, 450, 300, 450 ],
-    [ 300, 450, 400, 400 ],
-    [ 400, 400, 450, 300 ],
-    [ 450, 300, 450, 200 ],
-    [ 450, 200, 400, 100 ],
-    [ 400, 100, 300,  50 ],
-    [ 300,  50, 200,  50 ],
-    [ 200,  50, 100, 100 ],
+  [ 100, 100, 100, 400 ],
+    [ 100, 400, 400, 400 ],
+    [ 400, 400, 400, 100 ],
+    [ 400, 100, 100, 100 ],
 
-    // inner
-    [ 200, 250, 200, 225 ],
-    [ 200, 225, 250, 200 ],
-    [ 250, 200, 300, 225 ],
-    [ 300, 225, 300, 250 ],
-    [ 300, 250, 300, 275 ],
-    [ 300, 275, 250, 300 ],
-    [ 250, 300, 200, 275 ],
-    [ 200, 275, 200, 250 ],
+  [ 200, 250, 250, 200 ],
+    [ 250, 200, 300, 250 ],
+    [ 300, 250, 250, 300 ],
+    [ 250, 300, 200, 250 ],
+
+    
+    
   ].map( e => new Line( ...e ) );
 
   draw();
@@ -38,15 +27,46 @@
   function draw() {
     const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
     ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
-    
-    
-    
-    const cellMap = CellMap.fromEdges( lines );
-    // cellMap.cells[ 0 ].drawDebug( ctx );
-    cellMap.cells.forEach( cell => cell.drawDebug( ctx ) );
 
-    ctx.strokeStyle = 'orange';
+    ctx.strokeStyle = 'white';
     lines.forEach( line => line.draw( ctx ) );
+
+    const colors = [ 'red', 'orange', 'yellow', 'lime', 'cyan', 'violet', 'brown', 'silver' ];
+
+    for ( let i = 0; i < lines.length; i ++ ) {
+      ctx.strokeStyle = colors[ i ];
+
+      for ( let j = i + 1; j < lines.length; j ++ ) {
+        const from = lines[ i ], to = lines[ j ];
+
+        const ray = new Line( from.x1, from.y1, to.x1, to.y1 );
+
+        let closestHit, closestTime = Infinity;
+        lines.forEach( other => {
+          const hit = ray.getLineHit( other );
+          if ( 0 <= hit.uB && hit.uB <= 1 ) {
+            if ( 0 < hit.uA && hit.uA < closestTime ) {
+              closestTime = hit.uA;
+              closestHit = hit;
+            }
+          }
+        } );
+
+        const dirFrom = ray.slope.x * from.normal.x + ray.slope.y * from.normal.y;
+        const dirTo = ray.slope.x * to.normal.x + ray.slope.y * to.normal.y;
+        // NOTE: Do we need a tolerance for this?
+        if ( closestHit.uA == 1 && ( dirFrom > 0 || dirTo < 0 ) ) {
+          ctx.beginPath();
+          ctx.moveTo( from.x1, from.y1 );
+          ctx.lineTo( closestHit.position.x, closestHit.position.y );
+          // ctx.strokeStyle = 'lime';
+          ctx.stroke();
+        }
+      }
+    }
+    
+
+    
   }
   
 </script>
