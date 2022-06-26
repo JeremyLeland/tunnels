@@ -7,11 +7,19 @@
   import Delaunay from '../../lib/delaunay/delaunay.js';
 
   const points = [
-    [ 100, 100 ],
-    [ 300, 100 ],
+    // in order:
+    // [ 100, 100 ],
+    // [ 300, 100 ],
+    // [ 250, 200 ],
+    // [ 200, 250 ],
+    // [ 100, 300 ],
+
+    // scrambled
     [ 250, 200 ],
-    [ 200, 250 ],
+    [ 300, 100 ],
     [ 100, 300 ],
+    [ 100, 100 ],
+    [ 200, 250 ],
   ];
   
   const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
