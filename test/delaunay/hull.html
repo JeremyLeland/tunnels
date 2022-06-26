@@ -1,0 +1,31 @@
+<title>Get Hull from Points</title>
+<link rel="stylesheet" href="../../style.css">
+
+<canvas id="canvas" width="800px" height="800px"></canvas>
+
+<script type="module">
+  import Delaunay from '../../lib/delaunay/delaunay.js';
+
+  const points = [
+    [ 100, 100 ],
+    [ 300, 100 ],
+    [ 250, 200 ],
+    [ 200, 250 ],
+    [ 100, 300 ],
+  ];
+  
+  const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
+  
+  ctx.fillStyle = 'gray';
+  points.forEach( p => {
+    ctx.fillRect( p[ 0 ] - 4, p[ 1 ] - 4, 8, 8 );
+  } );
+  
+  const delaunay = Delaunay.from( points );
+
+  ctx.beginPath();
+  Array.from( delaunay.hull, i => points[ i ] ).forEach( p => ctx.lineTo( p[ 0 ], p[ 1 ] ) );
+  ctx.fillStyle = 'rgba( 255, 150, 100, 0.5 )';
+  ctx.fill();
+  
+</script>
