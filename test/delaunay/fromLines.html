@@ -23,14 +23,20 @@
     [ 200,  50, 100, 100 ],
 
     // inner
-    [ 200, 250, 200, 225 ],
-    [ 200, 225, 250, 200 ],
-    [ 250, 200, 300, 225 ],
-    [ 300, 225, 300, 250 ],
+    [ 200, 250, 200, 125 ],
+    [ 200, 125, 250, 200 ],
+    [ 250, 200, 300, 125 ],
+    [ 300, 125, 300, 250 ],
     [ 300, 250, 300, 275 ],
     [ 300, 275, 250, 300 ],
     [ 250, 300, 200, 275 ],
     [ 200, 275, 200, 250 ],
+
+    // small
+    [ 350, 350, 360, 350 ],
+    [ 360, 350, 360, 360 ],
+    [ 360, 360, 350, 360 ],
+    [ 350, 360, 350, 350 ],
   ].map( e => new Line( ...e ) );
 
   const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
@@ -54,11 +60,9 @@
   
   ctx.lineWidth = 2;
 
-  for ( let triIndex = 0; triIndex < numTriangles; triIndex ++ ) {
-    const a = lines[ delaunay.triangles[ triIndex * 3 ] ];
-    const b = lines[ delaunay.triangles[ triIndex * 3 + 1 ] ];
-    const c = lines[ delaunay.triangles[ triIndex * 3 + 2 ] ];
+  for ( let triIndex = 6; triIndex < 7; triIndex ++ ) {
 
+    const [ a, b, c ] = [ 0, 1, 2 ].map( i => lines[ delaunay.triangles[ triIndex * 3 + i ] ] );
     const linePairs = [ [ a, b ], [ b, c ], [ c, a ] ];
     const lineColors = [ 'red', 'green', 'blue' ];
     const pointColors = [ 'pink', 'lime', 'cyan' ];
