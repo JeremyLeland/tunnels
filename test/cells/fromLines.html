@@ -1,0 +1,109 @@
+<title>Building Cell Map from Lines</title>
+<link rel="stylesheet" href="../../style.css">
+
+<canvas id="canvas" width="800px" height="800px"></canvas>
+
+<script type="module">
+  import { Line } from '../../src/Line.js';
+  import { Cell, CellMap } from '../../src/CellMap.js';
+
+  const lines = [
+    // inner
+    [ 200, 250, 250, 200 ],
+    [ 250, 200, 300, 250 ],
+    [ 300, 250, 250, 300 ],
+    [ 250, 300, 200, 250 ],
+
+    // outer
+    [ 100, 100, 100, 400 ],
+    [ 100, 400, 400, 400 ],
+    [ 400, 400, 400, 100 ],
+    [ 400, 100, 100, 100 ],
+    
+  ].map( e => new Line( ...e ) );
+
+  draw();
+  
+  function draw() {
+    const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
+    ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
+
+    ctx.strokeStyle = 'white';
+    lines.forEach( line => line.draw( ctx ) );
+
+    const visible = new Map();
+
+   
+
+    lines.forEach( line => visible.set( line, [ line ] ) );
+      
+    for ( let i = 0; i < lines.length; i ++ ) {
+      for ( let j = i + 1; j < lines.length; j ++ ) {
+        const from = lines[ i ], to = lines[ j ];
+
+        const ray = new Line( from.x1, from.y1, to.x1, to.y1 );
+
+        let closestHit;
+        lines.forEach( other => {
+          const hit = ray.getLineHit( other );
+          if ( 0 <= hit.uB && hit.uB <= 1 &&
+               0 < hit.uA && hit.uA < ( closestHit?.uA ?? Infinity ) ) {
+            closestHit = hit;
+          }
+        } );
+
+        const dirFrom = ray.slope.x * from.normal.x + ray.slope.y * from.normal.y;
+        const dirTo = ray.slope.x * to.normal.x + ray.slope.y * to.normal.y;
+        
+        const TOLERANCE = 0.01;
+        if ( closestHit.uA == 1 && ( dirFrom > TOLERANCE || dirTo < -TOLERANCE ) ) {
+          visible.get( from ).push( to );
+          visible.get( to ).push( from );
+        }
+      }
+    }
+
+    const colors = [ 'red', 'orange', 'yellow', 'lime', 'cyan', 'violet', 'salmon', 'silver' ];
+    let colorIndex = 0;
+
+    ctx.globalAlpha = 0.5;
+    
+    for ( const [ key, value ] of visible.entries() ) {
+      const cell = new Cell();
+
+      // TODO: Angle-from-center method doesn't seem to work in more complicated cases
+      //       the lines really should be ordered by angle from key
+      //       need to figure out how to include key in this order
+      let x = 0;
+      let y = 0;
+
+      value.forEach( line => {
+        x += line.x1;
+        y += line.y1;
+      } );
+
+      x /= value.length;
+      y /= value.length;
+
+      const points = value.map( e => ( { angle: Math.atan2( e.y1 - y, e.x1 - x ), point: [ e.x1, e.y1 ] } ) );
+
+      cell.edges = Line.getLoopThroughPoints( points.sort( ( a, b ) => a.angle - b.angle ).map( e => e.point ) );
+      cell.drawShaded( ctx, colors[ colorIndex ++ ] );
+
+      // ctx.beginPath();
+
+      // value.sort( ( a, b ) => a.angle - b.angle ).forEach( e => ctx.lineTo( e.x1, e.y1 ) );
+      // ctx.fillStyle = colors[ colorIndex ++ ];
+      // ctx.fill();
+    }
+    
+    console.log( visible );
+    
+  }
+
+  function fixAngle( a ) {
+    return a > Math.PI ? a - Math.PI * 2 : a < -Math.PI ? a + Math.PI * 2 : a;
+  }
+
+  
+</script>
