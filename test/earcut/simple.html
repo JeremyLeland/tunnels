@@ -1,0 +1,65 @@
+<title>Earcut Trianglization with holes</title>
+<link rel="stylesheet" href="../../style.css">
+
+<canvas id="canvas" width="800px" height="800px"></canvas>
+
+<script type="module">
+  import { Line } from '../../src/Line.js';
+  import earcut from '../../lib/earcut.js';
+
+  const lines = [
+    // outer
+    [ 100, 100,  50, 200 ],
+    [  50, 200,  50, 300 ],
+    [  50, 300, 100, 400 ],
+    [ 100, 400, 200, 450 ],
+    [ 200, 450, 300, 450 ],
+    [ 300, 450, 400, 400 ],
+    [ 400, 400, 450, 300 ],
+    [ 450, 300, 450, 200 ],
+    [ 450, 200, 400, 100 ],
+    [ 400, 100, 300,  50 ],
+    [ 300,  50, 200,  50 ],
+    [ 200,  50, 100, 100 ],
+
+    // inner
+    [ 200, 250, 200, 125 ],
+    [ 200, 125, 250, 200 ],
+    [ 250, 200, 300, 125 ],
+    [ 300, 125, 300, 250 ],
+    [ 300, 250, 300, 275 ],
+    [ 300, 275, 250, 300 ],
+    [ 250, 300, 200, 275 ],
+    [ 200, 275, 200, 250 ],
+
+    // small
+    [ 300, 300, 360, 300 ],
+    [ 360, 300, 360, 360 ],
+    [ 360, 360, 300, 360 ],
+    [ 300, 360, 300, 300 ],
+  ].map( e => new Line( ...e ) );
+
+  const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
+
+  const flatcoords = [];
+  lines.forEach( line => flatcoords.push( line.x1, line.y1 ) );
+
+  const triangles = earcut( flatcoords, [ 12, 20 ] );
+
+  const numTriangles = triangles.length / 3;
+  for ( let triIndex = 0; triIndex < numTriangles; triIndex ++ ) {
+
+    const [ a, b, c ] = [ 0, 1, 2 ].map( i => lines[ triangles[ triIndex * 3 + i ] ] );
+    
+    ctx.beginPath();
+    [ a, b, c ].forEach( line => ctx.lineTo( line.x1, line.y1 ) );
+    ctx.closePath();
+
+    ctx.fillStyle = `hsl( ${ Math.random() * 360 }deg, 50%, 50% )`;
+    ctx.fill();
+  }
+
+  ctx.strokeStyle = 'white';
+  lines.forEach( line => line.draw( ctx ) );
+  
+</script>

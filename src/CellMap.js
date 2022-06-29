@@ -154,13 +154,18 @@ export class CellMap {
       const [ a, b, c ] = [ 0, 1, 2 ].map( i => lines[ delaunay.triangles[ triIndex * 3 + i ] ] );
       const linePairs = [ [ a, b ], [ b, c ], [ c, a ] ];
       
-      const THRESHOLD = 0.001;
-      if ( linePairs.some( pair => {
-        const [ start, end ] = pair;
-        const startOverlap = ( end.x1 - start.x1 ) * start.normal.x + ( end.y1 - start.y1 ) * start.normal.y;
-        const endOverlap   = ( start.x1 - end.x1 ) * end.normal.x   + ( start.y1 - end.y1 ) * end.normal.y;
-        return startOverlap < -THRESHOLD && endOverlap < -THRESHOLD;
-      } ) ) {
+      // const THRESHOLD = 0.001;
+      // if ( linePairs.some( pair => {
+      //   const [ start, end ] = pair;
+      //   const startOverlap = ( end.x1 - start.x1 ) * start.normal.x + ( end.y1 - start.y1 ) * start.normal.y;
+      //   const endOverlap   = ( start.x1 - end.x1 ) * end.normal.x   + ( start.y1 - end.y1 ) * end.normal.y;
+      //   return startOverlap < -THRESHOLD && endOverlap < -THRESHOLD;
+      // } ) ) {
+      //   // inside, skip
+      // }
+      if ( a.x1 == b.x2 && a.y1 == b.y2 || 
+           b.x1 == c.x2 && b.y1 == c.y2 ||
+           c.x1 == a.x2 && c.y1 == a.y2 ) {
         // inside, skip
       }
       else {
