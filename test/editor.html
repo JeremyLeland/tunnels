@@ -57,9 +57,7 @@
       cellMap.removeCell( cell );
       lines = getCaveLines( cellMap );
 
-      const edgeLines = [];
-      cellMap.getEdgeLoops().forEach( loop => edgeLines.push( ...loop ) );
-      pathMap = CellMap.fromEdges( edgeLines );
+      pathMap = CellMap.fromEdgeLoops( cellMap.getEdgeLoops() );
 
       draw();
     }
@@ -71,8 +69,8 @@
 
     pathMap?.drawDebug( ctx );
 
-    // ctx.strokeStyle = 'yellow';
-    // cellMap.draw( ctx );
+    ctx.strokeStyle = 'yellow';
+    cellMap.draw( ctx );
 
     ctx.strokeStyle = 'orange';
     lines.forEach( line => line.draw( ctx ) );

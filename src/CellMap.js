@@ -1,4 +1,5 @@
 import Delaunay from '../lib/delaunay/delaunay.js';
+import earcut from '../lib/earcut.js';
 import { Line } from './Line.js';
 
 export class Cell {
@@ -142,51 +143,51 @@ export class CellMap {
     return cellMap;
   }
 
-  static fromEdges( lines ) {
-    const delaunay = Delaunay.from( lines, e => e.x1, e => e.y1 );
+  // TODO: We need to know the loops, not just random edges. Make it from that.
+  static fromEdgeLoops( edgeLoops ) {
     const cellMap = new CellMap();
 
-    const numTriangles = delaunay.triangles.length / 3;
+    const flatcoords = [];
+    const holes = [];
 
+    edgeLoops.forEach( loop => { 
+      if ( flatcoords.length > 0 ) {
+        holes.push( flatcoords.length / 2 );
+      }
+
+      loop.forEach( line => flatcoords.push( line.x1, line.y1 ) );
+    } );
+
+    const triangles = earcut( flatcoords, holes );
+
+    const numTriangles = triangles.length / 3;
     const cells = Array( numTriangles ).fill( null );
-  
+
     for ( let triIndex = 0; triIndex < numTriangles; triIndex ++ ) {
-      const [ a, b, c ] = [ 0, 1, 2 ].map( i => lines[ delaunay.triangles[ triIndex * 3 + i ] ] );
+
+      const [ a, b, c ] = [ 0, 1, 2 ].map( i => {
+        const coordIndex = triangles[ triIndex * 3 + i ] * 2;
+        return flatcoords.slice( coordIndex, coordIndex + 2 );
+      } );
+
       const linePairs = [ [ a, b ], [ b, c ], [ c, a ] ];
+
+      const cell = new Cell();
+
+      // linePairs.forEach( pair => cell.edges.push( new Line( ...pair[ 0 ], ...pair[ 1 ] ) ) );
+      linePairs.forEach( pair => cell.edges.push( new Line( pair[ 0 ][ 0 ], pair[ 0 ][ 1 ], pair[ 1 ][ 0 ], pair[ 1 ][ 1 ] ) ) );
       
-      // const THRESHOLD = 0.001;
-      // if ( linePairs.some( pair => {
-      //   const [ start, end ] = pair;
-      //   const startOverlap = ( end.x1 - start.x1 ) * start.normal.x + ( end.y1 - start.y1 ) * start.normal.y;
-      //   const endOverlap   = ( start.x1 - end.x1 ) * end.normal.x   + ( start.y1 - end.y1 ) * end.normal.y;
-      //   return startOverlap < -THRESHOLD && endOverlap < -THRESHOLD;
-      // } ) ) {
-      //   // inside, skip
-      // }
-      if ( a.x1 == b.x2 && a.y1 == b.y2 || 
-           b.x1 == c.x2 && b.y1 == c.y2 ||
-           c.x1 == a.x2 && c.y1 == a.y2 ) {
-        // inside, skip
-      }
-      else {
-        const cell = new Cell();
+      cell.updateCenter();
 
-        cell.edges.push( new Line( a.x1, a.y1, b.x1, b.y1 ) );
-        cell.edges.push( new Line( b.x1, b.y1, c.x1, c.y1 ) );
-        cell.edges.push( new Line( c.x1, c.y1, a.x1, a.y1 ) );
+      // const AA = delaunay.halfedges[ triIndex * 3 ];
+      // const BB = delaunay.halfedges[ triIndex * 3 + 1 ];
+      // const CC = delaunay.halfedges[ triIndex * 3 + 2 ];
 
-        cell.updateCenter();
+      // cell.links.push( AA == -1 ? null : cells[ Math.floor( AA / 3 ) ] );
+      // cell.links.push( BB == -1 ? null : cells[ Math.floor( BB / 3 ) ] );
+      // cell.links.push( CC == -1 ? null : cells[ Math.floor( CC / 3 ) ] );
 
-        const AA = delaunay.halfedges[ triIndex * 3 ];
-        const BB = delaunay.halfedges[ triIndex * 3 + 1 ];
-        const CC = delaunay.halfedges[ triIndex * 3 + 2 ];
-
-        cell.links.push( AA == -1 ? null : cells[ Math.floor( AA / 3 ) ] );
-        cell.links.push( BB == -1 ? null : cells[ Math.floor( BB / 3 ) ] );
-        cell.links.push( CC == -1 ? null : cells[ Math.floor( CC / 3 ) ] );
-
-        cells[ triIndex ] = cell;
-      }
+      cells[ triIndex ] = cell;
     }
 
     cellMap.cells = cells.filter( c => c != null );
