@@ -1,0 +1,44 @@
+<title>Combine cells</title>
+<link rel="stylesheet" href="../../style.css">
+
+<canvas id="canvas" width="400px" height="400px"></canvas>
+
+<script type="module">
+  import Delaunay from '../../lib/delaunay/delaunay.js';
+
+  import { Line } from '../../src/Line.js';
+  import { CellMap } from '../../src/CellMap.js';
+
+  const width = 400, height = 400;
+  const seeds = Array.from( Array( 30 ), _ => ( {
+    x: Math.random() * width, 
+    y: Math.random() * height
+  } ) );
+
+  const delaunay = Delaunay.from( seeds, ( e ) => e.x, ( e ) => e.y );
+  const voronoi = delaunay.voronoi( [ 0, 0, width, height ] );
+
+  const cellMap = CellMap.fromVoronoi( voronoi );
+  // for ( let i = 0; i < 5; i ++ ) {
+  //   cellMap.removeCell( cellMap.cells[ 0 ] );
+  // }
+
+  const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
+
+  const edgeLines = [];
+  cellMap.getEdgeLoops().forEach( loop => edgeLines.push( ...loop ) );
+  const pathMap = CellMap.fromEdges( edgeLines );
+
+  ctx.strokeStyle = 'red';
+  pathMap.draw( ctx );
+
+  
+  ctx.strokeStyle = 'yellow';
+  pathMap.cells[ 0 ].draw( ctx );
+
+  pathMap.cells[ 0 ].merge( 0 );
+
+  ctx.strokeStyle = 'green';
+  pathMap.cells[ 0 ].drawDebug( ctx );
+  
+</script>

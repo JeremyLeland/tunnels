@@ -31,6 +31,21 @@ export class Cell {
     );
   }
 
+  merge( index ) {
+    const other = this.links[ index ];
+    if ( other ) {
+      const otherIndex = other.links.findIndex( link => link == this );
+      
+      // TODO: Is it expensive to keep making this function if we call this a bunch?
+      const extract = ( arr ) => arr.slice( otherIndex + 1 ).concat( arr.slice( 0, otherIndex ) );
+
+      this.edges.splice( index, 1, ...extract( other.edges ) );
+      this.links.splice( index, 1, ...extract( other.links ) );
+    }
+
+    this.updateCenter();
+  }
+
   unlink( index ) {
     const other = this.links[ index ];
     if ( other ) {
@@ -50,6 +65,7 @@ export class Cell {
   draw( ctx ) {
     ctx.beginPath();
     this.edges.forEach( edge => ctx.lineTo( edge.x1, edge.y1 ) );
+    ctx.closePath();
     ctx.stroke(); 
   }
 
@@ -143,7 +159,70 @@ export class CellMap {
     return cellMap;
   }
 
-  // TODO: We need to know the loops, not just random edges. Make it from that.
+
+  // NOTE: Keep going back and forth on whether I like the delaunay triangles or want something else
+  //       Keeping both of these around for now until I get one really working
+  static fromEdges( lines ) {
+    const delaunay = Delaunay.from( lines, e => e.x1, e => e.y1 );
+    const cellMap = new CellMap();
+
+    const numTriangles = delaunay.triangles.length / 3;
+
+    const cells = Array( numTriangles ).fill( null );
+  
+    for ( let triIndex = 0; triIndex < numTriangles; triIndex ++ ) {
+      const [ a, b, c ] = [ 0, 1, 2 ].map( i => lines[ delaunay.triangles[ triIndex * 3 + i ] ] );
+      const linePairs = [ [ a, b ], [ b, c ], [ c, a ] ];
+      
+      // const THRESHOLD = 0.001;
+      // if ( linePairs.some( pair => {
+      //   const [ start, end ] = pair;
+      //   const startOverlap = ( end.x1 - start.x1 ) * start.normal.x + ( end.y1 - start.y1 ) * start.normal.y;
+      //   const endOverlap   = ( start.x1 - end.x1 ) * end.normal.x   + ( start.y1 - end.y1 ) * end.normal.y;
+      //   return startOverlap < -THRESHOLD && endOverlap < -THRESHOLD;
+      // } ) ) {
+      //   // inside, skip
+      // }
+      if ( a.x1 == b.x2 && a.y1 == b.y2 || 
+           b.x1 == c.x2 && b.y1 == c.y2 ||
+           c.x1 == a.x2 && c.y1 == a.y2 ) {
+        // inside, skip
+      }
+      else {
+        const cell = new Cell();
+
+        cell.edges.push( new Line( a.x1, a.y1, b.x1, b.y1 ) );
+        cell.edges.push( new Line( b.x1, b.y1, c.x1, c.y1 ) );
+        cell.edges.push( new Line( c.x1, c.y1, a.x1, a.y1 ) );
+
+        cell.updateCenter();
+
+        cells[ triIndex ] = cell;
+      }
+    }
+
+    for ( let triIndex = 0; triIndex < numTriangles; triIndex ++ ) {
+      const cell = cells[ triIndex ];
+
+      if ( cell ) {
+        // TODO: Make sure these are in right order! Or even remotely correct at all...
+        const AA = delaunay.halfedges[ triIndex * 3 ];
+        const BB = delaunay.halfedges[ triIndex * 3 + 1 ];
+        const CC = delaunay.halfedges[ triIndex * 3 + 2 ];
+
+        cell.links.push( AA == -1 ? null : cells[ Math.floor( AA / 3 ) ] );
+        cell.links.push( BB == -1 ? null : cells[ Math.floor( BB / 3 ) ] );
+        cell.links.push( CC == -1 ? null : cells[ Math.floor( CC / 3 ) ] );
+      }
+    }
+
+    cellMap.cells = cells.filter( c => c != null );
+
+    return cellMap;
+  }
+
+  // NOTE: Keep going back and forth on whether I like the delaunay triangles or want something else
+  //       Keeping both of these around for now until I get one really working
   static fromEdgeLoops( edgeLoops ) {
     const cellMap = new CellMap();
 

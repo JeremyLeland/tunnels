@@ -43,6 +43,10 @@ export class PathfindingActor extends Actor {
             }
           }
 
+          // TODO: This fixation on heading to the edge can result in some weird navigation
+          // The links between cells can give us the spirit of what route we should take, but 
+          // maybe it's better to avoid walls than to specifically target cell edges
+
           if ( this.nextEdge ) {
             const left = { 
               x: this.nextEdge.x2 - this.nextEdge.slope.x * this.size,
