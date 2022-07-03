@@ -7,7 +7,7 @@
   import { Line } from '../../src/Line.js';
   import Delaunay from '../../lib/delaunay/delaunay.js';
 
-  import { CellMap } from '../../src/CellMap.js';
+  import { Cell, CellMap } from '../../src/CellMap.js';
 
   const lines = [
     // outer
@@ -39,69 +39,105 @@
     [ 360, 320, 360, 360 ],
     [ 360, 360, 320, 360 ],
     [ 320, 360, 320, 320 ],
+
+
+    // [ 100, 300, 200, 320 ],
+    // [ 200, 320, 210, 400 ],
+    // [ 250, 100,  50, 150 ],
+
   ].map( e => new Line( ...e ) );
 
   const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
 
-  const delaunay = Delaunay.from( lines, e => e.x1, e => e.y1 );
-
-  // TODO: Move fromEdges code to test for now, so we can instrument with more visual debug output
-  // Namely, drawText the angle difference for each edge and color it based on angle (w/hue)
-
+  
   // // cellMap.cells[ 0 ].drawDebug( ctx );
   // cellMap.cells.forEach( cell => cell.drawDebug( ctx ) );
-
-  // delaunay.render( ctx );
-  // ctx.strokeStyle = 'gray';
-  // ctx.stroke();
   
   ctx.strokeStyle = 'white';
   lines.forEach( line => line.draw( ctx ) );
 
-  const pathMap = CellMap.fromEdges( lines );
+  // const pathMap = CellMap.fromEdges( lines );
+  // pathMap.drawDebug( ctx );
 
-  pathMap.drawDebug( ctx );
+  const delaunay = Delaunay.from( lines, e => e.x1, e => e.y1 );
+  delaunay.render( ctx );
+  ctx.strokeStyle = 'gray';
+  ctx.stroke();
 
-  // const numTriangles = delaunay.triangles.length / 3;
-  
-  // ctx.lineWidth = 2;
+  const cellMap = new CellMap();
 
-  // for ( let triIndex = 0; triIndex < numTriangles; triIndex ++ ) {
+  const numTriangles = delaunay.triangles.length / 3;
 
-  //   const [ a, b, c ] = [ 0, 1, 2 ].map( i => lines[ delaunay.triangles[ triIndex * 3 + i ] ] );
-  //   const linePairs = [ [ a, b ], [ b, c ], [ c, a ] ];
-  //   const lineColors = [ 'red', 'green', 'blue' ];
-  //   const pointColors = [ 'pink', 'lime', 'cyan' ];
+  const cells = Array( numTriangles ).fill( null );
 
-  //   ctx.beginPath();
-  //   linePairs.forEach( pair => ctx.lineTo( pair[0].x1, pair[0].y1 ) );
-  //   ctx.closePath();
+  for ( let triIndex = 0; triIndex < numTriangles; triIndex ++ ) {
+    const [ a, b, c ] = [ 0, 1, 2 ].map( i => lines[ delaunay.triangles[ triIndex * 3 + i ] ] );
+    const linePairs = [ [ a, b ], [ b, c ], [ c, a ] ];
 
-  //   // TODO: Remove triangles with an edge facing wrong way
-  //   // TODO: Figure out how to remove triangles in the hole but not touching the edge
-  //   //       Something about being in the circles formed by those edge triangles? Look up constrained delaunay triangles
+    const center = {
+      x: ( a.x1 + b.x1 + c.x1 ) / 3,
+      y: ( a.y1 + b.y1 + c.y1 ) / 3,
+    };
 
-  //   // TODO: Try using earcut for this? Seems to support holes already
+    ctx.fillStyle = 'red';
+    ctx.fillRect( center.x - 2, center.y - 2, 4, 4 );
 
-  //   const THRESHOLD = 0.001;
-  //   // const hole = linePairs.some( pair => {
-  //   //   const [ start, end ] = pair;
-  //   //   const startOverlap = ( end.x1 - start.x1 ) * start.normal.x + ( end.y1 - start.y1 ) * start.normal.y;
-  //   //   const endOverlap   = ( start.x1 - end.x1 ) * end.normal.x   + ( start.y1 - end.y1 ) * end.normal.y;
-  //   //   return startOverlap < -THRESHOLD && endOverlap < -THRESHOLD;
-  //   // } );
 
-  //   const AC = ( a.x1 - c.x1 ) * c.normal.x + ( a.y1 - c.y1 ) * c.normal.y;
-  //   const BC = ( b.x1 - c.x1 ) * c.normal.x + ( b.y1 - c.y1 ) * c.normal.y;
-  //   // const BAC = ( a.x1 - b.x1 ) * c.normal.x + ( a.y1 - b.y1 ) * c.normal.y;
-  //   // const BC = ( c.x1 - b.x1 ) * b.normal.x + ( c.y1 - b.y1 ) * b.normal.y;
-  //   // const CB = ( b.x1 - c.x1 ) * c.normal.x + ( b.y1 - c.y1 ) * c.normal.y;
+    const cell = new Cell();
+    cell.edges.push( new Line( a.x1, a.y1, b.x1, b.y1 ) );
+    cell.edges.push( new Line( b.x1, b.y1, c.x1, c.y1 ) );
+    cell.edges.push( new Line( c.x1, c.y1, a.x1, a.y1 ) );
+    cell.updateCenter();
+
+    const inBounds = [ a, b, c ].map( e => {
+      const px = e.x2 - e.x1;
+      const py = e.y2 - e.y1;
+      const u = ( ( center.x - e.x1 ) * px + ( center.y - e.y1 ) * py ) / ( ( px * px ) + ( py * py ) );
+
+      return 0 <= u && u <= 1;
+    } );
     
-  //   const hole = AC < -THRESHOLD || BC < -THRESHOLD;
+    const dirs = [ a, b, c ].map( e => 
+      ( center.x - e.x1 ) * e.normal.x + ( center.y - e.y1 ) * e.normal.y
+    );
 
+    // if ( dirs[ 0 ] < 0 )  cell.drawShaded( ctx, 'red' );
+    // if ( dirs[ 1 ] < 0 )  cell.drawShaded( ctx, 'green' );
+    // if ( dirs[ 2 ] < 0 )  cell.drawShaded( ctx, 'blue' );
 
-  //   ctx.fillStyle = hole ? 'orange' : 'yellow';
-  //   ctx.fill();
+    const hole = dirs.filter( e => e < 0 ).length > 1;
+
+    cell.drawShaded( ctx, hole ? 'red' : 'green' );
+
+    // if (
+    //   linePairs.some( pair => {
+    //     const [ start, end ] = pair;
+    //     if ( ( end.x1 - start.x1 ) * start.normal.x + ( end.y1 - start.y1 ) * start.normal.y > 0 ) {
+    //       const px = start.x2 - start.x1;
+    //       const py = start.y2 - start.y1;
+    //       const u = ( ( end.x1 - start.x1 ) * px + ( end.y1 - start.y1 ) * py ) / ( ( px * px ) + ( py * py ) );
+
+    //       return 0 <= u && u <= 1
+    //     }
+
+    //     return false;
+    //   }
+
+    //   )
+    // )   cell.drawShaded( ctx, 'green' );
+    
+    // if ( a.x1 == b.x2 && a.y1 == b.y2 || 
+    //      b.x1 == c.x2 && b.y1 == c.y2 ||
+    //      c.x1 == a.x2 && c.y1 == a.y2 ) {
+    //   cell.drawShaded( ctx, 'red' );
+    // }
+    // else if ( hole ) {
+    //   cell.drawShaded( ctx, 'orange' );
+    // }
+    // else {
+    //   cell.drawShaded( ctx, 'green' );
+    // }
+  }
     
 
   //   for ( let i = 0; i < 3; i ++ ) {
