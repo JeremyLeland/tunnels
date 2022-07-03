@@ -78,6 +78,8 @@ export class Cell {
     // const colors = [ 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'brown', 'pink' ];
     // let colorIndex = 0;
 
+    this.drawShaded( ctx, 'cyan' );
+
     this.edges.forEach( edge => { 
       ctx.strokeStyle = 'cyan'; //colors[ colorIndex ++ ];
       edge.draw( ctx );
@@ -187,17 +189,18 @@ export class CellMap {
         return 0 <= u && u <= 1;
       } );
       
-      // TODO: This isn't quite right...need to handle case where we are behind several lines (but not in bounds of them)
-      const inside = inBounds.length == 0 || inBounds.every( e => 
-        ( center.x - e.x1 ) * e.normal.x + ( center.y - e.y1 ) * e.normal.y < 0
+      const dirs = [ a, b, c ].map( e => 
+        ( center.x - e.x1 ) * e.normal.x + ( center.y - e.y1 ) * e.normal.y
       );
+
+      const hole = dirs.filter( e => e < 0 ).length > 1;
       
-      if ( a.x1 == b.x2 && a.y1 == b.y2 || 
-           b.x1 == c.x2 && b.y1 == c.y2 ||
-           c.x1 == a.x2 && c.y1 == a.y2 ) {
-        // inside, skip
-      }
-      else if ( inside ) {
+      // if ( a.x1 == b.x2 && a.y1 == b.y2 || 
+      //      b.x1 == c.x2 && b.y1 == c.y2 ||
+      //      c.x1 == a.x2 && c.y1 == a.y2 ) {
+      //   // inside, skip
+      // }
+      /*else*/ if ( hole ) {
         // inside, skip
       }
       else {
