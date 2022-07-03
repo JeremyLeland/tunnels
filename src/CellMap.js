@@ -173,20 +173,22 @@ export class CellMap {
     for ( let triIndex = 0; triIndex < numTriangles; triIndex ++ ) {
       const [ a, b, c ] = [ 0, 1, 2 ].map( i => lines[ delaunay.triangles[ triIndex * 3 + i ] ] );
       const linePairs = [ [ a, b ], [ b, c ], [ c, a ] ];
+
+      const center = {
+        x: ( a.x1 + b.x1 + c.x1 ) / 3,
+        y: ( a.y1 + b.y1 + c.y1 ) / 3,
+      };
       
-      // const THRESHOLD = 0.001;
-      // if ( linePairs.some( pair => {
-      //   const [ start, end ] = pair;
-      //   const startOverlap = ( end.x1 - start.x1 ) * start.normal.x + ( end.y1 - start.y1 ) * start.normal.y;
-      //   const endOverlap   = ( start.x1 - end.x1 ) * end.normal.x   + ( start.y1 - end.y1 ) * end.normal.y;
-      //   return startOverlap < -THRESHOLD && endOverlap < -THRESHOLD;
-      // } ) ) {
-      //   // inside, skip
-      // }
       if ( a.x1 == b.x2 && a.y1 == b.y2 || 
            b.x1 == c.x2 && b.y1 == c.y2 ||
            c.x1 == a.x2 && c.y1 == a.y2 ) {
         // inside, skip
+      }
+      else if ( [ a, b, c ].every( e => 
+        ( center.x - e.x1 ) * e.normal.x + ( center.y - e.y1 ) * e.normal.y < 0
+      ) ) {
+        // inside, skip
+        // TODO: Would this work for more cases if we also checked if closest point to center was in bounds of line?
       }
       else {
         const cell = new Cell();
