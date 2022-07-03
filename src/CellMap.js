@@ -178,17 +178,27 @@ export class CellMap {
         x: ( a.x1 + b.x1 + c.x1 ) / 3,
         y: ( a.y1 + b.y1 + c.y1 ) / 3,
       };
+
+      const inBounds = [ a, b, c ].filter( e => {
+        const px = e.x2 - e.x1;
+        const py = e.y2 - e.y1;
+        const u = ( ( center.x - e.x1 ) * px + ( center.y - e.y1 ) * py ) / ( ( px * px ) + ( py * py ) );
+
+        return 0 <= u && u <= 1;
+      } );
+      
+      // TODO: This isn't quite right...need to handle case where we are behind several lines (but not in bounds of them)
+      const inside = inBounds.length == 0 || inBounds.every( e => 
+        ( center.x - e.x1 ) * e.normal.x + ( center.y - e.y1 ) * e.normal.y < 0
+      );
       
       if ( a.x1 == b.x2 && a.y1 == b.y2 || 
            b.x1 == c.x2 && b.y1 == c.y2 ||
            c.x1 == a.x2 && c.y1 == a.y2 ) {
         // inside, skip
       }
-      else if ( [ a, b, c ].every( e => 
-        ( center.x - e.x1 ) * e.normal.x + ( center.y - e.y1 ) * e.normal.y < 0
-      ) ) {
+      else if ( inside ) {
         // inside, skip
-        // TODO: Would this work for more cases if we also checked if closest point to center was in bounds of line?
       }
       else {
         const cell = new Cell();
