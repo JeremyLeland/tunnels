@@ -114,6 +114,16 @@ export class Cell {
   }
 }
 
+function getOverlap( a, b ) {
+  const px = a.x2 - a.x1;
+  const py = a.y2 - a.y1;
+  return ( ( b.x1 - a.x1 ) * px + ( b.y1 - a.y1 ) * py ) / ( ( px * px ) + ( py * py ) );
+}
+
+function getDir( a, b ) {
+  return ( b.x1 - a.x1 ) * a.normal.x + ( b.y1 - a.y1 ) * a.normal.y;
+}
+
 export class CellMap {
   cells = [];
 
@@ -176,40 +186,19 @@ export class CellMap {
       const [ a, b, c ] = [ 0, 1, 2 ].map( i => lines[ delaunay.triangles[ triIndex * 3 + i ] ] );
       const linePairs = [ [ a, b ], [ b, c ], [ c, a ] ];
 
-      const center = {
-        x: ( a.x1 + b.x1 + c.x1 ) / 3,
-        y: ( a.y1 + b.y1 + c.y1 ) / 3,
-      };
+      let hole = true;
 
-      const inBounds = [ a, b, c ].filter( e => {
-        const px = e.x2 - e.x1;
-        const py = e.y2 - e.y1;
-        const u = ( ( center.x - e.x1 ) * px + ( center.y - e.y1 ) * py ) / ( ( px * px ) + ( py * py ) );
+      linePairs.forEach( pair => {
+        const [ a, b ] = pair;
 
-        return 0 <= u && u <= 1;
+        if ( getOverlap( a, b ) > 0 ) {
+          hole = getDir( a, b ) < -0.001;
+        }
       } );
-      
-      const dirs = [ a, b, c ].map( e => 
-        ( center.x - e.x1 ) * e.normal.x + ( center.y - e.y1 ) * e.normal.y
-      );
 
-      const hole = dirs.filter( e => e < 0 ).length > 1;
-      
-      // if ( a.x1 == b.x2 && a.y1 == b.y2 || 
-      //      b.x1 == c.x2 && b.y1 == c.y2 ||
-      //      c.x1 == a.x2 && c.y1 == a.y2 ) {
-      //   // inside, skip
-      // }
-      /*else*/ if ( hole ) {
-        // inside, skip
-      }
-      else {
+     if ( !hole ) {
         const cell = new Cell();
-
-        cell.edges.push( new Line( a.x1, a.y1, b.x1, b.y1 ) );
-        cell.edges.push( new Line( b.x1, b.y1, c.x1, c.y1 ) );
-        cell.edges.push( new Line( c.x1, c.y1, a.x1, a.y1 ) );
-
+        cell.edges = Array.from( linePairs, p => new Line( p[ 0 ].x1, p[ 0 ].y1, p[ 1 ].x1, p[ 1 ].y1 ) );
         cell.updateCenter();
 
         cells[ triIndex ] = cell;
@@ -373,3 +362,4 @@ export class CellMap {
     ctx.globalAlpha = 1;
   }
 }
+

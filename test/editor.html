@@ -86,15 +86,15 @@
     cellMap.getEdgeLoops().forEach( loop => {
       const offset = -10, subLength = 10;
       const sublines = [];
-      Line.getOffsetLoop( loop, offset ).forEach( 
+      Line.getOffsetLoop( loop, 0 ).forEach( 
         edge => sublines.push( ...edge.getSublines( subLength ) ) 
       );
 
       // TODO: Try to do this in a way that avoids overlaps?
       const perterb = 10;
       const perterbed = sublines.map( line => [ 
-        line.x1 + perterb * ( Math.random() - 0.5 ), 
-        line.y1 + perterb * ( Math.random() - 0.5 ), 
+        line.x1, //+ perterb * ( Math.random() - 0.5 ), 
+        line.y1, //+ perterb * ( Math.random() - 0.5 ), 
       ] );
       lines.push( ...Line.getLoopThroughPoints( perterbed ) );
     } );
