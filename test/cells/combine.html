@@ -19,26 +19,25 @@
   const voronoi = delaunay.voronoi( [ 0, 0, width, height ] );
 
   const cellMap = CellMap.fromVoronoi( voronoi );
-  // for ( let i = 0; i < 5; i ++ ) {
-  //   cellMap.removeCell( cellMap.cells[ 0 ] );
-  // }
+  for ( let i = 0; i < 5; i ++ ) {
+    cellMap.removeCell( cellMap.cells[ 0 ] );
+  }
 
   const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
 
-  const edgeLines = [];
-  cellMap.getEdgeLoops().forEach( loop => edgeLines.push( ...loop ) );
-  const pathMap = CellMap.fromEdges( edgeLines );
+  const pathMap = CellMap.fromEdgeLoops( cellMap.getEdgeLoops() );
+  pathMap.drawDebug( ctx );
 
-  ctx.strokeStyle = 'red';
-  pathMap.draw( ctx );
+  // ctx.strokeStyle = 'red';
+  // pathMap.draw( ctx );
 
   
-  ctx.strokeStyle = 'yellow';
-  pathMap.cells[ 0 ].draw( ctx );
+  // ctx.strokeStyle = 'yellow';
+  // pathMap.cells[ 0 ].draw( ctx );
 
-  pathMap.cells[ 0 ].merge( 0 );
+  // pathMap.cells[ 0 ].merge( 0 );
 
-  ctx.strokeStyle = 'green';
-  pathMap.cells[ 0 ].drawDebug( ctx );
+  // ctx.strokeStyle = 'green';
+  // pathMap.cells[ 0 ].drawDebug( ctx );
   
 </script>

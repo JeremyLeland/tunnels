@@ -20,7 +20,8 @@
     [ 400, 400, 450, 300 ],
     [ 450, 300, 450, 200 ],
     [ 450, 200, 400, 100 ],
-    [ 400, 100, 300,  50 ],
+    [ 400, 100, 295,  90 ],
+    [ 295,  90, 300,  50 ],
     [ 300,  50, 200,  50 ],
     [ 200,  50, 100, 100 ],
 
@@ -40,26 +41,17 @@
     [ 360, 360, 320, 360 ],
     [ 320, 360, 320, 320 ],
 
+    // another small
+    [ 340, 240, 380, 240 ],
+    [ 380, 240, 380, 280 ],
+    [ 380, 280, 340, 280 ],
+    [ 340, 280, 340, 240 ],
+
   
     // test 1
-    // [ 100, 300, 200, 320 ],
-    // [ 200, 320, 210, 400 ],
-    // [ 250, 100,  50, 150 ],
-
-    // test 2
-    // [ 100, 100, 90, 80 ],
-    // [ 150, 95, 200, 120 ],
-    // [ 140, 80, 150, 60 ],
-
-    // test 3
-    // [ 100, 100, 50, 50 ],
-    // [ 90, 150, 100, 100 ],
-    // [ 150, 150, 200, 150 ],
-
-    // // test 4
-    // [ 200, 250, 200, 125 ],
-    // [ 200, 125, 250, 200 ],
-    // [ 250, 200, 300, 125 ],
+    // [ 100, 100,  50, 100 ],
+    // [  95, 150, 100, 100 ],
+    // [ 300, 175,  95, 150 ],
 
   ].map( e => new Line( ...e ) );
 
@@ -76,14 +68,14 @@
 
   function doTriangle( triIndex ) {
     // Use for debugging one triangle at a time
-    // ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
-    // drawLines();
+    ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
+    drawLines();
 
     const [ a, b, c ] = [ 0, 1, 2 ].map( i => lines[ delaunay.triangles[ triIndex * 3 + i ] ] );
     const linePairs = [ [ a, b ], [ b, c ], [ c, a ] ];
 
     const cell = new Cell();
-    cell.edges = Array.from( linePairs, p => new Line( p[ 0 ].x1, p[ 0 ].y1, p[ 1 ].x1, p[ 1 ].y1 ) );
+    cell.edges = Array.from( linePairs, ( [ a, b ] ) => new Line( a.x1, a.y1, b.x1, b.y1 ) );
     cell.updateCenter();
 
     // cell.drawShaded( ctx, 'yellow' );
@@ -94,14 +86,14 @@
     for ( let i = 0; i < 3; i ++ ) {
       const point = linePairs[ i ][ 0 ];
 
-  //    ctx.strokeStyle = lineColors[ i ];
-  //    point.draw( ctx );
+      ctx.strokeStyle = lineColors[ i ];
+      point.draw( ctx );
 
       ctx.fillStyle = pointColors[ i ];
       ctx.fillRect( point.x1 - 3, point.y1 - 3, 6, 6 );
     }
 
-    let hole = true;
+    let hole = false;
 
     ctx.lineWidth = 2;
     linePairs.forEach( pair => {
@@ -123,7 +115,10 @@
       ctx.stroke();
 
       if ( overlap > 0 ) {
-        hole = dir < -0.001;
+        //hole = dir < -0.001;
+        if ( dir < -0.001 ) {
+          hole = true;
+        }
       }
     } );
 

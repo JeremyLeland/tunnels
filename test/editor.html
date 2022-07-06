@@ -59,9 +59,9 @@
 
       // pathMap = CellMap.fromEdgeLoops( cellMap.getEdgeLoops() );
 
-      const edgeLines = [];
-      cellMap.getEdgeLoops().forEach( loop => edgeLines.push( ...loop ) );
-      pathMap = CellMap.fromEdges( edgeLines );
+      // const edgeLines = [];
+      // cellMap.getEdgeLoops().forEach( loop => edgeLines.push( ...loop ) );
+      // pathMap = CellMap.fromEdges( edgeLines );
 
       draw();
     }
@@ -71,10 +71,10 @@
   function draw() {
     ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
 
-    pathMap?.drawDebug( ctx );
+    // pathMap?.drawDebug( ctx );
 
     ctx.strokeStyle = 'rgba( 255, 255, 0, 0.3 )';
-    cellMap.draw( ctx );
+    cellMap.drawDebug( ctx );
 
     ctx.strokeStyle = 'orange';
     lines.forEach( line => line.draw( ctx ) );
@@ -86,15 +86,15 @@
     cellMap.getEdgeLoops().forEach( loop => {
       const offset = -10, subLength = 10;
       const sublines = [];
-      Line.getOffsetLoop( loop, 0 ).forEach( 
+      Line.getOffsetLoop( loop, offset ).forEach( 
         edge => sublines.push( ...edge.getSublines( subLength ) ) 
       );
 
       // TODO: Try to do this in a way that avoids overlaps?
       const perterb = 10;
       const perterbed = sublines.map( line => [ 
-        line.x1, //+ perterb * ( Math.random() - 0.5 ), 
-        line.y1, //+ perterb * ( Math.random() - 0.5 ), 
+        line.x1 + perterb * ( Math.random() - 0.5 ), 
+        line.y1 + perterb * ( Math.random() - 0.5 ), 
       ] );
       lines.push( ...Line.getLoopThroughPoints( perterbed ) );
     } );

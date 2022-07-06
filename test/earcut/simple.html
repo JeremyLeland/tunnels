@@ -37,6 +37,12 @@
     [ 360, 300, 360, 360 ],
     [ 360, 360, 300, 360 ],
     [ 300, 360, 300, 300 ],
+
+    // another small
+    [ 340, 240, 380, 240 ],
+    [ 380, 240, 380, 280 ],
+    [ 380, 280, 340, 280 ],
+    [ 340, 280, 340, 240 ],
   ].map( e => new Line( ...e ) );
 
   const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
@@ -44,7 +50,7 @@
   const flatcoords = [];
   lines.forEach( line => flatcoords.push( line.x1, line.y1 ) );
 
-  const triangles = earcut( flatcoords, [ 12, 20 ] );
+  const triangles = earcut( flatcoords, [ 12, 20, 24 ] );
 
   const numTriangles = triangles.length / 3;
   for ( let triIndex = 0; triIndex < numTriangles; triIndex ++ ) {

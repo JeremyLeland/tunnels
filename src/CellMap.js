@@ -78,7 +78,7 @@ export class Cell {
     // const colors = [ 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'brown', 'pink' ];
     // let colorIndex = 0;
 
-    this.drawShaded( ctx, 'cyan' );
+    // this.drawShaded( ctx, 'cyan' );
 
     this.edges.forEach( edge => { 
       ctx.strokeStyle = 'cyan'; //colors[ colorIndex ++ ];
