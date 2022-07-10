@@ -1,0 +1,88 @@
+<title>Avoid Entities</title>
+<link rel="stylesheet" href="../../style.css">
+
+<canvas id="canvas" oncontextmenu="return false;" width="800px" height="800px"></canvas>
+
+<script type="module">
+  import { Entity } from '../../src/Entity.js';
+  import { AvoidingActor } from '../../src/AvoidingActor.js';
+
+  class AvoidEntity extends Entity {
+    size = 10;
+
+    drawEntity( ctx ) {
+      ctx.beginPath();
+      ctx.arc( 0, 0, this.size, 0, Math.PI * 2 );
+      ctx.fillStyle = 'blue';
+      ctx.fill();
+      ctx.strokeStyle = 'white';
+      ctx.stroke();
+    }
+  }
+
+  class Player extends AvoidingActor {
+    size = 10;
+    speed = 0.1;
+    turnSpeed = 0.008;
+
+    drawEntity( ctx ) {
+      ctx.beginPath();
+      ctx.moveTo( this.size, 0 );
+      ctx.arc( 0, 0, this.size, Math.PI - 1, Math.PI + 1 );
+      ctx.closePath();
+      ctx.fillStyle = 'green';
+      ctx.fill();
+      ctx.strokeStyle = 'white';
+      ctx.stroke();
+    }
+  }
+
+  const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
+
+  let entities = [];
+  let player = new Player( { x: 400, y: 400 } );
+  player.avoidList = entities;
+
+  document.addEventListener( 'mousedown', e => {
+    if ( e.button == 0 ) {
+      if ( e.ctrlKey ) {
+        player.x = e.clientX;
+        player.y = e.clientY;
+      }
+      else {
+        addEntity( e.clientX, e.clientY );
+      }
+    }
+    if ( e.button == 2 )  removeEntity( e.clientX, e.clientY );
+    draw();
+  } );
+
+  document.addEventListener( 'mousemove', e => {
+    player.target = { x: e.clientX, y: e.clientY };
+    draw();
+  } );
+
+
+  function draw() {
+    ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
+    entities.forEach( e => e.draw( ctx ) );
+    player.draw( ctx );
+  }
+
+  function addEntity( x, y ) {
+    entities.push( new AvoidEntity( { x: x, y: y } ) );
+  }
+
+  function removeEntity( x, y ) {
+    if ( entities.length > 0 ) {
+      let closest = entities.map( 
+        e => ( { entity: e, dist: Math.hypot( e.x - x, e.y - y ) } )
+      ).reduce( 
+        ( closest, e ) => e.dist < closest.dist ? e : closest
+      );
+      
+      entities = entities.filter( e => e != closest.entity );
+    }
+  }
+
+</script>
