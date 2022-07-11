@@ -9,6 +9,7 @@ export class Game {
 
   constructor() {
     const canvas = document.createElement( 'canvas' );
+    canvas.oncontextmenu = () => { return false };
     window.onresize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;

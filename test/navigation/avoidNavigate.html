@@ -1,0 +1,89 @@
+<title>Navigation by Avoidance</title>
+<link rel="stylesheet" href="../../style.css">
+
+<script type="module">
+  import { Entity } from '../../src/Entity.js';
+  import { Game } from '../../src/Game.js';
+  import { AvoidingActor } from '../../src/AvoidingActor.js';
+
+  class AvoidEntity extends Entity {
+    size = 40;
+
+    drawEntity( ctx ) {
+      ctx.beginPath();
+      ctx.arc( 0, 0, this.size, 0, Math.PI * 2 );
+      ctx.fillStyle = 'blue';
+      ctx.fill();
+      ctx.strokeStyle = 'white';
+      ctx.stroke();
+    }
+  }
+
+  class Player extends AvoidingActor {
+    size = 20;
+    speed = 0.1;
+    turnSpeed = 0.008;
+
+    drawEntity( ctx ) {
+      ctx.beginPath();
+      ctx.moveTo( this.size, 0 );
+      ctx.arc( 0, 0, this.size, Math.PI - 1, Math.PI + 1 );
+      ctx.closePath();
+      ctx.fillStyle = 'green';
+      ctx.fill();
+      ctx.strokeStyle = 'white';
+      ctx.stroke();
+    }
+  }
+
+  let entities = [];
+  let player = new Player( { x: 400, y: 400 } );
+
+  const game = new Game();
+
+  game.update = ( dt ) => {
+    if ( !game.keysPressed.has( ' ' ) ) {
+      player.update( dt, entities );
+    }
+  };
+
+  game.draw = ( ctx ) => {
+    entities.forEach( e => e.draw( ctx ) );
+    player.draw( ctx );
+  };
+
+
+  document.addEventListener( 'mousedown', e => {
+    if ( e.button == 0 ) {
+      if ( e.ctrlKey ) {
+        player.x = e.clientX;
+        player.y = e.clientY;
+      }
+      else {
+        addEntity( e.clientX, e.clientY );
+      }
+    }
+    if ( e.button == 2 )  removeEntity( e.clientX, e.clientY );
+  } );
+
+  document.addEventListener( 'mousemove', e => {
+    player.target = { x: e.clientX, y: e.clientY };
+  } );
+
+  function addEntity( x, y ) {
+    entities.push( new AvoidEntity( { x: x, y: y } ) );
+  }
+
+  function removeEntity( x, y ) {
+    if ( entities.length > 0 ) {
+      let closest = entities.map( 
+        e => ( { entity: e, dist: Math.hypot( e.x - x, e.y - y ) } )
+      ).reduce( 
+        ( closest, e ) => e.dist < closest.dist ? e : closest
+      );
+      
+      entities = entities.filter( e => e != closest.entity );
+    }
+  }
+
+</script>
