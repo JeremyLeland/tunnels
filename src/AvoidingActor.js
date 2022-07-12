@@ -58,10 +58,9 @@ export class AvoidingActor extends Actor {
           betweenAngles( targetAngle, cone.left, cone.right )
         );
 
-        // TODO: Base this on how we're currently facing, so we don't bounce around so much
-        if ( cone ) {  
-          const fromLeft = targetAngle + ( targetAngle < cone.left ? Math.PI * 2 : 0 ) - cone.left;
-          const fromRight = cone.right - targetAngle - ( cone.right < targetAngle ? Math.PI * 2 : 0 );
+        if ( cone ) {
+          const fromLeft = Math.abs( deltaAngle( this.angle, cone.left ) );
+          const fromRight = Math.abs( deltaAngle( this.angle, cone.right ) );
           this.goalAngle = fromLeft < fromRight ? cone.left : cone.right;
         }
         else {
