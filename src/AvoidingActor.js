@@ -1,5 +1,7 @@
 import { Actor } from '../src/Actor.js';
 
+const AVOID_TIME = 2000;
+
 export class AvoidingActor extends Actor {
     
     target;
@@ -10,30 +12,34 @@ export class AvoidingActor extends Actor {
       let cones = [];
 
       entities.forEach( e => {
-        const r = e.size + this.size;   // TODO: Plus some buffer space?
         const cx = e.x - this.x;
         const cy = e.y - this.y;
         const h = Math.hypot( cx, cy );
-        const angle = Math.atan2( cy, cx );
-        const spread = Math.asin( Math.min( 1, r / h ) );   // prevent floating point errors when really close
 
-        let left = fixAngle( angle - spread );
-        let right = fixAngle( angle + spread );
-
-        for ( let i = 0; i < cones.length; i ++ ) {
-          const cone = cones[ i ];
-
-          if ( betweenAngles( left, cone.left, cone.right ) )   left = cone.left;
-          if ( betweenAngles( right, cone.left, cone.right ) )  right = cone.right;
-
-          if ( betweenAngles( cone.left, left, right ) && 
-               betweenAngles( cone.right, left, right ) ) {
-            cones.splice( i, 1 );
-            i --;
+        if ( h < this.speed * AVOID_TIME ) {
+          const angle = Math.atan2( cy, cx );
+          
+          const r = e.size + this.size;   // TODO: Plus some buffer space?
+          const spread = Math.asin( Math.min( 1, r / h ) );   // prevent floating point errors when really close
+          
+          let left = fixAngle( angle - spread );
+          let right = fixAngle( angle + spread );
+          
+          for ( let i = 0; i < cones.length; i ++ ) {
+            const cone = cones[ i ];
+            
+            if ( betweenAngles( left, cone.left, cone.right ) )   left = cone.left;
+            if ( betweenAngles( right, cone.left, cone.right ) )  right = cone.right;
+            
+            if ( betweenAngles( cone.left, left, right ) && 
+                 betweenAngles( cone.right, left, right ) ) {
+                cones.splice( i, 1 );
+              i --;
+            }
           }
-        }
 
-        cones.push( { left: left, right: right } );
+          cones.push( { left: left, right: right } );
+        }
       } );
 
       return cones;
@@ -52,9 +58,10 @@ export class AvoidingActor extends Actor {
           betweenAngles( targetAngle, cone.left, cone.right )
         );
 
+        // TODO: Base this on how we're currently facing, so we don't bounce around so much
         if ( cone ) {  
-          const fromLeft = ( targetAngle < cone.left ? targetAngle + Math.PI * 2 : targetAngle ) - cone.left;
-          const fromRight = cone.right - ( cone.right < targetAngle ? targetAngle - Math.PI * 2 : targetAngle );
+          const fromLeft = targetAngle + ( targetAngle < cone.left ? Math.PI * 2 : 0 ) - cone.left;
+          const fromRight = cone.right - targetAngle - ( cone.right < targetAngle ? Math.PI * 2 : 0 );
           this.goalAngle = fromLeft < fromRight ? cone.left : cone.right;
         }
         else {
