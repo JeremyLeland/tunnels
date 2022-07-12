@@ -9,6 +9,8 @@ export class AvoidingActor extends Actor {
     getAvoidCones( entities ) {
       let cones = [];
 
+      // TODO: Maybe something useful here? https://gamedev.stackexchange.com/questions/174279/improve-velocity-obstacle-calculation-algorithm-performance
+
       entities.forEach( e => {
         const r = e.size + this.size;   // TODO: Plus some buffer space?
         const cx = e.x - this.x;
@@ -17,34 +19,23 @@ export class AvoidingActor extends Actor {
         const angle = Math.atan2( cy, cx );
         const spread = Math.asin( Math.min( 1, r / h ) );   // prevent floating point errors when really close
 
-        const lower = angle - spread;
-        const upper = angle + spread;
-  
-        const collidingCones = cones.filter( cone => 
-          betweenAngles( lower, cone.lower, cone.upper ) ||
-          betweenAngles( upper, cone.lower, cone.upper ) ||
-          betweenAngles( cone.lower, lower, upper ) ||
-          betweenAngles( cone.upper, lower, upper )
-        );
+        let left = fixAngle( angle - spread );
+        let right = fixAngle( angle + spread );
 
-        if ( collidingCones.length > 0 ) {
-          cones = cones.filter( cone => !collidingCones.includes( cone ) );
+        for ( let i = 0; i < cones.length; i ++ ) {
+          const cone = cones[ i ];
 
-          const lowers = collidingCones.map( cone => cone.lower ).concat( lower );
-          const uppers = collidingCones.map( cone => cone.upper ).concat( upper );
+          if ( betweenAngles( left, cone.left, cone.right ) )   left = cone.left;
+          if ( betweenAngles( right, cone.left, cone.right ) )  right = cone.right;
 
-          const deltaSort = ( a, b ) => deltaAngle( b, a );
-          lowers.sort( deltaSort );
-          uppers.sort( deltaSort );
-
-          cones.push( {
-            lower: lowers.at(  0 ),
-            upper: uppers.at( -1 ),
-          } );
+          if ( betweenAngles( cone.left, left, right ) && 
+               betweenAngles( cone.right, left, right ) ) {
+            cones.splice( i, 1 );
+            i --;
+          }
         }
-        else {
-          cones.push( { lower: lower, upper: upper } );
-        }
+
+        cones.push( { left: left, right: right } );
       } );
 
       return cones;
@@ -60,13 +51,14 @@ export class AvoidingActor extends Actor {
         );
 
         const blockingCone = this.#avoidCones.find( cone => 
-          betweenAngles( targetAngle, cone.lower, cone.upper )
+          //betweenAngles( targetAngle, cone.left, cone.right )
+          cone.left < targetAngle && targetAngle < cone.right
         );
 
         if ( blockingCone ) {  
-          const fromLower = deltaAngle( blockingCone.lower, targetAngle );
-          const fromUpper = deltaAngle( targetAngle, blockingCone.upper );
-          this.goalAngle = fromLower < fromUpper ? blockingCone.lower : blockingCone.upper;
+          const fromLeft = targetAngle - blockingCone.left; //deltaAngle( blockingCone.left, targetAngle );
+          const fromRight = blockingCone.right - targetAngle; //deltaAngle( targetAngle, blockingCone.right );
+          this.goalAngle = fromLeft < fromRight ? blockingCone.left : blockingCone.right;
         }
         else {
           this.goalAngle = targetAngle;
@@ -93,7 +85,7 @@ export class AvoidingActor extends Actor {
       this.#avoidCones.forEach( cone => { 
         ctx.beginPath();
         ctx.moveTo( this.x, this.y );
-        ctx.arc( this.x, this.y, 100, cone.lower, cone.upper );
+        ctx.arc( this.x, this.y, 100, cone.left, cone.right );
         ctx.fill();
       } );
       ctx.globalAlpha = 1;
@@ -129,6 +121,7 @@ export class AvoidingActor extends Actor {
     return fixAngle( b - a );
   }
 
-  function betweenAngles( angle, lower, upper ) {
-    return 0 < deltaAngle( lower, angle ) && 0 < deltaAngle( angle, upper ); 
+  function betweenAngles( angle, left, right ) {
+    // TODO: Should this have = or not?
+    return left < right ? left <= angle && angle <= right : left <= angle || angle <= right;
   }
