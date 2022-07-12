@@ -49,26 +49,33 @@ export class AvoidingActor extends Actor {
       this.#avoidCones = this.getAvoidCones( avoidList );
 
       if ( this.target ) {
-        const targetAngle = Math.atan2(
-          this.target.y - this.y, 
-          this.target.x - this.x 
-        );
+        const cx = this.target.x - this.x;
+        const cy = this.target.y - this.y;
+        const targetDist = Math.hypot( cx, cy );
 
-        const cone = this.#avoidCones.find( cone => 
-          betweenAngles( targetAngle, cone.left, cone.right )
-        );
+        if ( targetDist > this.speed * dt ) {
+          const targetAngle = Math.atan2( cy, cx );
+          
+          const cone = this.#avoidCones.find( cone => 
+            betweenAngles( targetAngle, cone.left, cone.right )
+          );
+            
+          if ( cone ) {
+            const fromLeft = Math.abs( deltaAngle( this.angle, cone.left ) );
+            const fromRight = Math.abs( deltaAngle( this.angle, cone.right ) );
+            this.goalAngle = fromLeft < fromRight ? cone.left : cone.right;
+          }
+          else {
+            this.goalAngle = targetAngle;
+          }
 
-        if ( cone ) {
-          const fromLeft = Math.abs( deltaAngle( this.angle, cone.left ) );
-          const fromRight = Math.abs( deltaAngle( this.angle, cone.right ) );
-          this.goalAngle = fromLeft < fromRight ? cone.left : cone.right;
+          super.update( dt );
         }
         else {
-          this.goalAngle = targetAngle;
+          // close enough
+          this.target = null;
         }
       }
-
-      super.update( dt );
     }
 
     drawEntity( ctx ) {
