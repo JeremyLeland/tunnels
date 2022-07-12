@@ -9,8 +9,6 @@ export class AvoidingActor extends Actor {
     getAvoidCones( entities ) {
       let cones = [];
 
-      // TODO: Maybe something useful here? https://gamedev.stackexchange.com/questions/174279/improve-velocity-obstacle-calculation-algorithm-performance
-
       entities.forEach( e => {
         const r = e.size + this.size;   // TODO: Plus some buffer space?
         const cx = e.x - this.x;
@@ -50,22 +48,19 @@ export class AvoidingActor extends Actor {
           this.target.x - this.x 
         );
 
-        const blockingCone = this.#avoidCones.find( cone => 
-          //betweenAngles( targetAngle, cone.left, cone.right )
-          cone.left < targetAngle && targetAngle < cone.right
+        const cone = this.#avoidCones.find( cone => 
+          betweenAngles( targetAngle, cone.left, cone.right )
         );
 
-        if ( blockingCone ) {  
-          const fromLeft = targetAngle - blockingCone.left; //deltaAngle( blockingCone.left, targetAngle );
-          const fromRight = blockingCone.right - targetAngle; //deltaAngle( targetAngle, blockingCone.right );
-          this.goalAngle = fromLeft < fromRight ? blockingCone.left : blockingCone.right;
+        if ( cone ) {  
+          const fromLeft = ( targetAngle < cone.left ? targetAngle + Math.PI * 2 : targetAngle ) - cone.left;
+          const fromRight = cone.right - ( cone.right < targetAngle ? targetAngle - Math.PI * 2 : targetAngle );
+          this.goalAngle = fromLeft < fromRight ? cone.left : cone.right;
         }
         else {
           this.goalAngle = targetAngle;
         }
       }
-
-      this.goalAngle
 
       super.update( dt );
     }
@@ -122,6 +117,5 @@ export class AvoidingActor extends Actor {
   }
 
   function betweenAngles( angle, left, right ) {
-    // TODO: Should this have = or not?
     return left < right ? left <= angle && angle <= right : left <= angle || angle <= right;
   }
