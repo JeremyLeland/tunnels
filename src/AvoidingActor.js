@@ -12,6 +12,8 @@ export class AvoidingActor extends Actor {
       let cones = [];
 
       entities.forEach( e => {
+        if ( e == this )  return;
+
         const cx = e.x - this.x;
         const cy = e.y - this.y;
         const h = Math.hypot( cx, cy );
@@ -89,7 +91,7 @@ export class AvoidingActor extends Actor {
       super.draw( ctx );
   
       ctx.fillStyle = 'red';
-      ctx.globalAlpha = 0.5;
+      ctx.globalAlpha = 0.1;
       this.#avoidCones.forEach( cone => { 
         ctx.beginPath();
         ctx.moveTo( this.x, this.y );
@@ -99,8 +101,6 @@ export class AvoidingActor extends Actor {
       ctx.globalAlpha = 1;
 
       if ( this.target ) {
-        ctx.lineWidth = 2;
-
         ctx.beginPath();
         ctx.moveTo( this.x, this.y );
         ctx.lineTo( this.target.x, this.target.y );
@@ -115,8 +115,6 @@ export class AvoidingActor extends Actor {
         );
         ctx.strokeStyle = 'lime';
         ctx.stroke();
-        
-        ctx.lineWidth = 1;
       }
     }
   }
