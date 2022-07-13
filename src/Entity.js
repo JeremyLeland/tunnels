@@ -8,9 +8,22 @@ export class Entity {
   dy = 0;
   dAngle = 0;
   dSize = 0;
+
+  isAlive = true;
   
   constructor( info ) {
     Object.assign( this, info );
+  }
+
+  getOffset( offset ) {
+    const cos = Math.cos( this.angle );
+    const sin = Math.sin( this.angle );
+    
+    return {
+      x: this.x + cos * offset.front - sin * offset.side,
+      y: this.y + sin * offset.front + cos * offset.side,
+      angle: this.angle + offset.angle,
+    }
   }
 
   update( dt ) {

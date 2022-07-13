@@ -26,8 +26,8 @@
 
     drawEntity( ctx ) {
       ctx.beginPath();
-      ctx.moveTo( this.size, 0 );
-      ctx.arc( 0, 0, this.size, Math.PI - 1, Math.PI + 1 );
+      ctx.moveTo( -this.size, 0 );
+      ctx.arc( 0, 0, this.size, -1, 1 );
       ctx.closePath();
       ctx.fillStyle = 'green';
       ctx.fill();
