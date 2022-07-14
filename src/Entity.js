@@ -10,6 +10,7 @@ export class Entity {
   dSize = 0;
 
   isAlive = true;
+  createdEntities = [];
   
   constructor( info ) {
     Object.assign( this, info );

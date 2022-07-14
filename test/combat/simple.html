@@ -1,0 +1,108 @@
+<title>Simple battle</title>
+<link rel="stylesheet" href="../../style.css">
+
+<script type="module">
+  import { Game } from '../../src/Game.js';
+  import { AvoidingActor } from '../../src/AvoidingActor.js';
+  import { Gun } from '../../src/Gun.js';
+  import { Bullet } from '../../src/Bullet.js';
+  import { World } from '../../src/World.js';
+  
+
+  class Marine extends AvoidingActor {
+    size = 10;
+
+    gun = new Gun( 'shotgun', this );
+
+    update( dt ) {
+      this.gun.update( dt );
+    }
+
+    shoot( bullet ) {
+      world.addBullet( bullet );
+    }
+
+    drawEntity( ctx ) {
+      ctx.strokeStyle = 'black';
+
+      ctx.fillStyle = 'gray';
+      ctx.fillRect( 0, -1, this.size * 2, 2 );
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc( 0, 0, this.size, 0, Math.PI * 2 );
+      ctx.fillStyle = 'blue';
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    draw( ctx ) {
+      super.draw( ctx );
+
+      this.#drawBar( ctx, 'red', 1, -14 );
+      this.#drawBar( ctx, 'yellow', this.gun.getUIPercentage(), -8 );
+    }
+
+    #drawBar( ctx, color, val, offset ) {
+      const bar = new Path2D();
+      bar.rect(
+        this.x - this.size, this.y - this.size + offset, 
+        this.size * val * 2, 4
+      );
+
+      ctx.fillStyle = color;
+      ctx.fill( bar );
+      ctx.stroke( bar );
+    }
+  }
+
+  class Alien extends AvoidingActor {
+    size = 10;
+    speed = 0.1;
+    turnSpeed = 0.008;
+
+    update( dt ) {
+      this.updateAvoid( world.actors.filter( a => a instanceof Alien ) );
+
+      super.update( dt );
+    }
+
+    drawEntity( ctx ) {
+      ctx.beginPath();
+      ctx.moveTo( -this.size, 0 );
+      ctx.arc( 0, 0, this.size, -1, 1 );
+      ctx.closePath();
+
+      ctx.fillStyle = 'green';
+      ctx.fill();
+      ctx.strokeStyle = 'black';
+      ctx.stroke();
+    }
+  }
+
+  const game = new Game();
+  const world = new World();
+
+  const player = new Marine( { x: 300, y: 300 } );
+  world.actors.push( player );
+
+  for ( let i = 0; i < 5; i ++ ) {
+    const alien = new Alien( { x: i * 50, y: 50 } );
+    alien.target = player;
+    world.actors.push( alien );
+  }
+
+  game.update = ( dt ) => {
+    player.angle = Math.atan2( game.mouse.y - player.y, game.mouse.x - player.x );
+    player.gun.isShooting = game.mouse.down;
+
+    world.update( dt );
+  };
+
+  game.draw = ( ctx ) => {
+    world.draw( ctx );
+  };
+
+  
+
+</script>

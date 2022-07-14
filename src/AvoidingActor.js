@@ -47,30 +47,31 @@ export class AvoidingActor extends Actor {
       return cones;
     }
 
-    update( dt, avoidList ) {
+    updateAvoid( avoidList ) {
       this.#avoidCones = this.getAvoidCones( avoidList );
+    }
 
+    update( dt ) {  
       if ( this.target ) {
         const cx = this.target.x - this.x;
         const cy = this.target.y - this.y;
         const targetDist = Math.hypot( cx, cy );
 
         if ( targetDist > this.speed * dt ) {
-          const targetAngle = Math.atan2( cy, cx );
+          this.goalAngle = Math.atan2( cy, cx );
           
-          const cone = this.#avoidCones.find( cone => 
-            betweenAngles( targetAngle, cone.left, cone.right )
-          );
+          if ( this.#avoidCones ) {
+            const cone = this.#avoidCones.find( cone => 
+              betweenAngles( this.goalAngle, cone.left, cone.right )
+            );
             
-          if ( cone ) {
-            const fromLeft = Math.abs( deltaAngle( this.angle, cone.left ) );
-            const fromRight = Math.abs( deltaAngle( this.angle, cone.right ) );
-            this.goalAngle = fromLeft < fromRight ? cone.left : cone.right;
+            if ( cone ) {
+              const fromLeft = Math.abs( deltaAngle( this.angle, cone.left ) );
+              const fromRight = Math.abs( deltaAngle( this.angle, cone.right ) );
+              this.goalAngle = fromLeft < fromRight ? cone.left : cone.right;
+            }
           }
-          else {
-            this.goalAngle = targetAngle;
-          }
-
+              
           super.update( dt );
         }
         else {
@@ -90,15 +91,17 @@ export class AvoidingActor extends Actor {
     draw( ctx ) {
       super.draw( ctx );
   
-      ctx.fillStyle = 'red';
-      ctx.globalAlpha = 0.1;
-      this.#avoidCones.forEach( cone => { 
-        ctx.beginPath();
-        ctx.moveTo( this.x, this.y );
-        ctx.arc( this.x, this.y, 100, cone.left, cone.right );
-        ctx.fill();
-      } );
-      ctx.globalAlpha = 1;
+      if ( this.#avoidCones ) {
+        ctx.fillStyle = 'red';
+        ctx.globalAlpha = 0.1;
+        this.#avoidCones.forEach( cone => { 
+          ctx.beginPath();
+          ctx.moveTo( this.x, this.y );
+          ctx.arc( this.x, this.y, 100, cone.left, cone.right );
+          ctx.fill();
+        } );
+        ctx.globalAlpha = 1;
+      }
 
       if ( this.target ) {
         ctx.beginPath();
