@@ -13,12 +13,14 @@
       'timeBetweenShots': 100,
       'bulletsPerShot': 1,
       'spread': 0.1,
+      'reloadTime': 1000,
     },
     'shotgun': {
       'maxAmmo': 8,
-      'timeBetweenShots': 1000,
+      'timeBetweenShots': 500,
       'bulletsPerShot': 6,
       'spread': 0.2,
+      'reloadTime': 1500,
     }
   }
 
@@ -42,6 +44,7 @@
     ammo;
     timeUntilReady = 0;
     isShooting = false;
+    isReloading = false;
 
     #info;
     #owner;
@@ -57,24 +60,42 @@
     update( dt ) {
       this.timeUntilReady -= dt;
 
-      if ( this.timeUntilReady < 0 && this.isShooting && this.ammo > 0 ) {
-        for ( let i = 0; i < this.#info.bulletsPerShot; i ++ ) {
-          const info = this.#owner.getOffset( { 
-            front: this.#owner.size,
-            side:  0,
-            angle: this.#info.spread * ( -0.5 + Math.random() ),
-          } );
-          
-          info.type = this.type;
-          info.dx = this.#owner.dx;
-          info.dy = this.#owner.dy;
-          
-          addBullet( new Bullet( info ) );
-        }
+      if ( this.timeUntilReady < 0 ) {
+        this.isReloading = false;
 
-        this.ammo --;
-        this.timeUntilReady = this.#info.timeBetweenShots;
+        if ( this.isShooting && this.ammo > 0 ) {
+          for ( let i = 0; i < this.#info.bulletsPerShot; i ++ ) {
+            const info = this.#owner.getOffset( { 
+              front: this.#owner.size,
+              side:  0,
+              angle: this.#info.spread * ( -0.5 + Math.random() ),
+            } );
+            
+            info.type = this.type;
+            info.dx = this.#owner.dx;
+            info.dy = this.#owner.dy;
+            
+            addBullet( new Bullet( info ) );
+          }
+
+          this.ammo --;
+
+          if ( this.ammo == 0 ) {
+            this.isReloading = true;
+            this.ammo = this.#info.maxAmmo;
+            this.timeUntilReady = this.#info.reloadTime;
+          }
+          else {
+            this.timeUntilReady = this.#info.timeBetweenShots;
+          }
+        }
       }
+    }
+
+    getUIPercentage() {
+      return this.isReloading ? 
+        1 - this.timeUntilReady / this.#info.reloadTime : 
+        this.ammo / this.#info.maxAmmo;
     }
   }
 
@@ -126,6 +147,25 @@
       ctx.fill();
       ctx.stroke();
     }
+
+    draw( ctx ) {
+      super.draw( ctx );
+
+      this.#drawBar( ctx, 'red', 1, -14 );
+      this.#drawBar( ctx, 'yellow', this.gun.getUIPercentage(), -8 );
+    }
+
+    #drawBar( ctx, color, val, offset ) {
+      const bar = new Path2D();
+      bar.rect(
+        this.x - this.size, this.y - this.size + offset, 
+        this.size * val * 2, 4
+      );
+
+      ctx.fillStyle = color;
+      ctx.fill( bar );
+      ctx.stroke( bar );
+    }
   }
 
   let bullets = [], pendingBullets = [];
@@ -138,7 +178,7 @@
     pendingBullets = [];
 
     bullets.forEach( bullet => bullet.update( dt ) );
-    bullets = bullets.filter( b => b.isAlive );
+    bullets = bullets.filter( b => 0 < b.x && b.x < 400 && 0 < b.y && b.y < 400 );
     
     player.angle = Math.atan2( game.mouse.y - player.y, game.mouse.x - player.x );
     player.gun.isShooting = game.mouse.down;
