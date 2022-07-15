@@ -56,8 +56,9 @@ export class AvoidingActor extends Actor {
         const cx = this.target.x - this.x;
         const cy = this.target.y - this.y;
         const targetDist = Math.hypot( cx, cy );
+        const goalDist = this.size + this.target.size ?? 0;
 
-        if ( targetDist > this.speed * dt ) {
+        if ( targetDist - this.speed * dt > goalDist ) {
           this.goalAngle = Math.atan2( cy, cx );
           
           if ( this.#avoidCones ) {
