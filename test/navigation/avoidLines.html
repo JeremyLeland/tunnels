@@ -1,24 +1,12 @@
-<title>Avoid Entities</title>
+<title>Avoid Lines</title>
 <link rel="stylesheet" href="../../style.css">
 
 <canvas id="canvas" oncontextmenu="return false;" width="800px" height="800px"></canvas>
 
 <script type="module">
   import { Entity } from '../../src/Entity.js';
+  import { Line } from '../../src/Line.js';
   import { AvoidingActor } from '../../src/AvoidingActor.js';
-
-  class AvoidEntity extends Entity {
-    size = 40;
-
-    drawEntity( ctx ) {
-      ctx.beginPath();
-      ctx.arc( 0, 0, this.size, 0, Math.PI * 2 );
-      ctx.fillStyle = 'blue';
-      ctx.fill();
-      ctx.strokeStyle = 'white';
-      ctx.stroke();
-    }
-  }
 
   class Player extends AvoidingActor {
     size = 20;
@@ -39,8 +27,10 @@
 
   const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
 
-  let entities = [];
+  let lines = [];
   let player = new Player( { x: 400, y: 400 } );
+
+  let startX = 0, startY = 0;
 
   document.addEventListener( 'mousedown', e => {
     if ( e.button == 0 ) {
@@ -49,13 +39,19 @@
         player.y = e.clientY;
       }
       else {
-        addEntity( e.clientX, e.clientY );
+        startX = e.clientX;
+        startY = e.clientY;
       }
     }
-    if ( e.button == 2 )  removeEntity( e.clientX, e.clientY );
-
+    
     update();
     draw();
+  } );
+
+  document.addEventListener( 'mouseup', e => {
+    if ( !e.ctrlKey ) {
+      lines.push( new Line( startX, startY, e.clientX, e.clientY ) );
+    }
   } );
 
   document.addEventListener( 'mousemove', e => {
@@ -66,29 +62,17 @@
   } );
 
   function update() {
-    player.updateAvoid( entities );
+    player.updateAvoid( lines );
   }
 
   function draw() {
     ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
-    entities.forEach( e => e.draw( ctx ) );
+
+    ctx.strokeStyle = 'white';
+    lines.forEach( e => e.draw( ctx ) );
     player.draw( ctx );
   }
 
-  function addEntity( x, y ) {
-    entities.push( new AvoidEntity( { x: x, y: y } ) );
-  }
 
-  function removeEntity( x, y ) {
-    if ( entities.length > 0 ) {
-      let closest = entities.map( 
-        e => ( { entity: e, dist: Math.hypot( e.x - x, e.y - y ) } )
-      ).reduce( 
-        ( closest, e ) => e.dist < closest.dist ? e : closest
-      );
-      
-      entities = entities.filter( e => e != closest.entity );
-    }
-  }
 
 </script>

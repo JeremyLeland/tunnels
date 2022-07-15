@@ -1,4 +1,5 @@
 import { Actor } from '../src/Actor.js';
+import { Entity } from './Entity.js';
 
 const AVOID_TIME = 2000;
 
@@ -14,44 +15,82 @@ export class AvoidingActor extends Actor {
       entities.forEach( e => {
         if ( e == this )  return;
 
-        const cx = e.x - this.x;
-        const cy = e.y - this.y;
-        const h = Math.hypot( cx, cy );
-
-        if ( h < this.speed * AVOID_TIME ) {
-          const angle = Math.atan2( cy, cx );
-          
-          const r = e.size + this.size;   // TODO: Plus some buffer space?
-          const spread = Math.asin( Math.min( 1, r / h ) );   // prevent floating point errors when really close
-          
-          let left = fixAngle( angle - spread );
-          let right = fixAngle( angle + spread );
-          
+        const cone = e instanceof Entity ? this.getAvoidEntity( e ) : this.getAvoidLine( e );
+        
+        if ( cone ) {   
           for ( let i = 0; i < cones.length; i ++ ) {
-            const cone = cones[ i ];
+            const other = cones[ i ];
             
-            if ( betweenAngles( left, cone.left, cone.right ) )   left = cone.left;
-            if ( betweenAngles( right, cone.left, cone.right ) )  right = cone.right;
+            if ( betweenAngles( cone.left, other.left, other.right ) ) {
+              cone.left = other.left;
+            }  
+            if ( betweenAngles( cone.right, other.left, other.right ) ) {
+              cone.right = other.right;
+            }
             
-            if ( betweenAngles( cone.left, left, right ) && 
-                 betweenAngles( cone.right, left, right ) ) {
-                cones.splice( i, 1 );
+            if ( betweenAngles( other.left, cone.left, cone.right ) && 
+                betweenAngles( other.right, cone.left, cone.right ) ) {
+              cones.splice( i, 1 );
               i --;
             }
           }
-
-          cones.push( { left: left, right: right } );
+          
+          cones.push( cone );
         }
       } );
 
       return cones;
     }
 
+    getAvoidEntity( entity ) {
+      const cx = entity.x - this.x;
+      const cy = entity.y - this.y;
+      const h = Math.hypot( cx, cy );
+
+      if ( h < this.speed * AVOID_TIME ) {
+        const angle = Math.atan2( cy, cx );
+
+        const r = entity.size + this.size;   // TODO: Plus some buffer space?
+        const spread = Math.asin( Math.min( 1, r / h ) );   // prevent floating point errors when really close
+        
+        return { 
+          left: fixAngle( angle - spread ), 
+          right: fixAngle( angle + spread ),
+        };
+      }
+    }
+
+    getAvoidLine( line ) {
+      const cx1 = line.x1 - this.x;
+      const cy1 = line.y1 - this.y;
+      const h1 = Math.hypot( cx1, cy1 );
+
+      const cx2 = line.x2 - this.x;
+      const cy2 = line.y2 - this.y;
+      const h2 = Math.hypot( cx2, cy2 );
+
+      const maxDist = this.speed * AVOID_TIME;
+
+      if ( h1 < maxDist || h2 < maxDist ) {
+        const angle1 = Math.atan2( cy1, cx1 );
+        const angle2 = Math.atan2( cy2, cx2 );
+
+        const r = this.size;   // TODO: Plus some buffer space?
+        const spread1 = Math.asin( Math.min( 1, r / h1 ) );
+        const spread2 = Math.asin( Math.min( 1, r / h2 ) );
+        
+        return { 
+          left: fixAngle( Math.min( angle1 - spread1, angle2 - spread2 ) ), 
+          right: fixAngle( Math.max( angle1 + spread1, angle2 + spread2 ) ),
+        };
+      }
+    }
+
     updateAvoid( avoidList ) {
       this.#avoidCones = this.getAvoidCones( avoidList );
     }
 
-    update( dt ) {  
+    update( dt ) {
       if ( this.target ) {
         const cx = this.target.x - this.x;
         const cy = this.target.y - this.y;
