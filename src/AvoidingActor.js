@@ -78,11 +78,14 @@ export class AvoidingActor extends Actor {
         const r = this.size;   // TODO: Plus some buffer space?
         const spread1 = Math.asin( Math.min( 1, r / h1 ) );
         const spread2 = Math.asin( Math.min( 1, r / h2 ) );
+
+        const left1 = fixAngle( angle1 - spread1 );
+        const right1 = fixAngle( angle1 + spread1 );
+        const left2 = fixAngle( angle2 - spread2 );
+        const right2 = fixAngle( angle2 + spread2 );
         
-        return { 
-          left: fixAngle( Math.min( angle1 - spread1, angle2 - spread2 ) ), 
-          right: fixAngle( Math.max( angle1 + spread1, angle2 + spread2 ) ),
-        };
+        return deltaAngle( angle1, angle2 ) > 0 ? 
+          { left: left1, right: right2 } : { left: left2, right: right1 };
       }
     }
 
@@ -95,9 +98,10 @@ export class AvoidingActor extends Actor {
         const cx = this.target.x - this.x;
         const cy = this.target.y - this.y;
         const targetDist = Math.hypot( cx, cy );
-        const goalDist = this.size + this.target.size ?? 0;
+        const goalDist = this.size + ( this.target.size ?? 0 );
 
-        if ( targetDist - this.speed * dt > goalDist ) {
+        // TODO: Make this not dependent on dt?
+        if ( targetDist /*- this.speed * dt*/ > goalDist ) {
           this.goalAngle = Math.atan2( cy, cx );
           
           if ( this.#avoidCones ) {

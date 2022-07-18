@@ -1,6 +1,7 @@
 export class World {
   actors = [];
   bullets = [];
+  lines = [];
   
   #pendingBullets = [];
   
@@ -19,6 +20,8 @@ export class World {
   }
 
   draw( ctx ) {
+    ctx.strokeStyle = 'white';
+    this.lines.forEach( line => line.draw( ctx ) );
     this.bullets.forEach( bullet => bullet.draw( ctx ) );
     this.actors.forEach( alien => alien.draw( ctx ) );
   }

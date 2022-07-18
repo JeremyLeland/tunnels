@@ -7,6 +7,7 @@
   import { Gun } from '../../src/Gun.js';
   import { Bullet } from '../../src/Bullet.js';
   import { World } from '../../src/World.js';
+  import { Line } from '../../src/Line.js';
   
 
   class Marine extends AvoidingActor {
@@ -62,7 +63,7 @@
     turnSpeed = 0.008;
 
     update( dt ) {
-      this.updateAvoid( world.actors.filter( a => a instanceof Alien ) );
+      this.updateAvoid( world.lines.concat( world.actors.filter( a => a instanceof Alien ) ) );
 
       super.update( dt );
     }
@@ -80,6 +81,8 @@
     }
   }
 
+  // TODO: Add lines to avoid (as well as other aliens)
+
   const game = new Game();
   const world = new World();
 
@@ -91,6 +94,11 @@
     alien.target = player;
     world.actors.push( alien );
   }
+
+  world.lines.push( new Line( 200, 100, 300, 100 ) );
+  world.lines.push( new Line( 300, 100, 300, 200 ) );
+  world.lines.push( new Line( 300, 200, 200, 200 ) );
+  world.lines.push( new Line( 200, 200, 200, 100 ) );
 
   game.update = ( dt ) => {
     player.angle = Math.atan2( game.mouse.y - player.y, game.mouse.x - player.x );
