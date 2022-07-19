@@ -8,6 +8,8 @@
   import { Bullet } from '../../src/Bullet.js';
   import { World } from '../../src/World.js';
   import { Line } from '../../src/Line.js';
+
+  import { ActorInfo } from '../../info/info.js';
   
 
   class Marine extends AvoidingActor {
@@ -78,7 +80,7 @@
     ].map( e => new Line( ...e ) );
 
     update( dt ) {
-      this.updateAvoid( world.lines.concat( world.actors.filter( a => a instanceof Alien ) ) );
+      this.updateList = world.lines.concat( world.actors.filter( a => a instanceof Alien ) );
 
       super.update( dt );
     }

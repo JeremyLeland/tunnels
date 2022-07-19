@@ -1,4 +1,5 @@
 import { Bullet } from './Bullet.js';
+// TODO: Forget the info objects, just make everything classes and duplicate everything?
 
 const gunInfo = {
   'rifle': {

@@ -1,0 +1,41 @@
+<title>Avoid Lines from Map</title>
+<link rel="stylesheet" href="../../style.css">
+
+<body></body>
+
+<script type="module">
+
+  import { Game } from '../../src/Game.js';
+  import { Level } from '../../src/Level.js';
+  import { AvoidingActor } from '../../src/AvoidingActor.js';
+
+  import { ActorInfo } from '../../info/info.js';
+  
+  const level = Level.fromJson(
+    await ( await fetch( '../../levels/test3.json' ) ).text()
+  );
+  
+  const player = new AvoidingActor( { x: 250, y: 200 }, ActorInfo.alien );
+  player.avoidList = level.lines;
+
+  const game = new Game();
+
+  game.update = ( dt ) => {
+    player.update( dt );
+  };
+
+  game.draw = ( ctx ) => {
+    level.draw( ctx );
+    player.draw( ctx );
+  };
+
+  document.addEventListener( 'mousedown', e => {
+    const x = e.clientX - game.scroll.x;
+    const y = e.clientY - game.scroll.y;
+    const cell = level.cellMap.closestCellTo( x, y );
+    if ( cell ) {
+      player.target = { x: x, y: y, cell: cell }
+    }
+  } );
+
+</script>

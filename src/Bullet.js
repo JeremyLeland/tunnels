@@ -1,20 +1,7 @@
 import { Entity } from './Entity.js';
 import { Trail } from './Trail.js';
+import { BulletInfo } from '../info/info.js';
 
-const bulletInfo = {
-  'rifle': {
-    'speed': 0.9,
-    'size': 1,
-    'color': 'gray',
-    'trailLength': 40,
-  },
-  'shotgun': {
-    'speed': 1.2,
-    'size': 1,
-    'color': 'darkgoldenrod',
-    'trailLength': 60,
-  }
-}
 
 export class Bullet extends Entity {
   #info;
@@ -23,7 +10,7 @@ export class Bullet extends Entity {
   constructor( info ) {
     super( info );
 
-    this.#info = bulletInfo[ this.type ];
+    this.#info = BulletInfo[ this.type ];
 
     this.dx += Math.cos( this.angle ) * this.#info.speed;
     this.dy += Math.sin( this.angle ) * this.#info.speed;

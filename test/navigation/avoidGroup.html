@@ -44,7 +44,10 @@
   game.update = ( dt ) => {
     if ( !game.keysPressed.has( ' ' ) ) {
       const everything = players.concat( obstacles );
-      players.forEach( e => e.update( dt, everything ) );
+      players.forEach( e => {
+        e.avoidList = everything;
+        e.update( dt );
+      } );
     }
   };
 

@@ -141,11 +141,12 @@
       ctx.fillRect( 0, -1, this.size * 2, 2 );
       ctx.stroke();
 
-      ctx.beginPath();
-      ctx.arc( 0, 0, this.size, 0, Math.PI * 2 );
+      //ctx.beginPath();
+      //ctx.arc( 0, 0, this.size, 0, Math.PI * 2 );
+      const bodyPath = new Path2D( 'M 0 -10 A 5 10 0 0 1 0 10 A 5 10 0 0 1 0 -10 ' );
       ctx.fillStyle = 'blue';
-      ctx.fill();
-      ctx.stroke();
+      ctx.fill( bodyPath );
+      ctx.stroke( bodyPath );
     }
 
     draw( ctx ) {
