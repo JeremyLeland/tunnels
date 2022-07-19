@@ -1,3 +1,5 @@
+import { Line } from './Line.js';
+
 export class Entity {
   x = 0;
   y = 0;
@@ -10,10 +12,25 @@ export class Entity {
   dSize = 0;
 
   isAlive = true;
+  boundingLines;
   createdEntities = [];
   
   constructor( info ) {
     Object.assign( this, info );
+  }
+
+  getBounds() {
+    if ( this.boundingLines ) {
+      const cos = Math.cos( this.angle );
+      const sin = Math.sin( this.angle );
+      
+      return this.boundingLines.map( line => new Line(
+        this.x + cos * line.x1 - sin * line.y1,
+        this.y + sin * line.x1 + cos * line.y1,
+        this.x + cos * line.x2 - sin * line.y2,
+        this.y + sin * line.x2 + cos * line.y2,
+      ) );
+    }
   }
 
   getOffset( offset ) {
@@ -42,6 +59,9 @@ export class Entity {
     this.drawEntity( ctx );
 
     ctx.restore();
+
+    ctx.strokeStyle = 'red';
+    this.getBounds()?.forEach( line => line.draw( ctx ) );
   }
 
   drawEntity( ctx ) {

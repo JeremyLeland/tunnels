@@ -12,11 +12,20 @@
 
   class Marine extends AvoidingActor {
     size = 10;
+    speed = 0;
+    turnSpeed = 0.008;
+
+    boundingLines = [
+      [ -this.size, -this.size, this.size * 2, 0 ],
+      [ this.size * 2, 0, -this.size, this.size ],
+      [ -this.size, this.size, -this.size, -this.size ],
+    ].map( e => new Line( ...e ) );
 
     gun = new Gun( 'shotgun', this );
 
     update( dt ) {
       this.gun.update( dt );
+      super.update( dt );
     }
 
     shoot( bullet ) {
@@ -62,6 +71,12 @@
     speed = 0.1;
     turnSpeed = 0.008;
 
+    boundingLines = [
+      [ -this.size, 0, this.size, -this.size ],
+      [ this.size, -this.size, this.size, this.size ],
+      [ this.size, this.size, -this.size, 0 ],
+    ].map( e => new Line( ...e ) );
+
     update( dt ) {
       this.updateAvoid( world.lines.concat( world.actors.filter( a => a instanceof Alien ) ) );
 
@@ -101,7 +116,7 @@
   world.lines.push( new Line( 200, 200, 200, 100 ) );
 
   game.update = ( dt ) => {
-    player.angle = Math.atan2( game.mouse.y - player.y, game.mouse.x - player.x );
+    player.target = { x: game.mouse.x, y: game.mouse.y };
     player.gun.isShooting = game.mouse.down;
 
     world.update( dt );
