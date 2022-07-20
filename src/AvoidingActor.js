@@ -50,7 +50,8 @@ export class AvoidingActor extends Actor {
     if ( h < maxDist ) {
       const angle = Math.atan2( cy, cx );
 
-      const r = entity.size + this.info.size;   // TODO: Plus some buffer space?
+      // TODO: Either entity should include size again, or this should be made to clearly apply to actor
+      const r = entity.info.size + this.info.size;   // TODO: Plus some buffer space?
       const spread = Math.asin( Math.min( 1, r / h ) );   // prevent floating point errors when really close
       
       return { 
@@ -123,7 +124,7 @@ export class AvoidingActor extends Actor {
 
     if ( this.#avoidCones ) {
       ctx.fillStyle = 'red';
-      ctx.globalAlpha = 0.5;
+      ctx.globalAlpha = 0.2;
       this.#avoidCones.forEach( cone => { 
         ctx.beginPath();
         ctx.moveTo( this.x, this.y );

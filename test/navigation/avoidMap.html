@@ -14,19 +14,26 @@
   const level = Level.fromJson(
     await ( await fetch( '../../levels/test3.json' ) ).text()
   );
+
   
-  const player = new AvoidingActor( { x: 250, y: 200 }, ActorInfo.alien );
-  player.avoidList = level.lines;
+  const players = Array.from( Array( 5 ), _ => {
+    const index = Math.floor( Math.random() * level.cellMap.cells.length );
+    const cell = level.cellMap.cells[ index ];
+    return new AvoidingActor( { x: cell.x, y: cell.y }, ActorInfo.alien );
+  } );
+
+  const avoidList = level.lines.concat( players );
+  players.forEach( player => player.avoidList = avoidList );
 
   const game = new Game();
 
   game.update = ( dt ) => {
-    player.update( dt );
+    players.forEach( player => player.update( dt ) );
   };
 
   game.draw = ( ctx ) => {
     level.draw( ctx );
-    player.draw( ctx );
+    players.forEach( player => player.draw( ctx ) );
   };
 
   document.addEventListener( 'mousedown', e => {
@@ -34,7 +41,9 @@
     const y = e.clientY - game.scroll.y;
     const cell = level.cellMap.closestCellTo( x, y );
     if ( cell ) {
-      player.target = { x: x, y: y, cell: cell }
+      players.forEach( player => 
+        player.target = { x: x, y: y, cell: cell } 
+      );
     }
   } );
 
