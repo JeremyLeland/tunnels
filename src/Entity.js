@@ -43,7 +43,7 @@ export class Entity {
     ctx.restore();
 
     ctx.strokeStyle = 'red';
-    this.boundingLines.forEach( line => line.draw( ctx ) );
+    this.boundingLines?.forEach( line => line.draw( ctx ) );
   }
 
   drawEntity( ctx ) {

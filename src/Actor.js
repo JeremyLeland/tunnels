@@ -29,7 +29,7 @@ export class Actor extends Entity {
     this.dx = this.speed * cos;
     this.dy = this.speed * sin;
 
-    this.boundingLines = this.info.boundingLines.map( 
+    this.boundingLines = this.info.boundingLines?.map( 
       line => new Line(
         this.x + this.size * ( cos * line[ 0 ] - sin * line[ 1 ] ),
         this.y + this.size * ( sin * line[ 0 ] + cos * line[ 1 ] ),
