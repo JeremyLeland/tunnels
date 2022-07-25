@@ -1,7 +1,7 @@
 import { Actor } from '../src/Actor.js';
 import { Entity } from './Entity.js';
 
-const AVOID_TIME = 1000;
+const AVOID_DIST = 100;
 
 export class AvoidingActor extends Actor {
   target;
@@ -30,6 +30,9 @@ export class AvoidingActor extends Actor {
           
           if ( betweenAngles( other.left, cone.left, cone.right ) && 
               betweenAngles( other.right, cone.left, cone.right ) ) {
+            
+            // TODO: Combine cones for avoid purposes, but keep track of sub-cones for checking if enemies/allies are in front of us
+            cone.avoids.push( ...other.avoids );
             cones.splice( i, 1 );
             i --;
           }
@@ -57,6 +60,7 @@ export class AvoidingActor extends Actor {
       return { 
         left: fixAngle( angle - spread ), 
         right: fixAngle( angle + spread ),
+        avoids: [ entity ],
       };
     }
   }
@@ -83,8 +87,9 @@ export class AvoidingActor extends Actor {
       const left2 = fixAngle( angle2 - spread2 );
       const right2 = fixAngle( angle2 + spread2 );
       
-      return deltaAngle( angle1, angle2 ) > 0 ? 
-        { left: left1, right: right2 } : { left: left2, right: right1 };
+      return deltaAngle( angle1, angle2 ) > 0 ?
+        { left: left1, right: right2, avoids: [ line ] } : 
+        { left: left2, right: right1, avoids: [ line ] };
     }
   }
 
@@ -97,7 +102,7 @@ export class AvoidingActor extends Actor {
 
       // TODO: Better way to decide when we're done
       if ( targetDist /*- this.speed * dt*/ > goalDist ) {
-        this.#avoidCones = this.getAvoidCones( this.avoidList, Math.min( targetDist, this.speed * AVOID_TIME ) );
+        this.#avoidCones = this.getAvoidCones( this.avoidList, Math.min( targetDist + this.info.size, AVOID_DIST ) );
         
         this.goalAngle = Math.atan2( cy, cx );
         const cone = this.#avoidCones.find( cone => 
@@ -105,9 +110,24 @@ export class AvoidingActor extends Actor {
         );
         
         if ( cone ) {
-          const fromLeft = Math.abs( deltaAngle( this.angle, cone.left ) );
-          const fromRight = Math.abs( deltaAngle( this.angle, cone.right ) );
-          this.goalAngle = fromLeft < fromRight ? cone.left : cone.right;
+          // TODO: Keep track of individual avoid cones within larger cone group, so we don't need to recalculate this?
+          // We can also use different ranges to avoid walls and actors?
+          if ( cone.avoids.find( e => 
+                e instanceof Actor && 
+                Math.abs( Math.atan2( e.y - this.y, e.x - this.x ) - this.angle ) < 1
+             ) ) {
+            this.speed = 0;
+          }
+          else {
+            this.speed = this.info.maxSpeed;
+
+            const fromLeft = Math.abs( deltaAngle( this.angle, cone.left ) );
+            const fromRight = Math.abs( deltaAngle( this.angle, cone.right ) );
+            this.goalAngle = fromLeft < fromRight ? cone.left : cone.right;
+          }
+        }
+        else {
+          this.speed = this.info.maxSpeed;
         }
             
         super.update( dt );
@@ -124,7 +144,7 @@ export class AvoidingActor extends Actor {
 
     if ( this.#avoidCones ) {
       ctx.fillStyle = 'red';
-      ctx.globalAlpha = 0.2;
+      ctx.globalAlpha = 0.1;
       this.#avoidCones.forEach( cone => { 
         ctx.beginPath();
         ctx.moveTo( this.x, this.y );

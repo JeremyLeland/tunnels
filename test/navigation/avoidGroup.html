@@ -3,47 +3,28 @@
 
 <script type="module">
   import { Entity } from '../../src/Entity.js';
+  import { Line } from '../../src/Line.js';
   import { Game } from '../../src/Game.js';
   import { AvoidingActor } from '../../src/AvoidingActor.js';
+  import { ActorInfo } from '../../info/info.js';
 
-  class Obstacle extends Entity {
-    size = 20;
 
-    drawEntity( ctx ) {
-      ctx.beginPath();
-      ctx.arc( 0, 0, this.size, 0, Math.PI * 2 );
-      ctx.fillStyle = 'brown';
-      ctx.fill();
-      ctx.strokeStyle = 'black';
-      ctx.stroke();
-    }
-  }
+  const players = Array.from( Array( 2 ), ( _, index ) =>
+    new AvoidingActor( { x: 100 + index * 20, y: 100 + index * 20 }, ActorInfo.alien )
+  );
 
-  class Player extends AvoidingActor {
-    size = 10;
-    speed = 0.1;
-    turnSpeed = 0.008;
-
-    drawEntity( ctx ) {
-      ctx.beginPath();
-      ctx.moveTo( -this.size, 0 );
-      ctx.arc( 0, 0, this.size, -1, 1 );
-      ctx.closePath();
-      ctx.fillStyle = 'green';
-      ctx.fill();
-      ctx.strokeStyle = 'black';
-      ctx.stroke();
-    }
-  }
-
-  let obstacles = [];
-  let players = Array.from( Array( 5 ), ( _, ndx ) => new Player( { x: ndx * 50, y: 50 } ) );
-
+  const lines = [
+    new Line( 200, 100, 300, 100 ),
+    new Line( 300, 100, 300, 200 ),
+    new Line( 300, 200, 200, 200 ),
+    new Line( 200, 200, 200, 100 ),
+  ];
+  
   const game = new Game();
 
   game.update = ( dt ) => {
     if ( !game.keysPressed.has( ' ' ) ) {
-      const everything = players.concat( obstacles );
+      const everything = players.concat( lines );
       players.forEach( e => {
         e.avoidList = everything;
         e.update( dt );
@@ -52,36 +33,16 @@
   };
 
   game.draw = ( ctx ) => {
-    obstacles.forEach( e => e.draw( ctx ) );
-    players.forEach( e => e.draw( ctx ) );
+    ctx.strokeStyle = 'white';
+    lines.forEach( line => line.draw( ctx ) );
+    players.forEach( player => player.draw( ctx ) );
   };
 
 
   document.addEventListener( 'mousedown', e => {
-    if ( e.button == 0 )  addObstacle( e.clientX, e.clientY );
-    if ( e.button == 2 )  removeObstacle( e.clientX, e.clientY );
-  } );
-
-  document.addEventListener( 'mousemove', e => {
     players.forEach( player =>
       player.target = { x: e.clientX, y: e.clientY }
     );
   } );
-
-  function addObstacle( x, y ) {
-    obstacles.push( new Obstacle( { x: x, y: y } ) );
-  }
-
-  function removeObstacle( x, y ) {
-    if ( obstacles.length > 0 ) {
-      let closest = obstacles.map( 
-        e => ( { entity: e, dist: Math.hypot( e.x - x, e.y - y ) } )
-      ).reduce( 
-        ( closest, e ) => e.dist < closest.dist ? e : closest
-      );
-      
-      obstacles = obstacles.filter( e => e != closest.entity );
-    }
-  }
 
 </script>
