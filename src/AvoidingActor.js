@@ -112,29 +112,37 @@ export class AvoidingActor extends Actor {
         this.#avoidCones = this.getAvoidCones( this.avoidList, Math.min( targetDist + this.info.size, AVOID_DIST ) );
         
         this.goalAngle = Math.atan2( cy, cx );
-        const cone = this.#avoidCones.find( cone => 
-          betweenAngles( this.goalAngle, cone.left, cone.right )
+        const combinedCone = this.#avoidCones.find( combined => 
+          betweenAngles( this.goalAngle, combined.left, combined.right )
         );
         
-        if ( cone ) {
+        if ( combinedCone ) {
           // TODO: Keep track of individual avoid cones within larger cone group, so we don't need to recalculate this?
           // We can also use different ranges to avoid walls and actors?
-          if ( cone.avoids.find( e => 
-                e instanceof Actor && 
-                Math.abs( Math.atan2( e.y - this.y, e.x - this.x ) - this.angle ) < 1
+          if ( combinedCone.cones.find( cone => 
+                cone.avoids instanceof Actor && 
+                Math.abs( Math.atan2( cone.y - this.y, cone.x - this.x ) - this.angle ) < 1
              ) ) {
             this.speed = 0;
           }
           else {
             // this.speed = this.info.maxSpeed;
-            this.speed = Math.min( 
-              this.info.maxSpeed, 
-              cone.dist * this.info.turnSpeed / ( Math.PI / 2 ) 
+            const inFront = combinedCone.cones.filter( cone =>
+              betweenAngles( this.goalAngle, cone.left, cone.right )
             );
 
-            const fromLeft = Math.abs( deltaAngle( this.angle, cone.left ) );
-            const fromRight = Math.abs( deltaAngle( this.angle, cone.right ) );
-            this.goalAngle = fromLeft < fromRight ? cone.left : cone.right;
+            let closest = inFront.reduce( 
+              ( closest, e ) => e.dist < closest.dist ? e : closest
+            );
+
+            this.speed = Math.min( 
+              this.info.maxSpeed, 
+              closest.dist * this.info.turnSpeed / ( Math.PI / 2 ) 
+            );
+
+            const fromLeft = Math.abs( deltaAngle( this.angle, combinedCone.left ) );
+            const fromRight = Math.abs( deltaAngle( this.angle, combinedCone.right ) );
+            this.goalAngle = fromLeft < fromRight ? combinedCone.left : combinedCone.right;
           }
         }
         else {
