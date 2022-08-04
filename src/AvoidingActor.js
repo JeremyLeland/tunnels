@@ -10,39 +10,43 @@ export class AvoidingActor extends Actor {
   #avoidCones;
 
   getAvoidCones( entities, maxDist ) {
-    let cones = [];
+    let combinedCones = [];
+
+    // TODO: Create combined cones as we go, preserving original cones
 
     entities.forEach( e => {
-      if ( e == this )  return;
+      if ( e == this )  return;     // TODO: Need to account for this elsewhere if we are moving AvoidCones functionality out
 
       const cone = e instanceof Entity ? this.getAvoidEntity( e, maxDist ) : this.getAvoidLine( e, maxDist );
       
       if ( cone ) {   
-        for ( let i = 0; i < cones.length; i ++ ) {
-          const other = cones[ i ];
+        const newCombined = { left: cone.left, right: cone.right, cones: [ cone ] };
+
+        for ( let i = 0; i < combinedCones.length; i ++ ) {
+          const other = combinedCones[ i ];
           
-          if ( betweenAngles( cone.left, other.left, other.right ) ) {
-            cone.left = other.left;
+          if ( betweenAngles( newCombined.left, other.left, other.right ) ) {
+            newCombined.left = other.left;
           }  
-          if ( betweenAngles( cone.right, other.left, other.right ) ) {
-            cone.right = other.right;
+          if ( betweenAngles( newCombined.right, other.left, other.right ) ) {
+            newCombined.right = other.right;
           }
           
-          if ( betweenAngles( other.left, cone.left, cone.right ) && 
-              betweenAngles( other.right, cone.left, cone.right ) ) {
+          if ( betweenAngles( other.left, newCombined.left, newCombined.right ) && 
+              betweenAngles( other.right, newCombined.left, newCombined.right ) ) {
             
             // TODO: Combine cones for avoid purposes, but keep track of sub-cones for checking if enemies/allies are in front of us
-            cone.avoids.push( ...other.avoids );
-            cones.splice( i, 1 );
+            newCombined.cones.push( ...other.cones );
+            combinedCones.splice( i, 1 );
             i --;
           }
         }
         
-        cones.push( cone );
+        combinedCones.push( newCombined );
       }
     } );
 
-    return cones;
+    return combinedCones;
   }
 
   getAvoidEntity( entity, maxDist ) {
@@ -60,7 +64,8 @@ export class AvoidingActor extends Actor {
       return { 
         left: fixAngle( angle - spread ), 
         right: fixAngle( angle + spread ),
-        avoids: [ entity ],
+        dist: h,
+        avoids: entity,
       };
     }
   }
@@ -86,10 +91,12 @@ export class AvoidingActor extends Actor {
       const right1 = fixAngle( angle1 + spread1 );
       const left2 = fixAngle( angle2 - spread2 );
       const right2 = fixAngle( angle2 + spread2 );
+
+      const dist = Math.min( h1, h2 );
       
       return deltaAngle( angle1, angle2 ) > 0 ?
-        { left: left1, right: right2, avoids: [ line ] } : 
-        { left: left2, right: right1, avoids: [ line ] };
+        { left: left1, right: right2, dist: dist, avoids: line } : 
+        { left: left2, right: right1, dist: dist, avoids: line };
     }
   }
 
@@ -119,7 +126,11 @@ export class AvoidingActor extends Actor {
             this.speed = 0;
           }
           else {
-            this.speed = this.info.maxSpeed;
+            // this.speed = this.info.maxSpeed;
+            this.speed = Math.min( 
+              this.info.maxSpeed, 
+              cone.dist * this.info.turnSpeed / ( Math.PI / 2 ) 
+            );
 
             const fromLeft = Math.abs( deltaAngle( this.angle, cone.left ) );
             const fromRight = Math.abs( deltaAngle( this.angle, cone.right ) );
@@ -143,15 +154,7 @@ export class AvoidingActor extends Actor {
     super.draw( ctx );
 
     if ( this.#avoidCones ) {
-      ctx.fillStyle = 'red';
-      ctx.globalAlpha = 0.1;
-      this.#avoidCones.forEach( cone => { 
-        ctx.beginPath();
-        ctx.moveTo( this.x, this.y );
-        ctx.arc( this.x, this.y, 100, cone.left, cone.right );
-        ctx.fill();
-      } );
-      ctx.globalAlpha = 1;
+      this.drawAvoidCones( this.#avoidCones, ctx );
     }
 
     if ( this.target ) {
@@ -170,6 +173,28 @@ export class AvoidingActor extends Actor {
       ctx.strokeStyle = 'lime';
       ctx.stroke();
     }
+  }
+
+  drawAvoidCones( avoidCones, ctx ) {
+    ctx.strokeStyle = 'white';
+    ctx.fillStyle = 'red';
+    avoidCones.forEach( combinedCone => { 
+      ctx.beginPath();
+      ctx.moveTo( this.x, this.y );
+      ctx.arc( this.x, this.y, 100, combinedCone.left, combinedCone.right );
+      ctx.closePath();
+      ctx.stroke();
+      
+      ctx.globalAlpha = 0.1;
+      combinedCone.cones.forEach( cone => {
+        ctx.beginPath();
+        ctx.moveTo( this.x, this.y );
+        ctx.arc( this.x, this.y, 100, cone.left, cone.right );
+        ctx.closePath();
+        ctx.fill();
+      } );
+      ctx.globalAlpha = 1;
+    } );
   }
 }
 
