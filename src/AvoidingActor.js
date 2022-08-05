@@ -24,18 +24,23 @@ export class AvoidingActor extends Actor {
 
         for ( let i = 0; i < combinedCones.length; i ++ ) {
           const other = combinedCones[ i ];
+          let merge = false;
           
           if ( betweenAngles( newCombined.left, other.left, other.right ) ) {
             newCombined.left = other.left;
+            merge = true;
           }  
           if ( betweenAngles( newCombined.right, other.left, other.right ) ) {
             newCombined.right = other.right;
+            merge = true;
           }
           
           if ( betweenAngles( other.left, newCombined.left, newCombined.right ) && 
-              betweenAngles( other.right, newCombined.left, newCombined.right ) ) {
-            
-            // TODO: Combine cones for avoid purposes, but keep track of sub-cones for checking if enemies/allies are in front of us
+               betweenAngles( other.right, newCombined.left, newCombined.right ) ) {
+            merge = true;
+          }
+          
+          if ( merge ) {
             newCombined.cones.push( ...other.cones );
             combinedCones.splice( i, 1 );
             i --;
@@ -128,11 +133,11 @@ export class AvoidingActor extends Actor {
           else {
             // this.speed = this.info.maxSpeed;
             const inFront = combinedCone.cones.filter( cone =>
-              betweenAngles( this.goalAngle, cone.left, cone.right )
+              betweenAngles( this.angle, cone.left, cone.right )
             );
 
             let closest = inFront.reduce( 
-              ( closest, e ) => e.dist < closest.dist ? e : closest
+              ( closest, e ) => e.dist < closest.dist ? e : closest, { dist: Infinity }
             );
 
             this.speed = Math.min( 
@@ -214,6 +219,8 @@ function deltaAngle( a, b ) {
   return fixAngle( b - a );
 }
 
+// TODO: Does it make more sense to count left == angle or angle == right as "between"? Or not?
 function betweenAngles( angle, left, right ) {
-  return left < right ? left <= angle && angle <= right : left <= angle || angle <= right;
+  // return left < right ? left <= angle && angle <= right : left <= angle || angle <= right;
+  return left < right ? left < angle && angle < right : left < angle || angle < right;
 }
