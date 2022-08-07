@@ -131,7 +131,7 @@ export class AvoidingActor extends Actor {
             this.speed = 0;
           }
           else {
-            // this.speed = this.info.maxSpeed;
+            // TODO: Have some wiggle room to account for floating point error in this comparison
             const inFront = combinedCone.cones.filter( cone =>
               betweenAngles( this.angle, cone.left, cone.right )
             );
@@ -139,11 +139,18 @@ export class AvoidingActor extends Actor {
             let closest = inFront.reduce( 
               ( closest, e ) => e.dist < closest.dist ? e : closest, { dist: Infinity }
             );
+            
+            if ( closest.dist < AVOID_DIST ) {
+              this.speed = 0;
+            }
+            else {
+              this.speed = this.info.maxSpeed;
+            }
 
-            this.speed = Math.min( 
-              this.info.maxSpeed, 
-              closest.dist * this.info.turnSpeed / ( Math.PI / 2 ) 
-            );
+            // this.speed = Math.min( 
+            //   this.info.maxSpeed, 
+            //   closest.dist * this.info.turnSpeed / ( Math.PI / 2 ) 
+            // );
 
             const fromLeft = Math.abs( deltaAngle( this.angle, combinedCone.left ) );
             const fromRight = Math.abs( deltaAngle( this.angle, combinedCone.right ) );
