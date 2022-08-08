@@ -122,39 +122,30 @@ export class AvoidingActor extends Actor {
         );
         
         if ( combinedCone ) {
-          // TODO: Keep track of individual avoid cones within larger cone group, so we don't need to recalculate this?
-          // We can also use different ranges to avoid walls and actors?
-          if ( combinedCone.cones.find( cone => 
-                cone.avoids instanceof Actor && 
-                Math.abs( Math.atan2( cone.y - this.y, cone.x - this.x ) - this.angle ) < 1
-             ) ) {
+          const inFront = combinedCone.cones.filter( cone =>
+            betweenAngles( this.angle, cone.left, cone.right, false )
+          );
+
+          let closest = inFront.reduce( 
+            ( closest, e ) => e.dist < closest.dist ? e : closest, { dist: Infinity }
+          );
+          
+          if ( closest.dist < AVOID_DIST ) {
             this.speed = 0;
           }
           else {
-            const inFront = combinedCone.cones.filter( cone =>
-              betweenAngles( this.angle, cone.left, cone.right, false )
-            );
-
-            let closest = inFront.reduce( 
-              ( closest, e ) => e.dist < closest.dist ? e : closest, { dist: Infinity }
-            );
-            
-            if ( closest.dist < AVOID_DIST ) {
-              this.speed = 0;
-            }
-            else {
-              this.speed = this.info.maxSpeed;
-            }
-
-            // this.speed = Math.min( 
-            //   this.info.maxSpeed, 
-            //   closest.dist * this.info.turnSpeed / ( Math.PI / 2 ) 
-            // );
-
-            const fromLeft = Math.abs( deltaAngle( this.angle, combinedCone.left ) );
-            const fromRight = Math.abs( deltaAngle( this.angle, combinedCone.right ) );
-            this.goalAngle = fromLeft < fromRight ? combinedCone.left : combinedCone.right;
+            this.speed = this.info.maxSpeed;
           }
+
+          // TODO: Maybe try variable speed based on turning radius again later
+          // this.speed = Math.min( 
+          //   this.info.maxSpeed, 
+          //   closest.dist * this.info.turnSpeed / ( Math.PI / 2 ) 
+          // );
+
+          const fromLeft = Math.abs( deltaAngle( this.angle, combinedCone.left ) );
+          const fromRight = Math.abs( deltaAngle( this.angle, combinedCone.right ) );
+          this.goalAngle = fromLeft < fromRight ? combinedCone.left : combinedCone.right;
         }
         else {
           this.speed = this.info.maxSpeed;
