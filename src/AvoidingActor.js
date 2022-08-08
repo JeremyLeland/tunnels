@@ -131,9 +131,8 @@ export class AvoidingActor extends Actor {
             this.speed = 0;
           }
           else {
-            // TODO: Have some wiggle room to account for floating point error in this comparison
             const inFront = combinedCone.cones.filter( cone =>
-              betweenAngles( this.angle, cone.left, cone.right )
+              betweenAngles( this.angle, cone.left, cone.right, false )
             );
 
             let closest = inFront.reduce( 
@@ -226,8 +225,12 @@ function deltaAngle( a, b ) {
   return fixAngle( b - a );
 }
 
-// TODO: Does it make more sense to count left == angle or angle == right as "between"? Or not?
-function betweenAngles( angle, left, right ) {
+function betweenAngles( angle, left, right, inclusive = true ) {
   // return left < right ? left <= angle && angle <= right : left <= angle || angle <= right;
-  return left < right ? left < angle && angle < right : left < angle || angle < right;
+  // return left < right ? left < angle && angle < right : left < angle || angle < right;
+
+  const EPSILON = ( inclusive ? 1 : -1 ) * -0.000001;
+  return left < right ? 
+    EPSILON < angle - left && EPSILON < right - angle : 
+    EPSILON < angle - left || EPSILON < right - angle;
 }
