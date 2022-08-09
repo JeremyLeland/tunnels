@@ -1,7 +1,7 @@
 import { Actor } from '../src/Actor.js';
 import { Entity } from './Entity.js';
 
-const AVOID_DIST = 100;
+const AVOID_DIST = 100, CLOSE_ENOUGH = 50;
 
 export class AvoidingActor extends Actor {
   target;
@@ -130,7 +130,7 @@ export class AvoidingActor extends Actor {
             ( closest, e ) => e.dist < closest.dist ? e : closest, { dist: Infinity }
           );
           
-          if ( closest.dist < AVOID_DIST ) {
+          if ( closest.dist < AVOID_DIST || targetDist < CLOSE_ENOUGH ) {
             this.speed = 0;
           }
           else {
