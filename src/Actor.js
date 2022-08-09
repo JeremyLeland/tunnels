@@ -3,6 +3,8 @@ import { Line } from './Line.js';
 
 export class Actor extends Entity {
   speed = 0;
+
+  goalSpeed = 0;
   goalAngle = 0;
 
   info;
@@ -21,6 +23,13 @@ export class Actor extends Entity {
       this.goalAngle, 
       this.info.turnSpeed, 
       dt 
+    );
+
+    this.speed = approach(
+      this.speed, 
+      this.goalSpeed,
+      this.info.accelSpeed,
+      dt
     );
 
     const cos = Math.cos( this.angle );

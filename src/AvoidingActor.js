@@ -131,10 +131,10 @@ export class AvoidingActor extends Actor {
           );
           
           if ( closest.dist < AVOID_DIST || targetDist < CLOSE_ENOUGH ) {
-            this.speed = 0;
+            this.goalSpeed = 0;
           }
           else {
-            this.speed = this.info.maxSpeed;
+            this.goalSpeed = this.info.maxSpeed;
           }
 
           // TODO: Maybe try variable speed based on turning radius again later
@@ -148,7 +148,7 @@ export class AvoidingActor extends Actor {
           this.goalAngle = fromLeft < fromRight ? combinedCone.left : combinedCone.right;
         }
         else {
-          this.speed = this.info.maxSpeed;
+          this.goalSpeed = this.info.maxSpeed;
         }
             
         super.update( dt );

@@ -34,11 +34,13 @@ export const ActorInfo = {
   marine: {
     maxSpeed: 0.1,
     turnSpeed: 0.008,
+    accelSpeed: 0.0005,
     size: 10,
   },
   alien: {
     maxSpeed: 0.1,
     turnSpeed: 0.008,
+    accelSpeed: 0.0005,
     size: 10,
     boundingLines: [
       [ -1,  0,  1, -1 ],
