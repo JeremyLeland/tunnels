@@ -169,22 +169,22 @@ export class AvoidingActor extends Actor {
     //   this.drawAvoidCones( this.#avoidCones, ctx );
     // }
 
-    if ( this.target ) {
-      ctx.beginPath();
-      ctx.moveTo( this.x, this.y );
-      ctx.lineTo( this.target.x, this.target.y );
-      ctx.strokeStyle = 'yellow';
-      ctx.stroke();
+    // if ( this.target ) {
+    //   ctx.beginPath();
+    //   ctx.moveTo( this.x, this.y );
+    //   ctx.lineTo( this.target.x, this.target.y );
+    //   ctx.strokeStyle = 'yellow';
+    //   ctx.stroke();
 
-      ctx.beginPath();
-      ctx.moveTo( this.x, this.y );
-      ctx.lineTo( 
-        this.x + Math.cos( this.goalAngle ) * 100, 
-        this.y + Math.sin( this.goalAngle ) * 100,
-      );
-      ctx.strokeStyle = 'lime';
-      ctx.stroke();
-    }
+    //   ctx.beginPath();
+    //   ctx.moveTo( this.x, this.y );
+    //   ctx.lineTo( 
+    //     this.x + Math.cos( this.goalAngle ) * 100, 
+    //     this.y + Math.sin( this.goalAngle ) * 100,
+    //   );
+    //   ctx.strokeStyle = 'lime';
+    //   ctx.stroke();
+    // }
   }
 
   drawAvoidCones( avoidCones, ctx ) {

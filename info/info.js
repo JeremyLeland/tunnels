@@ -37,10 +37,20 @@ export const ActorInfo = {
     accelSpeed: 0.0005,
     size: 10,
     boundingLines: [
-      [ -1, -1,  2,  0 ],
-      [  2,  0, -1,  1 ],
-      [ -1,  1, -1, -1 ],
+      [ -0.5, -1,  2,  0 ],
+      [  2,  0, -0.5,  1 ],
+      [ -0.5,  1, -0.5, -1 ],
     ],
+    drawPaths: [ {
+      fillStyle: 'gray',
+      path: new Path2D( 'M 0.5 -0.2 L 2 -0.2 L 2 0.2 L 0.5 0.2 Z' ),
+    }, {
+      fillStyle: 'blue',
+      path: new Path2D( 'M 0 -1 A 0.5 1 0 0 1 0 1 A 0.5 1 0 0 1 0 -1' ),
+    }, {
+      fillStyle: 'blue',
+      path: new Path2D( 'M 0 -0.5 A 0.5 0.5 0 0 1 0 0.5 A 0.5 0.5 0 0 1 0 -0.5' ),
+    } ],
   },
   alien: {
     maxSpeed: 0.1,

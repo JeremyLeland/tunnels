@@ -30,7 +30,6 @@ export class Entity {
     this.x += this.dx * dt;
     this.y += this.dy * dt;
     this.angle += this.dAngle * dt;
-    this.size += this.dSize * dt;
   }
 
   draw( ctx ) {
@@ -42,8 +41,8 @@ export class Entity {
 
     ctx.restore();
 
-    ctx.strokeStyle = 'red';
-    this.boundingLines?.forEach( line => line.draw( ctx ) );
+    // ctx.strokeStyle = 'red';
+    // this.boundingLines?.forEach( line => line.draw( ctx ) );
   }
 
   drawEntity( ctx ) {

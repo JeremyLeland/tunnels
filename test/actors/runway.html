@@ -1,0 +1,26 @@
+<title>Draw various Actors</title>
+<link rel="stylesheet" href="../grid.css">
+
+<style>
+  body {
+    background-size: 20px 20px;
+  }
+</style>
+
+<canvas id="canvas" oncontextmenu="return false;" width="800px" height="800px"></canvas>
+
+<script type="module">
+  import { AvoidingActor } from '../../src/AvoidingActor.js';
+  import { ActorInfo } from '../../info/info.js';
+
+  const actors = [
+    new AvoidingActor( { x: 100, y: 100 }, ActorInfo.marine ),
+    new AvoidingActor( { x: 200, y: 100 }, ActorInfo.alien ),
+  ];
+  
+  const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
+
+  actors.forEach( actor => actor.draw( ctx ) );
+  
+
+</script>

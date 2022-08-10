@@ -14,7 +14,7 @@ export class Actor extends Entity {
     this.type = 'actor';
     this.info = actorInfo;
 
-    this.speed = this.info.maxSpeed;
+    this.#updateBoundingLines();
   }
   
   update( dt ) {
@@ -31,12 +31,18 @@ export class Actor extends Entity {
       this.info.accelSpeed,
       dt
     );
+        
+    this.dx = this.speed * Math.cos( this.angle );
+    this.dy = this.speed * Math.sin( this.angle );
 
+    super.update( dt );
+
+    this.#updateBoundingLines();
+  }
+
+  #updateBoundingLines() {
     const cos = Math.cos( this.angle );
     const sin = Math.sin( this.angle );
-        
-    this.dx = this.speed * cos;
-    this.dy = this.speed * sin;
 
     this.boundingLines = this.info.boundingLines?.map( 
       line => new Line(
@@ -46,8 +52,6 @@ export class Actor extends Entity {
         this.y + this.info.size * ( sin * line[ 2 ] + cos * line[ 3 ] ),
       )
     );
-
-    super.update( dt );
   }
 
   drawEntity( ctx ) {
