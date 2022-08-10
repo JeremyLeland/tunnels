@@ -7,10 +7,10 @@ export class Bullet extends Entity {
   #info;
   #trail;
 
-  constructor( info ) {
-    super( info );
+  constructor( values ) {
+    super( values );
 
-    this.#info = BulletInfo[ this.type ];
+    this.#info = BulletInfo[ this.bulletInfoKey ];
 
     this.dx += Math.cos( this.angle ) * this.#info.speed;
     this.dy += Math.sin( this.angle ) * this.#info.speed;

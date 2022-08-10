@@ -5,6 +5,7 @@ export const GunInfo = {
     bulletsPerShot: 1,
     spread: 0.1,
     reloadTime: 1000,
+    bulletInfoKey: 'rifle',
   },
   shotgun: {
     maxAmmo: 8,
@@ -12,6 +13,7 @@ export const GunInfo = {
     bulletsPerShot: 6,
     spread: 0.2,
     reloadTime: 1500,
+    bulletInfoKey: 'shotgun',
   }
 }
 
@@ -43,6 +45,10 @@ export const ActorInfo = {
       [  2,  0, -0.5,  1 ],
       [ -0.5,  1, -0.5, -1 ],
     ],
+    gun: {
+      gunInfoKey: 'shotgun',
+      offset: { front: 14, side: 0, angle: 0 }
+    },
     drawPaths: [ {
       fillStyle: 'gray',
       path: new Path2D( `M 0.5 ${ -GUN_W } L ${ GUN_LEN } ${ -GUN_W } L ${ GUN_LEN } ${ GUN_W } L 0.5 ${ GUN_W } Z` ),

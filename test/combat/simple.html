@@ -13,11 +13,11 @@
   
 
   class Marine extends AvoidingActor {
+    gun = new Gun( ActorInfo.marine.gun, this );
+
     constructor( values ) {
       super( values, ActorInfo.marine );
     }
-
-    gun = new Gun( 'shotgun', this );
 
     update( dt ) {
       this.gun.update( dt );
@@ -28,38 +28,24 @@
       world.addBullet( bullet );
     }
 
-    // drawEntity( ctx ) {
-    //   ctx.strokeStyle = 'black';
-
-    //   ctx.fillStyle = 'gray';
-    //   ctx.fillRect( 0, -1, this.size * 2, 2 );
-    //   ctx.stroke();
-
-    //   ctx.beginPath();
-    //   ctx.arc( 0, 0, this.size, 0, Math.PI * 2 );
-    //   ctx.fillStyle = 'blue';
-    //   ctx.fill();
-    //   ctx.stroke();
-    // }
-
     draw( ctx ) {
       super.draw( ctx );
 
-      // this.#drawBar( ctx, 'red', 1, -14 );
-      // this.#drawBar( ctx, 'yellow', this.gun.getUIPercentage(), -8 );
+      this.#drawBar( ctx, 'red', 1, -14, -34, 28 );
+      this.#drawBar( ctx, 'yellow', this.gun.getUIPercentage(), -14, -28, 28 );
     }
 
-    // #drawBar( ctx, color, val, offset ) {
-    //   const bar = new Path2D();
-    //   bar.rect(
-    //     this.x - this.size, this.y - this.size + offset, 
-    //     this.size * val * 2, 4
-    //   );
+    #drawBar( ctx, color, val, offsetX, offsetY, width ) {
+      const bar = new Path2D();
+      bar.rect(
+        this.x + offsetX, this.y + offsetY, 
+        width * val, 4
+      );
 
-    //   ctx.fillStyle = color;
-    //   ctx.fill( bar );
-    //   ctx.stroke( bar );
-    // }
+      ctx.fillStyle = color;
+      ctx.fill( bar );
+      ctx.stroke( bar );
+    }
   }
 
   class Alien extends AvoidingActor {
@@ -74,8 +60,6 @@
       super.update( dt );
     }
   }
-
-  // TODO: Add lines to avoid (as well as other aliens)
 
   const game = new Game();
   const world = new World();

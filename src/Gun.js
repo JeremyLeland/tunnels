@@ -1,26 +1,10 @@
 import { Bullet } from './Bullet.js';
-// TODO: Forget the info objects, just make everything classes and duplicate everything?
-
-const gunInfo = {
-  'rifle': {
-    'maxAmmo': 30,
-    'timeBetweenShots': 100,
-    'bulletsPerShot': 1,
-    'spread': 0.1,
-    'reloadTime': 1000,
-  },
-  'shotgun': {
-    'maxAmmo': 8,
-    'timeBetweenShots': 500,
-    'bulletsPerShot': 6,
-    'spread': 0.2,
-    'reloadTime': 1500,
-  }
-}
+import { GunInfo } from '../info/info.js';
 
 export class Gun {
-  type;
-  ammo;
+  gunInfoKey;
+
+  ammo = 0;
   timeUntilReady = 0;
   isShooting = false;
   isReloading = false;
@@ -28,11 +12,12 @@ export class Gun {
   #info;
   #owner;
 
-  constructor( gunType, owner ) {
-    this.#info = gunInfo[ gunType ];
+  constructor( values, owner ) {
+    Object.assign( this, values );
+
+    this.#info = GunInfo[ this.gunInfoKey ];
     this.#owner = owner;
 
-    this.type = gunType;
     this.ammo = this.#info.maxAmmo;
   }
 
@@ -44,17 +29,15 @@ export class Gun {
 
       if ( this.isShooting && this.ammo > 0 ) {
         for ( let i = 0; i < this.#info.bulletsPerShot; i ++ ) {
-          const info = this.#owner.getOffset( { 
-            front: this.#owner.size,
-            side:  0,
-            angle: this.#info.spread * ( -0.5 + Math.random() ),
-          } );
+          const values = this.#owner.getOffset( this.offset );
+
+          values.angle += this.#info.spread * ( -0.5 + Math.random() );
           
-          info.type = this.type;
-          info.dx = this.#owner.dx;
-          info.dy = this.#owner.dy;
+          values.bulletInfoKey = this.#info.bulletInfoKey;
+          values.dx = this.#owner.dx;
+          values.dy = this.#owner.dy;
           
-          this.#owner.shoot( new Bullet( info ) );
+          this.#owner.shoot( new Bullet( values ) );
         }
 
         this.ammo --;
