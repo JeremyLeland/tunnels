@@ -40,10 +40,10 @@ export class Actor extends Entity {
 
     this.boundingLines = this.info.boundingLines?.map( 
       line => new Line(
-        this.x + this.size * ( cos * line[ 0 ] - sin * line[ 1 ] ),
-        this.y + this.size * ( sin * line[ 0 ] + cos * line[ 1 ] ),
-        this.x + this.size * ( cos * line[ 2 ] - sin * line[ 3 ] ),
-        this.y + this.size * ( sin * line[ 2 ] + cos * line[ 3 ] ),
+        this.x + this.info.size * ( cos * line[ 0 ] - sin * line[ 1 ] ),
+        this.y + this.info.size * ( sin * line[ 0 ] + cos * line[ 1 ] ),
+        this.x + this.info.size * ( cos * line[ 2 ] - sin * line[ 3 ] ),
+        this.y + this.info.size * ( sin * line[ 2 ] + cos * line[ 3 ] ),
       )
     );
 
@@ -53,7 +53,7 @@ export class Actor extends Entity {
   drawEntity( ctx ) {
     ctx.scale( this.info.size, this.info.size );
 
-    this.info.drawPaths.forEach( e => {
+    this.info.drawPaths?.forEach( e => {
       ctx.fillStyle = e.fillStyle;
       ctx.fill( e.path );
       ctx.strokeStyle = 'black';

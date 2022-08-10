@@ -110,9 +110,11 @@ export class AvoidingActor extends Actor {
       const cx = this.target.x - this.x;
       const cy = this.target.y - this.y;
       const targetDist = Math.hypot( cx, cy );
-      const goalDist = this.info.size + ( this.target.size ?? 0 );
 
-      // TODO: Better way to decide when we're done
+      // TODO: How to account for target size? Should we be using a line from bounding box instead?
+      //       Maybe getClosestPoint from the various bounding box lines?
+      const goalDist = this.info.size + ( this.target.info?.size ?? 0 );
+
       if ( targetDist /*- this.speed * dt*/ > goalDist ) {
         this.#avoidCones = this.getAvoidCones( this.avoidList, Math.min( targetDist + this.info.size, AVOID_DIST ) );
         
@@ -163,9 +165,9 @@ export class AvoidingActor extends Actor {
   draw( ctx ) {
     super.draw( ctx );
 
-    if ( this.#avoidCones ) {
-      this.drawAvoidCones( this.#avoidCones, ctx );
-    }
+    // if ( this.#avoidCones ) {
+    //   this.drawAvoidCones( this.#avoidCones, ctx );
+    // }
 
     if ( this.target ) {
       ctx.beginPath();

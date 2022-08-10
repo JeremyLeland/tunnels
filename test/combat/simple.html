@@ -13,15 +13,9 @@
   
 
   class Marine extends AvoidingActor {
-    size = 10;
-    speed = 0;
-    turnSpeed = 0.008;
-
-    boundingLines = [
-      [ -this.size, -this.size, this.size * 2, 0 ],
-      [ this.size * 2, 0, -this.size, this.size ],
-      [ -this.size, this.size, -this.size, -this.size ],
-    ].map( e => new Line( ...e ) );
+    constructor( values ) {
+      super( values, ActorInfo.marine );
+    }
 
     gun = new Gun( 'shotgun', this );
 
@@ -34,67 +28,50 @@
       world.addBullet( bullet );
     }
 
-    drawEntity( ctx ) {
-      ctx.strokeStyle = 'black';
+    // drawEntity( ctx ) {
+    //   ctx.strokeStyle = 'black';
 
-      ctx.fillStyle = 'gray';
-      ctx.fillRect( 0, -1, this.size * 2, 2 );
-      ctx.stroke();
+    //   ctx.fillStyle = 'gray';
+    //   ctx.fillRect( 0, -1, this.size * 2, 2 );
+    //   ctx.stroke();
 
-      ctx.beginPath();
-      ctx.arc( 0, 0, this.size, 0, Math.PI * 2 );
-      ctx.fillStyle = 'blue';
-      ctx.fill();
-      ctx.stroke();
-    }
+    //   ctx.beginPath();
+    //   ctx.arc( 0, 0, this.size, 0, Math.PI * 2 );
+    //   ctx.fillStyle = 'blue';
+    //   ctx.fill();
+    //   ctx.stroke();
+    // }
 
     draw( ctx ) {
       super.draw( ctx );
 
-      this.#drawBar( ctx, 'red', 1, -14 );
-      this.#drawBar( ctx, 'yellow', this.gun.getUIPercentage(), -8 );
+      // this.#drawBar( ctx, 'red', 1, -14 );
+      // this.#drawBar( ctx, 'yellow', this.gun.getUIPercentage(), -8 );
     }
 
-    #drawBar( ctx, color, val, offset ) {
-      const bar = new Path2D();
-      bar.rect(
-        this.x - this.size, this.y - this.size + offset, 
-        this.size * val * 2, 4
-      );
+    // #drawBar( ctx, color, val, offset ) {
+    //   const bar = new Path2D();
+    //   bar.rect(
+    //     this.x - this.size, this.y - this.size + offset, 
+    //     this.size * val * 2, 4
+    //   );
 
-      ctx.fillStyle = color;
-      ctx.fill( bar );
-      ctx.stroke( bar );
-    }
+    //   ctx.fillStyle = color;
+    //   ctx.fill( bar );
+    //   ctx.stroke( bar );
+    // }
   }
 
   class Alien extends AvoidingActor {
-    size = 10;
-    speed = 0.1;
-    turnSpeed = 0.008;
-
-    boundingLines = [
-      [ -this.size, 0, this.size, -this.size ],
-      [ this.size, -this.size, this.size, this.size ],
-      [ this.size, this.size, -this.size, 0 ],
-    ].map( e => new Line( ...e ) );
-
-    update( dt ) {
-      this.updateList = world.lines.concat( world.actors.filter( a => a instanceof Alien ) );
-
-      super.update( dt );
+    
+    constructor( values ) {
+      super( values, ActorInfo.alien );
     }
 
-    drawEntity( ctx ) {
-      ctx.beginPath();
-      ctx.moveTo( -this.size, 0 );
-      ctx.arc( 0, 0, this.size, -1, 1 );
-      ctx.closePath();
+    update( dt ) {
+      this.avoidList = world.lines.concat( world.actors.filter( a => a instanceof Alien ) );
 
-      ctx.fillStyle = 'green';
-      ctx.fill();
-      ctx.strokeStyle = 'black';
-      ctx.stroke();
+      super.update( dt );
     }
   }
 

@@ -36,6 +36,11 @@ export const ActorInfo = {
     turnSpeed: 0.008,
     accelSpeed: 0.0005,
     size: 10,
+    boundingLines: [
+      [ -1, -1,  2,  0 ],
+      [  2,  0, -1,  1 ],
+      [ -1,  1, -1, -1 ],
+    ],
   },
   alien: {
     maxSpeed: 0.1,
