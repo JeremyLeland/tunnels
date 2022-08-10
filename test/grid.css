@@ -5,9 +5,9 @@ body {
   color: white;
   user-select: none;  /* Prevent accidental selection while dragging mouse */
 
-  background-image: linear-gradient(   0deg, #aaa3 1px, transparent 1px ), 
-                    linear-gradient(  90deg, #aaa3 1px, transparent 1px ),
-                    linear-gradient( 180deg, #aaa3 1px, transparent 1px ),
-                    linear-gradient( 270deg, #aaa3 1px, transparent 1px );
+  background-image: linear-gradient(   0deg, #aaa1 1px, transparent 1px ), 
+                    linear-gradient(  90deg, #aaa1 1px, transparent 1px ),
+                    linear-gradient( 180deg, #aaa1 1px, transparent 1px ),
+                    linear-gradient( 270deg, #aaa1 1px, transparent 1px );
   background-size: 32px 32px;
 }

@@ -30,12 +30,14 @@ export const BulletInfo = {
   }
 }
 
+const GUN_W = 0.15, GUN_LEN = 1.7;
+
 export const ActorInfo = {
   marine: {
     maxSpeed: 0.1,
     turnSpeed: 0.008,
     accelSpeed: 0.0005,
-    size: 10,
+    size: 14,
     boundingLines: [
       [ -0.5, -1,  2,  0 ],
       [  2,  0, -0.5,  1 ],
@@ -43,10 +45,16 @@ export const ActorInfo = {
     ],
     drawPaths: [ {
       fillStyle: 'gray',
-      path: new Path2D( 'M 0.5 -0.2 L 2 -0.2 L 2 0.2 L 0.5 0.2 Z' ),
+      path: new Path2D( `M 0.5 ${ -GUN_W } L ${ GUN_LEN } ${ -GUN_W } L ${ GUN_LEN } ${ GUN_W } L 0.5 ${ GUN_W } Z` ),
     }, {
       fillStyle: 'blue',
-      path: new Path2D( 'M 0 -1 A 0.5 1 0 0 1 0 1 A 0.5 1 0 0 1 0 -1' ),
+      path: new Path2D( `M 0 -1 L 1.5 ${ -GUN_W } L 1.2 ${ -GUN_W } L 0 -0.5 Z` ),
+    }, {
+      fillStyle: 'blue',
+      path: new Path2D( `M 0 1 L 1.2 ${ GUN_W } L 1 ${ GUN_W } L 0 0.5 Z` ),
+    }, {
+      fillStyle: 'darkblue',
+      path: new Path2D( 'M 0 -1 A 0.3 1 0 0 1 0 1 A 0.3 1 0 0 1 0 -1' ),
     }, {
       fillStyle: 'blue',
       path: new Path2D( 'M 0 -0.5 A 0.5 0.5 0 0 1 0 0.5 A 0.5 0.5 0 0 1 0 -0.5' ),
