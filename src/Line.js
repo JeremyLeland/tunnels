@@ -168,7 +168,8 @@ export class Line {
         position: {
           x: other.x + them * other.dx,
           y: other.y + them * other.dy,
-        }
+        },
+        entities: [ this, other ],
       }
     }
     else {

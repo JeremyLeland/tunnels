@@ -18,6 +18,10 @@ export class Bullet extends Entity {
     this.#trail = new Trail( this.#info.trailLength );
   }
 
+  hitWith( hit ) {
+    
+  }
+
   update( dt ) {
     super.update( dt );
     this.#trail.addPoint( this.x, this.y, this.angle, this.#info.speed * dt );

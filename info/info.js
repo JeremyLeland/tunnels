@@ -46,7 +46,7 @@ export const ActorInfo = {
       [ -0.5,  1, -0.5, -1 ],
     ],
     gun: {
-      gunInfoKey: 'shotgun',
+      gunInfoKey: 'rifle',
       offset: { front: 14, side: 0, angle: 0 }
     },
     drawPaths: [ {

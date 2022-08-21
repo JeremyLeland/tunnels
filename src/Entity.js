@@ -15,6 +15,9 @@ export class Entity {
     Object.assign( this, values );
   }
 
+  hitWith( hit ) {
+  }
+
   getOffset( offset ) {
     const cos = Math.cos( this.angle );
     const sin = Math.sin( this.angle );

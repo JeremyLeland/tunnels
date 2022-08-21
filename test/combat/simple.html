@@ -3,6 +3,7 @@
 
 <script type="module">
   import { Game } from '../../src/Game.js';
+  import { Actor } from '../../src/Actor.js';
   import { AvoidingActor } from '../../src/AvoidingActor.js';
   import { Gun } from '../../src/Gun.js';
   import { Bullet } from '../../src/Bullet.js';
@@ -12,7 +13,7 @@
   import { ActorInfo } from '../../info/info.js';
   
 
-  class Marine extends AvoidingActor {
+  class Marine extends Actor {
     gun = new Gun( ActorInfo.marine.gun, this );
 
     constructor( values ) {
@@ -78,8 +79,13 @@
   world.lines.push( new Line( 300, 200, 200, 200 ) );
   world.lines.push( new Line( 200, 200, 200, 100 ) );
 
+  world.lines.push( new Line( 500, 200, 600, 200 ) );
+  world.lines.push( new Line( 600, 200, 550, 300 ) );
+  world.lines.push( new Line( 550, 300, 500, 200 ) );
+
   game.update = ( dt ) => {
-    player.target = { x: game.mouse.x, y: game.mouse.y };
+    //player.target = { x: game.mouse.x, y: game.mouse.y };
+    player.goalAngle = Math.atan2( game.mouse.y - player.y, game.mouse.x - player.x );
     player.gun.isShooting = game.mouse.down;
 
     world.update( dt );
