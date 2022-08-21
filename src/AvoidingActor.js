@@ -12,8 +12,6 @@ export class AvoidingActor extends Actor {
   getAvoidCones( entities, maxDist ) {
     let combinedCones = [];
 
-    // TODO: Create combined cones as we go, preserving original cones
-
     entities.forEach( e => {
       if ( e == this )  return;     // TODO: Need to account for this elsewhere if we are moving AvoidCones functionality out
 
@@ -62,7 +60,6 @@ export class AvoidingActor extends Actor {
     if ( h < maxDist ) {
       const angle = Math.atan2( cy, cx );
 
-      // TODO: Either entity should include size again, or this should be made to clearly apply to actor
       const r = entity.info.size + this.info.size;   // TODO: Plus some buffer space?
       const spread = Math.asin( Math.min( 1, r / h ) );   // prevent floating point errors when really close
       

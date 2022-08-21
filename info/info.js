@@ -19,14 +19,26 @@ export const GunInfo = {
 
 export const BulletInfo = {
   rifle: {
+    damage: 10,
     speed: 0.9,
-    size: 1,
+    size: 2,
+    boundingLines: [
+      [ -1, -1,  1,  0 ],
+      [  1,  0, -1,  1 ],
+      [ -1,  1, -1, -1 ],
+    ],
     color: 'gray',
     trailLength: 40,
   },
   shotgun: {
+    damage: 10,
     speed: 1.2,
     size: 1,
+    boundingLines: [
+      [ -1, -1,  1,  0 ],
+      [  1,  0, -1,  1 ],
+      [ -1,  1, -1, -1 ],
+    ],
     color: 'darkgoldenrod',
     trailLength: 60,
   }
@@ -36,6 +48,7 @@ const GUN_W = 0.15, GUN_LEN = 1.7;
 
 export const ActorInfo = {
   marine: {
+    life: 100,
     maxSpeed: 0.1,
     turnSpeed: 0.008,
     accelSpeed: 0.0005,
@@ -47,7 +60,7 @@ export const ActorInfo = {
     ],
     gun: {
       gunInfoKey: 'rifle',
-      offset: { front: 14, side: 0, angle: 0 }
+      offset: { front: 28, side: 0, angle: 0 }
     },
     drawPaths: [ {
       fillStyle: 'gray',
@@ -67,6 +80,7 @@ export const ActorInfo = {
     } ],
   },
   alien: {
+    life: 50,
     maxSpeed: 0.1,
     turnSpeed: 0.008,
     accelSpeed: 0.0005,

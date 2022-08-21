@@ -1,3 +1,5 @@
+import { Line } from './Line.js';
+
 export class Entity {
   x = 0;
   y = 0;
@@ -7,15 +9,28 @@ export class Entity {
   dy = 0;
   dAngle = 0;
 
+  life = 0;
+  damage = 0;
+
   isAlive = true;
   boundingLines = [];
+
+  info = {};
   createdEntities = [];
   
-  constructor( values ) {
+  constructor( values, info ) {
     Object.assign( this, values );
+    this.info = info;
+    
+    this.#updateBoundingLines();
   }
 
   hitWith( hit ) {
+    hit.entities.forEach( e => {
+      if ( e != this ) {
+        this.life -= e.damage;
+      }
+    } );
   }
 
   getOffset( offset ) {
@@ -29,10 +44,50 @@ export class Entity {
     }
   }
 
+  #updateBoundingLines() {
+    const cos = Math.cos( this.angle );
+    const sin = Math.sin( this.angle );
+
+    this.boundingLines = this.info.boundingLines?.map( 
+      line => new Line(
+        this.x + this.info.size * ( cos * line[ 0 ] - sin * line[ 1 ] ),
+        this.y + this.info.size * ( sin * line[ 0 ] + cos * line[ 1 ] ),
+        this.x + this.info.size * ( cos * line[ 2 ] - sin * line[ 3 ] ),
+        this.y + this.info.size * ( sin * line[ 2 ] + cos * line[ 3 ] ),
+      )
+    );
+  }
+
+  getHit( other ) {
+    let closestHit = { time: Infinity };
+
+    this.boundingLines.forEach( thisLine => {
+      other.boundingLines.forEach( otherLine => {
+        let hit = thisLine.getHit( { x: otherLine.x1, y: otherLine.y1, dx: other.dx, dy: other.dy } );
+
+        if ( 0 < hit.time && hit.time < closestHit.time ) {
+          closestHit = hit;
+        }
+
+        hit = otherLine.getHit( { x: thisLine.x1, y: thisLine.y1, dx: this.dx, dy: this.dy } );
+
+        if ( 0 < hit.time && hit.time < closestHit.time ) {
+          closestHit = hit;
+        }
+      } );
+    } );
+
+    closestHit.entities = [ this, other ];
+
+    return closestHit;
+  }
+
   update( dt ) {
     this.x += this.dx * dt;
     this.y += this.dy * dt;
     this.angle += this.dAngle * dt;
+
+    this.#updateBoundingLines();
   }
 
   draw( ctx ) {
@@ -44,8 +99,8 @@ export class Entity {
 
     ctx.restore();
 
-    // ctx.strokeStyle = 'red';
-    // this.boundingLines?.forEach( line => line.draw( ctx ) );
+    ctx.strokeStyle = 'red';
+    this.boundingLines?.forEach( line => line.draw( ctx ) );
   }
 
   drawEntity( ctx ) {

@@ -33,6 +33,14 @@ export class World {
             closestHit = hit;
           }
         } );
+
+        this.actors.forEach( actor => {
+          const hit = actor.getHit( bullet );
+
+          if ( 0 < hit.time && hit.time < closestHit.time ) {
+            closestHit = hit;
+          }
+        } );
       } );
   
       let time = dt;
