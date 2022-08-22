@@ -22,10 +22,10 @@ export const BulletInfo = {
     damage: 10,
     speed: 0.9,
     size: 2,
-    boundingLines: [
-      [ -1, -1,  1,  0 ],
-      [  1,  0, -1,  1 ],
-      [ -1,  1, -1, -1 ],
+    boundingPoints: [
+      [ -1, -1 ],
+      [  1,  0 ],
+      [ -1,  1 ],
     ],
     color: 'gray',
     trailLength: 40,
@@ -34,10 +34,10 @@ export const BulletInfo = {
     damage: 10,
     speed: 1.2,
     size: 1,
-    boundingLines: [
-      [ -1, -1,  1,  0 ],
-      [  1,  0, -1,  1 ],
-      [ -1,  1, -1, -1 ],
+    boundingPoints: [
+      [ -1, -1 ],
+      [  1,  0 ],
+      [ -1,  1 ],
     ],
     color: 'darkgoldenrod',
     trailLength: 60,
@@ -53,14 +53,20 @@ export const ActorInfo = {
     turnSpeed: 0.008,
     accelSpeed: 0.0005,
     size: 14,
-    boundingLines: [
-      [ -0.5, -1,  2,  0 ],
-      [  2,  0, -0.5,  1 ],
-      [ -0.5,  1, -0.5, -1 ],
+    boundingPoints: [
+      [ -0.5, -1 ],
+      [  2.0,  0 ],
+      [ -0.5,  1 ],
     ],
     gun: {
       gunInfoKey: 'rifle',
-      offset: { front: 28, side: 0, angle: 0 }
+      offset: { front: 2, side: 0, angle: 0 }
+    },
+    hitParticle: {
+      size: 4,
+      maxSpeed: 0.1,
+      fillStyle: 'red',
+      path: new Path2D( 'M 0 -0.5 A 0.5 0.5 0 0 1 0 0.5 A 0.5 0.5 0 0 1 0 -0.5' ),
     },
     drawPaths: [ {
       fillStyle: 'gray',
@@ -85,11 +91,17 @@ export const ActorInfo = {
     turnSpeed: 0.008,
     accelSpeed: 0.0005,
     size: 10,
-    boundingLines: [
-      [ -1,  0,  1, -1 ],
-      [  1, -1,  1,  1 ],
-      [  1,  1, -1,  0 ],
+    boundingPoints: [
+      [ -1,  0 ],
+      [  1, -1 ],
+      [  1,  1 ],
     ],
+    hitParticle: {
+      size: 4,
+      maxSpeed: 0.1,
+      fillStyle: 'green',
+      path: new Path2D( 'M 0 -0.5 A 0.5 0.5 0 0 1 0 0.5 A 0.5 0.5 0 0 1 0 -0.5' ),
+    },
     drawPaths: [ {
       fillStyle: 'green',
       path: new Path2D( 'M -1 0 L 0.75 -1 A 0.5 1 0 0 1 0.75 1 Z' ),

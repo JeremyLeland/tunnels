@@ -29,6 +29,21 @@ export class Entity {
     hit.entities.forEach( e => {
       if ( e != this ) {
         this.life -= e.damage;
+
+        // const values = hit.position;
+
+        // // TODO: Use bounce angle?
+        // values.angle = e.angle + Math.PI;
+        // //values.angle += this.#info.spread * ( -0.5 + Math.random() );
+        
+        // values.dx = this.dx;
+        // values.dy = this.dy;
+        
+        // this.createdEntities.push( new Entity( values, this.info.hitParticle ) );
+
+        if ( this.life <= 0 ) {
+          this.isAlive = false;
+        }
       }
     } );
   }
@@ -38,8 +53,8 @@ export class Entity {
     const sin = Math.sin( this.angle );
     
     return {
-      x: this.x + cos * offset.front - sin * offset.side,
-      y: this.y + sin * offset.front + cos * offset.side,
+      x: this.x + this.info.size * ( cos * offset.front - sin * offset.side ),
+      y: this.y + this.info.size * ( sin * offset.front + cos * offset.side ),
       angle: this.angle + offset.angle,
     }
   }
@@ -48,14 +63,22 @@ export class Entity {
     const cos = Math.cos( this.angle );
     const sin = Math.sin( this.angle );
 
-    this.boundingLines = this.info.boundingLines?.map( 
-      line => new Line(
-        this.x + this.info.size * ( cos * line[ 0 ] - sin * line[ 1 ] ),
-        this.y + this.info.size * ( sin * line[ 0 ] + cos * line[ 1 ] ),
-        this.x + this.info.size * ( cos * line[ 2 ] - sin * line[ 3 ] ),
-        this.y + this.info.size * ( sin * line[ 2 ] + cos * line[ 3 ] ),
-      )
-    );
+    this.boundingLines = [];
+
+    const points = this.info.boundingPoints;
+    if ( points ) {
+      for ( let i = 0; i < points.length; i ++ ) {
+        const current = points[ i ], next = points[ ( i + 1 ) % points.length ];
+        this.boundingLines.push( 
+          new Line (
+            this.x + this.info.size * ( cos * current[ 0 ] - sin * current[ 1 ] ),
+            this.y + this.info.size * ( sin * current[ 0 ] + cos * current[ 1 ] ),
+            this.x + this.info.size * ( cos * next[ 0 ] - sin * next[ 1 ] ),
+            this.y + this.info.size * ( sin * next[ 0 ] + cos * next[ 1 ] ),
+          ) 
+        );
+      }
+    }
   }
 
   getHit( other ) {

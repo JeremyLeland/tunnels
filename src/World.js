@@ -1,7 +1,11 @@
 export class World {
   actors = [];
   bullets = [];
-  lines = [];
+  walls = [];
+
+  // TODO: Walls as Entities
+  // One list of all entities
+  // Add to that list
   
   #pendingBullets = [];
   
@@ -17,7 +21,7 @@ export class World {
 
     let closestHit;
     
-    do {
+    for ( let tries = 0; dt > 0 && tries < 8; tries ++ ) {
       closestHit = { time: Infinity };
 
       // TODO: Moving lines collision?
@@ -26,8 +30,8 @@ export class World {
 
 
       this.bullets.forEach( bullet => {
-        this.lines.forEach( line => { 
-          const hit = line.getHit( bullet );
+        this.walls.forEach( wall => { 
+          const hit = wall.getHit( bullet );
   
           if ( 0 < hit.time && hit.time < closestHit.time ) {
             closestHit = hit;
@@ -48,10 +52,10 @@ export class World {
       if ( closestHit.time < dt ) {
         time = closestHit.time;
 
-        // closestHit.entities.forEach( e => e.hitWith( hit ) );
-        closestHit.entities.forEach( e => {
-          e.isAlive = false;
-        } );
+        closestHit.entities.forEach( e => e.hitWith( closestHit ) );
+        // closestHit.entities.forEach( e => {
+        //   e.isAlive = false;
+        // } );
       }
 
       this.bullets.forEach( b => b.update( time ) );
@@ -61,12 +65,11 @@ export class World {
 
       dt -= time;
     }
-    while ( dt > 0 );    
   }
 
   draw( ctx ) {
     ctx.strokeStyle = 'white';
-    this.lines.forEach( line => line.draw( ctx ) );
+    this.walls.forEach( wall => wall.draw( ctx ) );
     this.bullets.forEach( bullet => bullet.draw( ctx ) );
     this.actors.forEach( alien => alien.draw( ctx ) );
   }

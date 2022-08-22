@@ -9,6 +9,7 @@
   import { Bullet } from '../../src/Bullet.js';
   import { World } from '../../src/World.js';
   import { Line } from '../../src/Line.js';
+  import { Wall } from '../../src/Wall.js';
 
   import { ActorInfo } from '../../info/info.js';
   
@@ -56,7 +57,7 @@
     }
 
     update( dt ) {
-      this.avoidList = world.lines.concat( world.actors.filter( a => a instanceof Alien ) );
+      this.avoidList = world.walls.concat( world.actors.filter( a => a instanceof Alien ) );
 
       super.update( dt );
     }
@@ -74,14 +75,14 @@
     world.actors.push( alien );
   }
 
-  world.lines.push( new Line( 200, 100, 300, 100 ) );
-  world.lines.push( new Line( 300, 100, 300, 200 ) );
-  world.lines.push( new Line( 300, 200, 200, 200 ) );
-  world.lines.push( new Line( 200, 200, 200, 100 ) );
-
-  world.lines.push( new Line( 500, 200, 600, 200 ) );
-  world.lines.push( new Line( 600, 200, 550, 300 ) );
-  world.lines.push( new Line( 550, 300, 500, 200 ) );
+  world.walls.push( 
+    new Wall( [
+      [ 200, 100 ], [ 300, 100 ], [ 300, 200 ], [ 200, 200 ],
+    ] ),
+    new Wall( [
+      [ 500, 200 ], [ 600, 200 ], [ 550, 300 ],
+    ] ),
+  );
 
   game.update = ( dt ) => {
     //player.target = { x: game.mouse.x, y: game.mouse.y };
