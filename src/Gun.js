@@ -37,7 +37,7 @@ export class Gun {
           values.dx = this.#owner.dx;
           values.dy = this.#owner.dy;
           
-          this.#owner.shoot( new Bullet( values ) );
+          this.#owner.createdEntities.push( new Bullet( values ) );
         }
 
         this.ammo --;

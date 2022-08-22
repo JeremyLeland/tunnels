@@ -9,11 +9,15 @@ export class AvoidingActor extends Actor {
 
   #avoidCones;
 
+  // TODO: Make this all based on boundingLines, don't do this instanceof branch
+
   getAvoidCones( entities, maxDist ) {
     let combinedCones = [];
 
     entities.forEach( e => {
-      if ( e == this )  return;     // TODO: Need to account for this elsewhere if we are moving AvoidCones functionality out
+      if ( e == this || e == target ) {
+        return;
+      }
 
       const cone = e instanceof Entity ? this.getAvoidEntity( e, maxDist ) : this.getAvoidLine( e, maxDist );
       

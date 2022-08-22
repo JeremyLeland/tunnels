@@ -19,6 +19,7 @@ export const GunInfo = {
 
 export const BulletInfo = {
   rifle: {
+    life: 1,
     damage: 10,
     speed: 0.9,
     size: 2,
@@ -31,6 +32,7 @@ export const BulletInfo = {
     trailLength: 40,
   },
   shotgun: {
+    life: 1,
     damage: 10,
     speed: 1.2,
     size: 1,
@@ -49,6 +51,7 @@ const GUN_W = 0.15, GUN_LEN = 1.7;
 export const ActorInfo = {
   marine: {
     life: 100,
+    damage: 1,
     maxSpeed: 0.1,
     turnSpeed: 0.008,
     accelSpeed: 0.0005,
@@ -87,6 +90,7 @@ export const ActorInfo = {
   },
   alien: {
     life: 50,
+    damage: 1,
     maxSpeed: 0.1,
     turnSpeed: 0.008,
     accelSpeed: 0.0005,

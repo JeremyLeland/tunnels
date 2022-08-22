@@ -26,10 +26,6 @@
       super.update( dt );
     }
 
-    shoot( bullet ) {
-      world.addBullet( bullet );
-    }
-
     draw( ctx ) {
       super.draw( ctx );
 
@@ -57,7 +53,7 @@
     }
 
     update( dt ) {
-      this.avoidList = world.walls.concat( world.actors.filter( a => a instanceof Alien ) );
+      this.avoidList = world.entities.filter( e => !( e instanceof Marine ) );
 
       super.update( dt );
     }
@@ -67,15 +63,15 @@
   const world = new World();
 
   const player = new Marine( { x: 300, y: 300 } );
-  world.actors.push( player );
+  world.entities.push( player );
 
   for ( let i = 0; i < 5; i ++ ) {
     const alien = new Alien( { x: i * 50, y: 50 } );
     alien.target = player;
-    world.actors.push( alien );
+    world.entities.push( alien );
   }
 
-  world.walls.push( 
+  world.entities.push( 
     new Wall( [
       [ 200, 100 ], [ 300, 100 ], [ 300, 200 ], [ 200, 200 ],
     ] ),

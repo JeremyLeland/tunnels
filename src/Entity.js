@@ -9,10 +9,9 @@ export class Entity {
   dy = 0;
   dAngle = 0;
 
-  life = 0;
-  damage = 0;
-
+  life = 1;
   isAlive = true;
+
   boundingLines = [];
 
   info = {};
@@ -21,14 +20,16 @@ export class Entity {
   constructor( values, info ) {
     Object.assign( this, values );
     this.info = info;
-    
+
+    this.life = this.info.life;
+
     this.#updateBoundingLines();
   }
 
   hitWith( hit ) {
     hit.entities.forEach( e => {
       if ( e != this ) {
-        this.life -= e.damage;
+        this.life -= e.info.damage;
 
         // const values = hit.position;
 

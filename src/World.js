@@ -1,76 +1,39 @@
 export class World {
-  actors = [];
-  bullets = [];
-  walls = [];
+  entities = [];
 
-  // TODO: Walls as Entities
-  // One list of all entities
-  // Add to that list
-  
-  #pendingBullets = [];
-  
-  addBullet( bullet ) {
-    this.#pendingBullets.push( bullet );
-  }
-
-  update( dt ) {
-    this.bullets = this.bullets.concat( this.#pendingBullets );
-    this.#pendingBullets = [];
-
-    // TODO: Find first bullet collision
-
-    let closestHit;
-    
+  update( dt ) {    
     for ( let tries = 0; dt > 0 && tries < 8; tries ++ ) {
-      closestHit = { time: Infinity };
-
-      // TODO: Moving lines collision?
-      // https://stackoverflow.com/questions/9099085/intersection-of-two-moving-line-segments-or-a-moving-line-segment-and-a-point
-      // Or just check all our points against their lines, then all their points against our lines?
-
-
-      this.bullets.forEach( bullet => {
-        this.walls.forEach( wall => { 
-          const hit = wall.getHit( bullet );
-  
+      let closestHit = { time: Infinity };
+      
+      for ( let i = 0; i < this.entities.length; i ++ ) {
+        for ( let j = i + 1; j < this.entities.length; j ++ ) {
+          const hit = this.entities[ i ].getHit( this.entities[ j ] );
+          
           if ( 0 < hit.time && hit.time < closestHit.time ) {
             closestHit = hit;
           }
-        } );
-
-        this.actors.forEach( actor => {
-          const hit = actor.getHit( bullet );
-
-          if ( 0 < hit.time && hit.time < closestHit.time ) {
-            closestHit = hit;
-          }
-        } );
-      } );
-  
-      let time = dt;
-
+        }
+      }
+      
+      let updateTime = Math.min( closestHit.time, dt );
+      this.entities.forEach( e => e.update( updateTime ) );
+      
       if ( closestHit.time < dt ) {
-        time = closestHit.time;
-
-        closestHit.entities.forEach( e => e.hitWith( closestHit ) );
-        // closestHit.entities.forEach( e => {
-        //   e.isAlive = false;
-        // } );
+        closestHit.entities.forEach( e => e.hitWith( closestHit ) );  
       }
 
-      this.bullets.forEach( b => b.update( time ) );
-      this.bullets = this.bullets.filter( b => b.isAlive );
+      dt -= updateTime;
       
-      this.actors.forEach( a => a.update( time ) );
-
-      dt -= time;
+      const createdEntities = [];
+      this.entities.forEach( 
+        e => createdEntities.push( ...e.createdEntities.splice( 0 ) ) 
+      );
+      this.entities.push( ...createdEntities );
+      this.entities = this.entities.filter( e => e.isAlive );
     }
   }
 
   draw( ctx ) {
-    ctx.strokeStyle = 'white';
-    this.walls.forEach( wall => wall.draw( ctx ) );
-    this.bullets.forEach( bullet => bullet.draw( ctx ) );
-    this.actors.forEach( alien => alien.draw( ctx ) );
+    this.entities.forEach( e => e.draw( ctx ) );
   }
 }
