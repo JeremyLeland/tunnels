@@ -21,9 +21,9 @@ export class Entity {
     Object.assign( this, values );
     this.info = info;
 
-    this.life = this.info.life;
+    this.life = this.info.life ?? 1;
 
-    this.#updateBoundingLines();
+    this.updateBoundingLines();
   }
 
   hitWith( hit ) {
@@ -31,16 +31,22 @@ export class Entity {
       if ( e != this ) {
         this.life -= e.info.damage;
 
-        // const values = hit.position;
+        if ( this.info.hitParticle ) {
+          const partInfo = this.info.hitParticle;
 
-        // // TODO: Use bounce angle?
-        // values.angle = e.angle + Math.PI;
-        // //values.angle += this.#info.spread * ( -0.5 + Math.random() );
-        
-        // values.dx = this.dx;
-        // values.dy = this.dy;
-        
-        // this.createdEntities.push( new Entity( values, this.info.hitParticle ) );
+          for ( let i = 0; i < partInfo.count; i ++ ) {
+            const values = { ...hit.position };
+            
+            // TODO: Use bounce angle?
+            values.angle = e.angle + Math.PI;
+            values.angle += partInfo.spread * ( -0.5 + Math.random() );
+            
+            values.dx = this.dx + Math.cos( values.angle ) * partInfo.maxSpeed;
+            values.dy = this.dy + Math.sin( values.angle ) * partInfo.maxSpeed;
+            
+            this.createdEntities.push( new Entity( values, partInfo ) );
+          }
+        }
 
         if ( this.life <= 0 ) {
           this.isAlive = false;
@@ -60,7 +66,7 @@ export class Entity {
     }
   }
 
-  #updateBoundingLines() {
+  updateBoundingLines() {
     const cos = Math.cos( this.angle );
     const sin = Math.sin( this.angle );
 
@@ -111,7 +117,7 @@ export class Entity {
     this.y += this.dy * dt;
     this.angle += this.dAngle * dt;
 
-    this.#updateBoundingLines();
+    this.updateBoundingLines();
   }
 
   draw( ctx ) {
@@ -128,5 +134,14 @@ export class Entity {
   }
 
   drawEntity( ctx ) {
+    ctx.scale( this.info.size, this.info.size );
+
+    this.info.drawPaths?.forEach( e => {
+      ctx.fillStyle = e.fillStyle;
+      ctx.fill( e.path );
+      ctx.strokeStyle = 'black';
+      ctx.lineWidth = 1 / this.info.size;
+      ctx.stroke( e.path );
+    } );
   }
 }

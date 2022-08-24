@@ -7,38 +7,18 @@
   import { Entity } from '../../src/Entity.js';
   import { AvoidingActor } from '../../src/AvoidingActor.js';
 
-  const avoidInfo = { size: 40 }
-
-  class AvoidEntity extends Entity {
-    info = avoidInfo;
-
-    drawEntity( ctx ) {
-      ctx.beginPath();
-      ctx.arc( 0, 0, this.info.size, 0, Math.PI * 2 );
-      ctx.fillStyle = 'blue';
-      ctx.fill();
-      ctx.strokeStyle = 'white';
-      ctx.stroke();
-    }
-  }
-
-  class Player extends AvoidingActor {
-    drawEntity( ctx ) {
-      ctx.beginPath();
-      ctx.moveTo( 20, 0 );
-      ctx.arc( 0, 0, 20, Math.PI - 1, Math.PI + 1 );
-      ctx.closePath();
-      ctx.fillStyle = 'green';
-      ctx.fill();
-      ctx.strokeStyle = 'white';
-      ctx.stroke();
-    }
-  }
-
   const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
 
-  let entities = [];
-  let player = new Player( { x: 400, y: 400 }, { size: 20, turnSpeed: 0.008, maxSpeed: 0.1 } );
+  let entities = [
+    new Entity( {}, {
+      size: 1,
+      boundingPoints: [ [ 500, 200 ], [ 500, 300 ], [ 700, 300 ], [ 700, 200 ] ],
+    } )
+  ];
+  let player = new Entity( { x: 400, y: 400 }, { 
+    size: 20,
+    boundingPoints: [ [ 1, 0 ], [ -1, 1 ], [ -1, -1 ] ],
+  } );
 
   document.addEventListener( 'mousedown', e => {
     if ( e.button == 0 ) {
@@ -57,15 +37,16 @@
   } );
 
   document.addEventListener( 'mousemove', e => {
-    player.target = { x: e.clientX, y: e.clientY };
+    player.angle = Math.atan2( e.clientY - player.y, e.clientX - player.x );
 
     update();
     draw();
   } );
 
   function update() {
-    player.avoidList = entities;
-    player.update( 1000 );
+    player.updateBoundingLines();
+
+    
   }
 
   function draw() {
@@ -75,7 +56,7 @@
   }
 
   function addEntity( x, y ) {
-    entities.push( new AvoidEntity( { x: x, y: y } ) );
+    // entities.push( new AvoidEntity( { x: x, y: y } ) );
   }
 
   function removeEntity( x, y ) {

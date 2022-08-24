@@ -15,7 +15,7 @@ export class AvoidingActor extends Actor {
     let combinedCones = [];
 
     entities.forEach( e => {
-      if ( e == this || e == target ) {
+      if ( e == this || e == this.target ) {
         return;
       }
 

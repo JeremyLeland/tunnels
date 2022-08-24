@@ -30,18 +30,6 @@ export class Actor extends Entity {
 
     super.update( dt );
   }
-
-  drawEntity( ctx ) {
-    ctx.scale( this.info.size, this.info.size );
-
-    this.info.drawPaths?.forEach( e => {
-      ctx.fillStyle = e.fillStyle;
-      ctx.fill( e.path );
-      ctx.strokeStyle = 'black';
-      ctx.lineWidth = 1 / this.info.size;
-      ctx.stroke( e.path );
-    } );
-  }
 }
 
 function approach( current, goal, speed, dt ) {
