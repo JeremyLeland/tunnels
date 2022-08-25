@@ -10,6 +10,7 @@ export class Entity {
   dAngle = 0;
 
   life = 1;
+  lifeSpan = Infinity;
   isAlive = true;
 
   boundingLines = [];
@@ -21,7 +22,8 @@ export class Entity {
     Object.assign( this, values );
     this.info = info;
 
-    this.life = this.info.life ?? 1;
+    this.life = this.info.life ?? this.life;
+    this.lifeSpan = this.info.lifeSpan ?? this.lifeSpan;
 
     this.updateBoundingLines();
   }
@@ -117,6 +119,11 @@ export class Entity {
     this.y += this.dy * dt;
     this.angle += this.dAngle * dt;
 
+    this.lifeSpan -= dt;
+    if ( this.lifeSpan <= 0 ) {
+      this.isAlive = false;
+    }
+
     this.updateBoundingLines();
   }
 
@@ -124,6 +131,10 @@ export class Entity {
     ctx.save();
     ctx.translate( this.x, this.y );
     ctx.rotate( this.angle );
+
+    if ( this.lifeSpan < Infinity ) {
+      ctx.globalAlpha = this.lifeSpan / this.info.lifeSpan;
+    }
 
     this.drawEntity( ctx );
 

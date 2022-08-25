@@ -46,6 +46,26 @@ export const BulletInfo = {
   }
 }
 
+export const WallInfo = {
+  rock: {
+    size: 1,
+    life: Infinity,
+    damage: 1,
+    hitParticle: {
+      count: 5,
+      spread: 1,
+      lifeSpan: 500,
+      size: 4,
+      maxSpeed: 0.1,
+      drawPaths: [ {
+        fillStyle: 'saddlebrown',
+        path: new Path2D( 'M 0 -0.5 A 0.5 0.5 0 0 1 0 0.5 A 0.5 0.5 0 0 1 0 -0.5' ),
+      } ],
+    },
+    fillStyle: 'saddlebrown',
+  }
+}
+
 const GUN_W = 0.15, GUN_LEN = 1.7;
 
 export const ActorInfo = {
@@ -101,10 +121,15 @@ export const ActorInfo = {
       [  1,  1 ],
     ],
     hitParticle: {
-      size: 4,
+      count: 10,
+      spread: 1,
+      lifeSpan: 1000,
+      size: 2,
       maxSpeed: 0.1,
-      fillStyle: 'green',
-      path: new Path2D( 'M 0 -0.5 A 0.5 0.5 0 0 1 0 0.5 A 0.5 0.5 0 0 1 0 -0.5' ),
+      drawPaths: [ {
+        fillStyle: 'cyan',
+        path: new Path2D( 'M 0 -0.5 A 0.5 0.5 0 0 1 0 0.5 A 0.5 0.5 0 0 1 0 -0.5' ),
+      } ],
     },
     drawPaths: [ {
       fillStyle: 'green',
