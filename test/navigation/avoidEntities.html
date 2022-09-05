@@ -6,6 +6,7 @@
 <script type="module">
   import { Entity } from '../../src/Entity.js';
   import { AvoidingActor } from '../../src/AvoidingActor.js';
+  import { AvoidCones } from '../../src/AvoidCones.js';
 
   const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
 
@@ -13,7 +14,11 @@
     new Entity( {}, {
       size: 1,
       boundingPoints: [ [ 500, 200 ], [ 500, 300 ], [ 700, 300 ], [ 700, 200 ] ],
-    } )
+    } ),
+    new Entity( {}, {
+      size: 1,
+      boundingPoints: [ [ 600, 400 ], [ 600, 500 ], [ 700, 500 ], [ 700, 400 ] ],
+    } ),
   ];
   let player = new Entity( { x: 400, y: 400 }, { 
     size: 20,
@@ -53,6 +58,26 @@
     ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
     entities.forEach( e => e.draw( ctx ) );
     player.draw( ctx );
+
+    ctx.beginPath();
+    entities.forEach( e => {
+      player.boundingLines.forEach( pLine => {
+        e.boundingLines.forEach( eLine => {
+          ctx.moveTo( pLine.x1, pLine.y1 );
+          ctx.lineTo( eLine.x1, eLine.y1 );
+        } );
+      } );
+    } );
+    ctx.strokeStyle = 'yellow';
+    ctx.globalAlpha = 0.1;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    const cone = new AvoidCones();
+    entities.forEach( e => {
+      cone.addCone( AvoidCones.betweenEntities( player, e ) );
+    } );
+    cone.draw( player.x, player.y, ctx );
   }
 
   function addEntity( x, y ) {
