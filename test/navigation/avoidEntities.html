@@ -11,16 +11,24 @@
   const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
 
   let entities = [
+    // new Entity( {}, {
+    //   size: 1,
+    //   boundingPoints: [ [ 500, 200 ], [ 500, 300 ], [ 700, 300 ], [ 700, 200 ] ],
+    // } ),
+    // new Entity( {}, {
+    //   size: 1,
+    //   boundingPoints: [ [ 600, 400 ], [ 600, 500 ], [ 700, 500 ], [ 700, 400 ] ],
+    // } ),
     new Entity( {}, {
       size: 1,
-      boundingPoints: [ [ 500, 200 ], [ 500, 300 ], [ 700, 300 ], [ 700, 200 ] ],
+      boundingPoints: [ [ 100, 300 ], [ 100, 400 ], [ 200, 400 ], [ 200, 300 ] ],
     } ),
     new Entity( {}, {
       size: 1,
-      boundingPoints: [ [ 600, 400 ], [ 600, 500 ], [ 700, 500 ], [ 700, 400 ] ],
+      boundingPoints: [ [ 500, 300 ], [ 500, 400 ], [ 600, 400 ], [ 600, 300 ] ],
     } ),
   ];
-  let player = new Entity( { x: 400, y: 400 }, { 
+  let player = new Entity( { x: 350, y: 350 }, { 
     size: 20,
     boundingPoints: [ [ 1, 0 ], [ -1, 1 ], [ -1, -1 ] ],
   } );
@@ -73,11 +81,12 @@
     ctx.stroke();
     ctx.globalAlpha = 1;
 
-    const cone = new AvoidCones();
+    const avoidCones = new AvoidCones();
     entities.forEach( e => {
-      cone.addCone( AvoidCones.betweenEntities( player, e ) );
+      const cones = AvoidCones.conesBetweenEntities( player, e, 1000 );
+      cones.forEach( cone => avoidCones.addCone( cone ) );
     } );
-    cone.draw( player.x, player.y, ctx );
+    avoidCones.draw( player.x, player.y, ctx );
   }
 
   function addEntity( x, y ) {

@@ -5,33 +5,29 @@ export class AvoidCones {
 
   }
 
-  static betweenEntities( a, b ) {
-    let left = Infinity, right = -Infinity, dist = Infinity;
-
-    let lastAngle;
+  // TODO: If we're going to use this for the outer loop of a level, we need to handle
+  //       cones that are bigger than 180 degrees. 
+  //       - Do we need cones per line like before to avoid this?
+  // TODO: We also need to handle long lines
+  //       - This could mess up any sort of maxDist
+  //         - end points might be outside maxDist, but not the middle of the line
+  //         - Find closest point and use that dist?
+  //         - Just require more points?
+  static conesBetweenEntities( a, b, maxDist ) {
+    const cones = [];
 
     a.boundingLines.forEach( aLine => {
       b.boundingLines.forEach( bLine => {
-        const cx = bLine.x1 - aLine.x1;
-        const cy = bLine.y1 - aLine.y1;
-        const d = Math.hypot( cx, cy );
-        const angle = Math.atan2( cy, cx );
+        const cone = AvoidCones.coneFromLine( aLine.x1, aLine.y1, bLine, maxDist );
 
-        if ( lastAngle && Math.abs( angle - lastAngle ) > Math.PI ) {
-          // flip it? I think this is the crosses +/- Math.PI case
+        if ( cone ) {
+          cone.avoids = b;
+          cones.push( cone );
         }
-        else {
-          left = Math.min( left, angle );
-          right = Math.max( right, angle );
-        }
-
-        dist = Math.min( dist, d );
-
-        lastAngle = angle;
       } );
     } );
 
-    return { left: left, right: right, dist: dist, avoids: b };
+    return cones;
   }
 
   static coneFromLine( x, y, line, maxDist ) {
@@ -111,6 +107,14 @@ export class AvoidCones {
       ctx.globalAlpha = 1;
     } );
   }
+}
+
+function fixAngle( a ) {
+  return a > Math.PI ? a - Math.PI * 2 : a < -Math.PI ? a + Math.PI * 2 : a;
+}
+
+function deltaAngle( a, b ) {
+  return fixAngle( b - a );
 }
 
 function betweenAngles( angle, left, right, inclusive = true ) {
