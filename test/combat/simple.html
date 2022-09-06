@@ -66,8 +66,8 @@
   world.entities.push( player );
 
   for ( let i = 0; i < 5; i ++ ) {
-    const alien = new Alien( { x: 320 + i * 50, y: 150 } );
-    // alien.target = player;
+    const alien = new Alien( { x: 50 + i * 50, y: 50 } );
+    alien.target = player;
     world.entities.push( alien );
   }
 

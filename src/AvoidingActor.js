@@ -1,5 +1,6 @@
 import { Actor } from '../src/Actor.js';
 import { Entity } from './Entity.js';
+import { AvoidCones } from './AvoidCones.js';
 
 const AVOID_DIST = 100, CLOSE_ENOUGH = 50;
 
@@ -8,103 +9,6 @@ export class AvoidingActor extends Actor {
   avoidList = [];
 
   #avoidCones;
-
-  // TODO: Make this all based on boundingLines, don't do this instanceof branch
-
-  getAvoidCones( entities, maxDist ) {
-    let combinedCones = [];
-
-    entities.forEach( e => {
-      if ( e == this || e == this.target ) {
-        return;
-      }
-
-      const cone = e instanceof Entity ? this.getAvoidEntity( e, maxDist ) : this.getAvoidLine( e, maxDist );
-      
-      if ( cone ) {   
-        const newCombined = { left: cone.left, right: cone.right, cones: [ cone ] };
-
-        for ( let i = 0; i < combinedCones.length; i ++ ) {
-          const other = combinedCones[ i ];
-          let merge = false;
-          
-          if ( betweenAngles( newCombined.left, other.left, other.right ) ) {
-            newCombined.left = other.left;
-            merge = true;
-          }  
-          if ( betweenAngles( newCombined.right, other.left, other.right ) ) {
-            newCombined.right = other.right;
-            merge = true;
-          }
-          
-          if ( betweenAngles( other.left, newCombined.left, newCombined.right ) && 
-               betweenAngles( other.right, newCombined.left, newCombined.right ) ) {
-            merge = true;
-          }
-          
-          if ( merge ) {
-            newCombined.cones.push( ...other.cones );
-            combinedCones.splice( i, 1 );
-            i --;
-          }
-        }
-        
-        combinedCones.push( newCombined );
-      }
-    } );
-
-    return combinedCones;
-  }
-
-  getAvoidEntity( entity, maxDist ) {
-    const cx = entity.x - this.x;
-    const cy = entity.y - this.y;
-    const h = Math.hypot( cx, cy );
-
-    if ( h < maxDist ) {
-      const angle = Math.atan2( cy, cx );
-
-      const r = entity.info.size + this.info.size;   // TODO: Plus some buffer space?
-      const spread = Math.asin( Math.min( 1, r / h ) );   // prevent floating point errors when really close
-      
-      return { 
-        left: fixAngle( angle - spread ), 
-        right: fixAngle( angle + spread ),
-        dist: h,
-        avoids: entity,
-      };
-    }
-  }
-
-  getAvoidLine( line, maxDist ) {
-    const cx1 = line.x1 - this.x;
-    const cy1 = line.y1 - this.y;
-    const h1 = Math.hypot( cx1, cy1 );
-
-    const cx2 = line.x2 - this.x;
-    const cy2 = line.y2 - this.y;
-    const h2 = Math.hypot( cx2, cy2 );
-
-    if ( h1 < maxDist || h2 < maxDist ) {
-      const angle1 = Math.atan2( cy1, cx1 );
-      const angle2 = Math.atan2( cy2, cx2 );
-
-      const r = this.info.size;   // TODO: Plus some buffer space?
-      const spread1 = Math.asin( Math.min( 1, r / h1 ) );
-      const spread2 = Math.asin( Math.min( 1, r / h2 ) );
-
-      const left1 = fixAngle( angle1 - spread1 );
-      const right1 = fixAngle( angle1 + spread1 );
-      const left2 = fixAngle( angle2 - spread2 );
-      const right2 = fixAngle( angle2 + spread2 );
-
-      const dist = Math.min( h1, h2 );
-      
-      return deltaAngle( angle1, angle2 ) > 0 ?
-        { left: left1, right: right2, dist: dist, avoids: line } : 
-        { left: left2, right: right1, dist: dist, avoids: line };
-    }
-  }
 
   update( dt ) {
     if ( this.target ) {
@@ -117,10 +21,17 @@ export class AvoidingActor extends Actor {
       const goalDist = this.info.size + ( this.target.info?.size ?? 0 );
 
       if ( targetDist /*- this.speed * dt*/ > goalDist ) {
-        this.#avoidCones = this.getAvoidCones( this.avoidList, Math.min( targetDist + this.info.size, AVOID_DIST ) );
+        const maxDist = Math.min( targetDist + this.info.size, AVOID_DIST );
         
+        this.#avoidCones = new AvoidCones();
+        this.avoidList.forEach( e => {
+          if ( e != this && e != this.target ) {
+            this.#avoidCones.addCones( AvoidCones.conesBetweenEntities( this, e, maxDist ) )
+          }
+        } );
+
         this.goalAngle = Math.atan2( cy, cx );
-        const combinedCone = this.#avoidCones.find( combined => 
+        const combinedCone = this.#avoidCones.getCones().find( combined => 
           betweenAngles( this.goalAngle, combined.left, combined.right )
         );
         
@@ -166,9 +77,7 @@ export class AvoidingActor extends Actor {
   draw( ctx ) {
     super.draw( ctx );
 
-    // if ( this.#avoidCones ) {
-    //   this.drawAvoidCones( this.#avoidCones, ctx );
-    // }
+    //this.#avoidCones?.draw( this.x, this.y, ctx );
 
     // if ( this.target ) {
     //   ctx.beginPath();
