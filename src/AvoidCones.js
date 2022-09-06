@@ -82,6 +82,10 @@ export class AvoidCones {
     this.#combinedCones.push( newCombined );
   }
 
+  addCones( cones ) {
+    cones.forEach( cone => this.addCone( cone ) );
+  }
+
   getCones() { 
     return this.#combinedCones;
   }

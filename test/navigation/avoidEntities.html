@@ -82,10 +82,9 @@
     ctx.globalAlpha = 1;
 
     const avoidCones = new AvoidCones();
-    entities.forEach( e => {
-      const cones = AvoidCones.conesBetweenEntities( player, e, 1000 );
-      cones.forEach( cone => avoidCones.addCone( cone ) );
-    } );
+    entities.forEach( e =>
+      avoidCones.addCones( AvoidCones.conesBetweenEntities( player, e, 1000 ) )
+    );
     avoidCones.draw( player.x, player.y, ctx );
   }
 
