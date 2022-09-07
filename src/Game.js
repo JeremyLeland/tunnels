@@ -9,15 +9,19 @@ export class Game {
 
   constructor() {
     const canvas = document.createElement( 'canvas' );
+    document.body.appendChild( canvas );
+    
+    const ctx = canvas.getContext( '2d' );
+
     canvas.oncontextmenu = () => { return false };
     window.onresize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.width = window.innerWidth * devicePixelRatio;
+      canvas.height = window.innerHeight * devicePixelRatio;
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+      ctx.scale( devicePixelRatio, devicePixelRatio );
     }
     window.onresize();
-    
-    document.body.appendChild( canvas );
-    const ctx = canvas.getContext( '2d' );
 
     window.onkeydown = ( e ) => this.keysPressed.add( e.key );
     window.onkeyup   = ( e ) => this.keysPressed.delete( e.key );
