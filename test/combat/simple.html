@@ -53,7 +53,7 @@
     }
 
     update( dt ) {
-      this.avoidList = world.entities.filter( e => !( e instanceof Marine ) );
+      this.avoidList = world.entities.filter( e => e instanceof Alien || e instanceof Wall );
 
       super.update( dt );
     }
@@ -81,11 +81,13 @@
   );
 
   game.update = ( dt ) => {
-    //player.target = { x: game.mouse.x, y: game.mouse.y };
-    player.goalAngle = Math.atan2( game.mouse.y - player.y, game.mouse.x - player.x );
-    player.gun.isShooting = game.mouse.down;
+    if ( !game.keysPressed.has( ' ' ) ) {
+      //player.target = { x: game.mouse.x, y: game.mouse.y };
+      player.goalAngle = Math.atan2( game.mouse.y - player.y, game.mouse.x - player.x );
+      player.gun.isShooting = game.mouse.down;
 
-    world.update( dt );
+      world.update( dt );
+    }
   };
 
   game.draw = ( ctx ) => {

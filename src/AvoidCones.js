@@ -100,7 +100,7 @@ export class AvoidCones {
       ctx.closePath();
       ctx.stroke();
       
-      ctx.globalAlpha = 0.1;
+      ctx.globalAlpha = 0.02;
       combinedCone.cones.forEach( cone => {
         ctx.beginPath();
         ctx.moveTo( x, y );
