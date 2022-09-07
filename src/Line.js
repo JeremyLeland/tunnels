@@ -235,15 +235,13 @@ export class Line {
 
   // Based on: https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
   // See also: http://paulbourke.net/geometry/pointlineplane/
-  getClosestPoint( x, y, radius ) {
+  getClosestPoint( x, y ) {
     const px = this.x2 - this.x1;
     const py = this.y2 - this.y1;
     const u = Math.max( 0, Math.min( 1, 
       ( ( x - this.x1 ) * px + ( y - this.y1 ) * py ) / ( ( px * px ) + ( py * py ) ) 
     ) );
     
-    // TODO: Account for radius (from end points)
-
     return { x: this.x1 + u * px, y: this.y1 + u * py };
   }
 }

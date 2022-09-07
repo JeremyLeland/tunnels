@@ -48,20 +48,21 @@ export class AvoidingActor extends Actor {
             this.goalSpeed = 0;
           }
           else {
-            this.goalSpeed = this.info.maxSpeed;
+            //this.goalSpeed = this.info.maxSpeed;
+            
+            // TODO: Maybe try variable speed based on turning radius again later
+            // TODO: Slow down for turns if turn speed is slower?
+            this.goalSpeed = Math.min( 
+              this.info.maxSpeed, 
+              closest.dist * this.info.turnSpeed / ( Math.PI / 2 ) 
+            );
           }
-
-          // TODO: Maybe try variable speed based on turning radius again later
-          // this.speed = Math.min( 
-          //   this.info.maxSpeed, 
-          //   closest.dist * this.info.turnSpeed / ( Math.PI / 2 ) 
-          // );
 
           const fromLeft = Math.abs( deltaAngle( this.angle, combinedCone.left ) );
           const fromRight = Math.abs( deltaAngle( this.angle, combinedCone.right ) );
 
           // TODO: Better way to avoid rubbing up against walls?
-          const EXTRA = 0.4;
+          const EXTRA = 0;
           this.goalAngle = fromLeft < fromRight ? combinedCone.left - EXTRA : combinedCone.right + EXTRA;
         }
         else {

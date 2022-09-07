@@ -30,24 +30,23 @@ export class AvoidCones {
     return cones;
   }
 
-  static coneFromLine( x, y, line, maxDist ) {
-    const cx1 = line.x1 - x;
-    const cy1 = line.y1 - y;
-    const h1 = Math.hypot( cx1, cy1 );
+  static coneFromLine( x, y, line, maxDist ) {    
+    const closest = line.getClosestPoint( x, y );
+    const dist = Math.hypot( closest.x - x, closest.y - y );
   
-    const cx2 = line.x2 - x;
-    const cy2 = line.y2 - y;
-    const h2 = Math.hypot( cx2, cy2 );
-  
-    if ( h1 < maxDist || h2 < maxDist ) {
+    if ( dist < maxDist ) {
+      const cx1 = line.x1 - x;
+      const cy1 = line.y1 - y;
+    
+      const cx2 = line.x2 - x;
+      const cy2 = line.y2 - y;
+
       const angle1 = Math.atan2( cy1, cx1 );
       const angle2 = Math.atan2( cy2, cx2 );
-  
-      const dist = Math.min( h1, h2 );
       
       return deltaAngle( angle1, angle2 ) > 0 ?
-        { left: angle1, right: angle2, dist: dist, avoids: line } : 
-        { left: angle2, right: angle1, dist: dist, avoids: line };
+        { x: x, y: y, left: angle1, right: angle2, dist: dist, avoids: line } : 
+        { x: x, y: y, left: angle2, right: angle1, dist: dist, avoids: line };
     }
   }
 
@@ -100,11 +99,11 @@ export class AvoidCones {
       ctx.closePath();
       ctx.stroke();
       
-      ctx.globalAlpha = 0.02;
+      ctx.globalAlpha = 0.1;
       combinedCone.cones.forEach( cone => {
         ctx.beginPath();
-        ctx.moveTo( x, y );
-        ctx.arc( x, y, 100, cone.left, cone.right );
+        ctx.moveTo( cone.x, cone.y );
+        ctx.arc( cone.x, cone.y, cone.dist, cone.left, cone.right );
         ctx.closePath();
         ctx.fill();
       } );
