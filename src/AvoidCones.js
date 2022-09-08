@@ -24,6 +24,25 @@ export class AvoidCones {
           cone.avoids = b;
           cones.push( cone );
         }
+
+        // TODO: Eventually, we need to handle case of bLine smaller than aLine:
+        // const cone1 = AvoidCones.coneFromLine( aLine.x1, aLine.y1, bLine, maxDist );
+        // const cone2 = AvoidCones.coneFromLine( aLine.x2, aLine.y2, bLine, maxDist );
+
+        // const left = Math.min( cone1.left, cone2.left );
+        // const right = Math.max( cone1.right, cone2.right );
+        // const dist = Math.min( cone1.dist, cone2.dist );
+
+        // if ( dist < maxDist ) {
+        //   cones.push( {
+        //     x: ( aLine.x1 + aLine.x2 ) / 2,
+        //     y: ( aLine.y1 + aLine.y2 ) / 2,
+        //     left: left,
+        //     right: right,
+        //     dist: dist,
+        //     avoids: b
+        //   } );
+        // }
       } );
     } );
 
@@ -35,11 +54,20 @@ export class AvoidCones {
     const dist = Math.hypot( closest.x - x, closest.y - y );
   
     if ( dist < maxDist ) {
-      const cx1 = line.x1 - x;
-      const cy1 = line.y1 - y;
+      const buffer = 20;  // TODO: Pass this in?
+
+      // TODO: This isn't quite right, we still get too close to the middle of lines
+      //       Need to incorporate the line's normal somehow? Or our angle to them? Dunno...
+      const x1 = line.x1 - buffer * line.slope.x;
+      const y1 = line.y1 - buffer * line.slope.y;
+      const x2 = line.x2 + buffer * line.slope.x;
+      const y2 = line.y2 + buffer * line.slope.y;
+      
+      const cx1 = x1 - x;
+      const cy1 = y1 - y;
     
-      const cx2 = line.x2 - x;
-      const cy2 = line.y2 - y;
+      const cx2 = x2 - x;
+      const cy2 = y2 - y;
 
       const angle1 = Math.atan2( cy1, cx1 );
       const angle2 = Math.atan2( cy2, cx2 );
