@@ -33,20 +33,21 @@ export class Entity {
       if ( e != this ) {
         this.life -= e.info.damage;
 
-        if ( this.info.hitParticle ) {
-          const partInfo = this.info.hitParticle;
+        if ( this.info.hit ) {
+          const hitInfo = this.info.hit;
 
-          for ( let i = 0; i < partInfo.count; i ++ ) {
+          for ( let i = 0; i < hitInfo.count; i ++ ) {
             const values = { ...hit.position };
             
             // TODO: Use bounce angle?
             values.angle = e.angle + Math.PI;
-            values.angle += partInfo.spread * ( -0.5 + Math.random() );
+            values.angle += hitInfo.spread * ( -0.5 + Math.random() );
             
-            values.dx = this.dx + Math.cos( values.angle ) * partInfo.maxSpeed;
-            values.dy = this.dy + Math.sin( values.angle ) * partInfo.maxSpeed;
+            const speed = ( 0.5 + 0.5 * Math.random() ) * hitInfo.maxSpeed;
+            values.dx = this.dx + Math.cos( values.angle ) * speed;
+            values.dy = this.dy + Math.sin( values.angle ) * speed;
             
-            this.createdEntities.push( new Entity( values, partInfo ) );
+            this.createdEntities.push( new Entity( values, hitInfo.particle ) );
           }
         }
 
@@ -93,23 +94,26 @@ export class Entity {
   getHit( other ) {
     let closestHit = { time: Infinity };
 
-    this.boundingLines.forEach( thisLine => {
-      other.boundingLines.forEach( otherLine => {
-        let hit = thisLine.getHit( { x: otherLine.x1, y: otherLine.y1, dx: other.dx, dy: other.dy } );
+    if ( this.info.hit?.types?.includes( other.info.type ) || 
+         other.info.hit?.types?.includes( this.info.type ) ) {
+      this.boundingLines.forEach( thisLine => {
+        other.boundingLines.forEach( otherLine => {
+          let hit = thisLine.getHit( { x: otherLine.x1, y: otherLine.y1, dx: other.dx, dy: other.dy } );
 
-        if ( 0 < hit.time && hit.time < closestHit.time ) {
-          closestHit = hit;
-        }
+          if ( 0 < hit.time && hit.time < closestHit.time ) {
+            closestHit = hit;
+          }
 
-        hit = otherLine.getHit( { x: thisLine.x1, y: thisLine.y1, dx: this.dx, dy: this.dy } );
+          hit = otherLine.getHit( { x: thisLine.x1, y: thisLine.y1, dx: this.dx, dy: this.dy } );
 
-        if ( 0 < hit.time && hit.time < closestHit.time ) {
-          closestHit = hit;
-        }
+          if ( 0 < hit.time && hit.time < closestHit.time ) {
+            closestHit = hit;
+          }
+        } );
       } );
-    } );
 
-    closestHit.entities = [ this, other ];
+      closestHit.entities = [ this, other ];
+    }
 
     return closestHit;
   }

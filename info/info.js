@@ -19,6 +19,7 @@ export const GunInfo = {
 
 export const BulletInfo = {
   rifle: {
+    type: 'attack',
     life: 1,
     damage: 10,
     speed: 0.9,
@@ -32,6 +33,7 @@ export const BulletInfo = {
     trailLength: 40,
   },
   shotgun: {
+    type: 'attack',
     life: 1,
     damage: 10,
     speed: 1.2,
@@ -48,19 +50,23 @@ export const BulletInfo = {
 
 export const WallInfo = {
   rock: {
+    type: 'wall',
     size: 1,
     life: Infinity,
     damage: 1,
-    hitParticle: {
+    hit: {
+      types: [ 'attack' ],
       count: 5,
       spread: 1,
-      lifeSpan: 500,
-      size: 4,
-      maxSpeed: 0.1,
-      drawPaths: [ {
-        fillStyle: 'saddlebrown',
-        path: new Path2D( 'M 0 -0.5 A 0.5 0.5 0 0 1 0 0.5 A 0.5 0.5 0 0 1 0 -0.5' ),
-      } ],
+      maxSpeed: 0.2,
+      particle: {
+        lifeSpan: 500,
+        size: 4,
+        drawPaths: [ {
+          fillStyle: 'saddlebrown',
+          path: new Path2D( 'M 0 -0.5 A 0.5 0.5 0 0 1 0 0.5 A 0.5 0.5 0 0 1 0 -0.5' ),
+        } ],
+      }
     },
     fillStyle: 'saddlebrown',
   }
@@ -70,6 +76,7 @@ const GUN_W = 0.15, GUN_LEN = 1.7;
 
 export const ActorInfo = {
   marine: {
+    type: 'actor',
     life: 100,
     damage: 1,
     maxSpeed: 0.1,
@@ -85,11 +92,17 @@ export const ActorInfo = {
       gunInfoKey: 'rifle',
       offset: { front: 2, side: 0, angle: 0 }
     },
-    hitParticle: {
-      size: 4,
+    hit: {
+      types: [ 'attack' ],
+      count: 10,
+      spread: 1,
       maxSpeed: 0.1,
-      fillStyle: 'red',
-      path: new Path2D( 'M 0 -0.5 A 0.5 0.5 0 0 1 0 0.5 A 0.5 0.5 0 0 1 0 -0.5' ),
+      particle: {
+        type: 'particle',
+        size: 4,
+        fillStyle: 'red',
+        path: new Path2D( 'M 0 -0.5 A 0.5 0.5 0 0 1 0 0.5 A 0.5 0.5 0 0 1 0 -0.5' ),
+      },
     },
     drawPaths: [ {
       fillStyle: 'gray',
@@ -109,9 +122,10 @@ export const ActorInfo = {
     } ],
   },
   alien: {
+    type: 'actor',
     life: 50,
     damage: 1,
-    maxSpeed: 0.1,
+    maxSpeed: 0.05,
     turnSpeed: 0.008,
     accelSpeed: 0.0005,
     size: 10,
@@ -120,16 +134,20 @@ export const ActorInfo = {
       [  1, -1 ],
       [  1,  1 ],
     ],
-    hitParticle: {
+    hit: {
+      types: [ 'attack' ],
       count: 10,
-      spread: 1,
-      lifeSpan: 1000,
-      size: 2,
-      maxSpeed: 0.1,
-      drawPaths: [ {
-        fillStyle: 'cyan',
-        path: new Path2D( 'M 0 -0.5 A 0.5 0.5 0 0 1 0 0.5 A 0.5 0.5 0 0 1 0 -0.5' ),
-      } ],
+      spread: 2,
+      maxSpeed: 0.05,
+      particle: {
+        type: 'particle',
+        lifeSpan: 500,
+        size: 3,
+        drawPaths: [ {
+          fillStyle: 'cyan',
+          path: new Path2D( 'M 0 -0.5 A 0.5 0.5 0 0 1 0 0.5 A 0.5 0.5 0 0 1 0 -0.5' ),
+        } ],
+      },
     },
     drawPaths: [ {
       fillStyle: 'green',
