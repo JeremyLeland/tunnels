@@ -5,8 +5,31 @@ export class Wall extends Entity {
   constructor( points ) {
     super( {}, Object.assign( { boundingPoints: points }, WallInfo.rock ) );
 
+    let hullPointIndex = 0;
+
     this.path = new Path2D();
-    points.forEach( p => this.path.lineTo( p[ 0 ], p[ 1 ] ) );
+    points.forEach( ( point, index ) => {
+      this.path.lineTo( point[ 0 ], point[ 1 ] );
+
+      // Left-most, top-most point should be on convex hull
+      const hullPoint = points[ hullPointIndex ];
+      if ( point[ 0 ] < hullPoint[ 0 ] ||
+           ( point[ 0 ] == hullPoint[ 0 ] && point[ 1 ] < hullPoint[ 1 ] ) ) {
+        hullPointIndex = index;
+      }
+    } );
+
+    const a = points.at( hullPointIndex - 1 );
+    const b = points.at( hullPointIndex     );
+    const c = points.at( hullPointIndex + 1 );
+
+    // https://en.wikipedia.org/wiki/Curve_orientation
+    const det = ( b[ 0 ] * c[ 1 ] + a[ 0 ] * b[ 1 ] + a[ 1 ] * c[ 0 ] ) - 
+                ( a[ 1 ] * b[ 0 ] + b[ 1 ] * c[ 0 ] + a[ 0 ] * c[ 1 ] );
+    
+    if ( det < 0 ) {
+      this.path.rect( 0, 0, 1000, 1000 );   // TODO: Don't hard-code this
+    }
   }
 
   update( dt ) {

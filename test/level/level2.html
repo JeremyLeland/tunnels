@@ -1,0 +1,23 @@
+<title>Level tests</title>
+<link rel="stylesheet" href="../../style.css">
+
+<body>
+  <canvas id="canvas" width="800px" height="800px"></canvas>
+</body>
+
+<script type="module">
+  import { Wall } from '../../src/Wall.js';
+
+  const json = JSON.parse( await ( await fetch( '../../levels/test4.json' ) ).text() );
+
+  const walls = [];
+
+  json.walls.forEach( points => {
+    walls.push( new Wall( points ) );
+  } );
+
+  const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
+
+  walls.forEach( wall => wall.draw( ctx ) );
+
+</script>

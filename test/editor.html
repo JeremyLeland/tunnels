@@ -84,31 +84,42 @@
     const lines = [];
 
     cellMap.getEdgeLoops().forEach( loop => {
-      const offset = -10, subLength = 10;
-      const sublines = [];
-      Line.getOffsetLoop( loop, offset ).forEach( 
-        edge => sublines.push( ...edge.getSublines( subLength ) ) 
-      );
+      //const offset = -10, subLength = 10;
+      // const sublines = [];
+
+
+      // Simpler edges for now
+      // Line.getOffsetLoop( loop, offset ).forEach( 
+      //   edge => sublines.push( ...edge.getSublines( subLength ) ) 
+      // );
 
       // TODO: Try to do this in a way that avoids overlaps?
-      const perterb = 10;
-      const perterbed = sublines.map( line => [ 
-        line.x1 + perterb * ( Math.random() - 0.5 ), 
-        line.y1 + perterb * ( Math.random() - 0.5 ), 
-      ] );
-      lines.push( ...Line.getLoopThroughPoints( perterbed ) );
+      // const perterb = 10;
+      // const perterbed = sublines.map( line => [ 
+      //   line.x1 + perterb * ( Math.random() - 0.5 ), 
+      //   line.y1 + perterb * ( Math.random() - 0.5 ), 
+      // ] );
+      // lines.push( ...Line.getLoopThroughPoints( perterbed ) );
+
+      lines.push( ...loop );
     } );
 
     return lines;
   }
 
   function outputLevel() {
-    const level = new Level();
+    // const level = new Level();
 
-    level.lines = lines;
-    level.cellMap = cellMap;
+    // level.lines = lines;
+    // level.cellMap = cellMap;
 
-    console.log( level.toJson() );
+    // console.log( level.toJson() );
+
+    const json = {};
+
+    json.walls = cellMap.getEdgeLoops().map( loop => loop.map( line => [ line.x1, line.y1 ] ) );
+
+    console.log( JSON.stringify( json ) );
   }
 
   function fixAngle( a ) {

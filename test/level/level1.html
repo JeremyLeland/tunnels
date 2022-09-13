@@ -1,0 +1,23 @@
+<title>Level tests</title>
+<link rel="stylesheet" href="../../style.css">
+
+<body>
+  <canvas id="canvas" width="800px" height="800px"></canvas>
+</body>
+
+<script type="module">
+  import { Level } from '../../src/Level.js';
+
+  const jsonStr = await ( await fetch( '../../levels/test1.json' ) ).text();
+
+  const level = Level.fromJson( jsonStr );
+
+  const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
+
+  level.draw( ctx );
+
+  console.log( level.closestNodeTo( 400, 200 ) );
+
+  console.log( level.toJson() );
+
+</script>
