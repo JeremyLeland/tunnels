@@ -6,45 +6,55 @@
 <script type="module">
 
   import { Game } from '../../src/Game.js';
-  import { Level } from '../../src/Level.js';
+  import { World } from '../../src/World.js';
+  import { Wall } from '../../src/Wall.js';
   import { AvoidingActor } from '../../src/AvoidingActor.js';
 
   import { ActorInfo } from '../../info/info.js';
   
-  const level = Level.fromJson(
-    await ( await fetch( '../../levels/test3.json' ) ).text()
+  const json = JSON.parse( 
+    await ( await fetch( '../../levels/test4.json' ) ).text() 
   );
 
-  
-  const players = Array.from( Array( 5 ), _ => {
-    const index = Math.floor( Math.random() * level.cellMap.cells.length );
-    const cell = level.cellMap.cells[ index ];
-    return new AvoidingActor( { x: cell.x, y: cell.y }, ActorInfo.alien );
+  const world = new World();
+  json.walls.forEach( points => {
+    world.entities.push( new Wall( points ) );
   } );
 
-  const avoidList = level.lines.concat( players );
-  players.forEach( player => player.avoidList = avoidList );
+  const aliens = [];
+
+  for ( let i = 0; i < 3; i ++ ) {
+    aliens.push( new AvoidingActor( { x: 150 + i * 50, y: 150 }, ActorInfo.alien ) );
+  }
+
+  aliens.forEach( alien => alien.avoidList = world.entities );
+
+  world.entities.push( ...aliens );
 
   const game = new Game();
-
   game.update = ( dt ) => {
-    players.forEach( player => player.update( dt ) );
+    if ( !game.keysPressed.has( ' ' ) ) {
+      world.entities.filter( e => e instanceof AvoidingActor ).forEach( e =>
+        e.target = { x: game.mouse.x, y: game.mouse.y }
+      );
+
+      world.update( dt );
+    }
   };
 
   game.draw = ( ctx ) => {
-    level.draw( ctx );
-    players.forEach( player => player.draw( ctx ) );
+    world.draw( ctx );
   };
 
-  document.addEventListener( 'mousedown', e => {
-    const x = e.clientX - game.scroll.x;
-    const y = e.clientY - game.scroll.y;
-    const cell = level.cellMap.closestCellTo( x, y );
-    if ( cell ) {
-      players.forEach( player => 
-        player.target = { x: x, y: y, cell: cell } 
-      );
-    }
-  } );
+  // document.addEventListener( 'mousedown', e => {
+  //   const x = e.clientX - game.scroll.x;
+  //   const y = e.clientY - game.scroll.y;
+  //   const cell = level.cellMap.closestCellTo( x, y );
+  //   if ( cell ) {
+  //     players.forEach( player => 
+  //       player.target = { x: x, y: y, cell: cell } 
+  //     );
+  //   }
+  // } );
 
 </script>

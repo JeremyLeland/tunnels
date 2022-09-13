@@ -54,7 +54,7 @@ export class AvoidCones {
     const dist = Math.hypot( closest.x - x, closest.y - y );
   
     if ( dist < maxDist ) {
-      const buffer = 20;  // TODO: Pass this in?
+      const buffer = 10;  // TODO: Pass this in?
 
       // TODO: This isn't quite right, we still get too close to the middle of lines
       //       Need to incorporate the line's normal somehow? Or our angle to them? Dunno...

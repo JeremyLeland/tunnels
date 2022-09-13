@@ -60,10 +60,7 @@ export class AvoidingActor extends Actor {
 
           const fromLeft = Math.abs( deltaAngle( this.angle, combinedCone.left ) );
           const fromRight = Math.abs( deltaAngle( this.angle, combinedCone.right ) );
-
-          // TODO: Better way to avoid rubbing up against walls?
-          const EXTRA = 0;
-          this.goalAngle = fromLeft < fromRight ? combinedCone.left - EXTRA : combinedCone.right + EXTRA;
+          this.goalAngle = fromLeft < fromRight ? combinedCone.left : combinedCone.right;
         }
         else {
           this.goalSpeed = this.info.maxSpeed;
