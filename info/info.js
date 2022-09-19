@@ -124,10 +124,10 @@ export const ActorInfo = {
       [  2.0,  0 ],
       [ -0.5,  1 ],
     ],
-    gun: {
+    guns: [ {
       gunInfoKey: 'rifle',
       offset: { front: 2, side: 0, angle: 0 }
-    },
+    } ],
     hit: {
       types: [ 'attack' ],
       count: 10,
@@ -165,10 +165,10 @@ export const ActorInfo = {
       [  1, -1 ],
       [  1,  1 ],
     ],
-    gun: {
+    guns: [ {
       gunInfoKey: 'bite',
       offset: { front: 1, side: 0, angle: 0 }
-    },
+    } ],
     hit: {
       types: [ 'attack' ],
       count: 10,

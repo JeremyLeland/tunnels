@@ -1,4 +1,5 @@
 import { Entity } from './Entity.js';
+import { Gun } from './Gun.js';
 
 export class Actor extends Entity {
   speed = 0;
@@ -6,8 +7,15 @@ export class Actor extends Entity {
   goalSpeed = 0;
   goalAngle = 0;
 
+  isShooting = false;
+  guns = [];
+
   constructor( values, actorInfo ) {
     super( values, actorInfo );
+
+    actorInfo.guns?.forEach( gunValues => 
+      this.guns.push( new Gun( gunValues, this ) ) 
+    );
   }
   
   update( dt ) {
@@ -29,6 +37,8 @@ export class Actor extends Entity {
     this.dy = this.speed * Math.sin( this.angle );
 
     super.update( dt );
+
+    this.guns.forEach( gun => gun.update( dt ) );
   }
 }
 

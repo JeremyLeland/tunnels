@@ -5,32 +5,22 @@
   import { Game } from '../../src/Game.js';
   import { Actor } from '../../src/Actor.js';
   import { AvoidingActor } from '../../src/AvoidingActor.js';
-  import { Gun } from '../../src/Gun.js';
-  import { Bullet } from '../../src/Bullet.js';
   import { World } from '../../src/World.js';
-  import { Line } from '../../src/Line.js';
   import { Wall } from '../../src/Wall.js';
 
   import { ActorInfo } from '../../info/info.js';
   
 
   class Marine extends Actor {
-    gun = new Gun( ActorInfo.marine.gun, this );
-
     constructor( values ) {
       super( values, ActorInfo.marine );
-    }
-
-    update( dt ) {
-      this.gun.update( dt );
-      super.update( dt );
     }
 
     draw( ctx ) {
       super.draw( ctx );
 
       this.#drawBar( ctx, 'red', 1, -14, -34, 28 );
-      this.#drawBar( ctx, 'yellow', this.gun.getUIPercentage(), -14, -28, 28 );
+      this.#drawBar( ctx, 'yellow', this.guns[ 0 ].getUIPercentage(), -14, -28, 28 );
     }
 
     #drawBar( ctx, color, val, offsetX, offsetY, width ) {
@@ -47,18 +37,15 @@
   }
 
   class Alien extends AvoidingActor {
-    gun = new Gun( ActorInfo.alien.gun, this );
-    
     constructor( values ) {
       super( values, ActorInfo.alien );
 
-      this.gun.isShooting = true;
+      this.isShooting = true;
     }
 
     update( dt ) {
       this.avoidList = world.entities.filter( e => e instanceof Alien || e instanceof Wall );
 
-      this.gun.update( dt );
       super.update( dt );
     }
   }
@@ -69,7 +56,7 @@
   const player = new Marine( { x: 300, y: 300 } );
   world.entities.push( player );
 
-  for ( let i = 0; i < 5; i ++ ) {
+  for ( let i = 0; i < 1; i ++ ) {
     const alien = new Alien( { x: 50 + i * 50, y: 50 } );
     alien.target = player;
     world.entities.push( alien );
@@ -88,7 +75,7 @@
     if ( !game.keysPressed.has( ' ' ) ) {
       //player.target = { x: game.mouse.x, y: game.mouse.y };
       player.goalAngle = Math.atan2( game.mouse.y - player.y, game.mouse.x - player.x );
-      player.gun.isShooting = game.mouse.down;
+      player.isShooting = game.mouse.down;
 
       world.update( dt );
     }

@@ -64,15 +64,16 @@ export class AvoidingActor extends Actor {
         }
         else {
           this.goalSpeed = this.info.maxSpeed;
-        }
-            
-        super.update( dt );
+        }     
       }
       else {
         // close enough
         this.target = null;
+        this.goalSpeed = 0;
       }
     }
+
+    super.update( dt );
   }
 
   draw( ctx ) {
