@@ -7,20 +7,28 @@
   import { AvoidingActor } from '../../src/AvoidingActor.js';
 
   let entities = [
+    // new Entity( {}, {
+    //   size: 1,
+    //   boundingPoints: [ [ 300, 100 ], [ 300, 200 ], [ 400, 200 ], [ 400, 100 ] ],
+    // } ),
+    // new Entity( {}, {
+    //   size: 1,
+    //   boundingPoints: [ [ 300, 300 ], [ 300, 400 ], [ 400, 400 ], [ 400, 300 ] ],
+    // } ),
     new Entity( {}, {
       size: 1,
-      boundingPoints: [ [ 300, 100 ], [ 300, 300 ], [ 400, 300 ], [ 400, 100 ] ],
-    } ),
+      boundingPoints: [ [ 400, 225 ], [ 400, 275 ], [ 450, 275 ], [ 450, 225 ] ],
+    } )
   ];
-  let player = new AvoidingActor( { x: 200, y: 200 }, { 
+  let player = new AvoidingActor( { x: 200, y: 250 }, { 
     maxSpeed: 0.1,
     turnSpeed: 0.005,
     accelSpeed: 0.0005,
-    size: 20,
+    size: 50,
     boundingPoints: [ [ -1, 0 ], [ 1, 1 ], [ 1, -1 ] ],
   } );
 
-  player.target = { x: 500, y: 200 };
+  player.target = { x: 500, y: 250 };
   player.avoidList = entities;
 
   const game = new Game();

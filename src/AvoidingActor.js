@@ -48,14 +48,14 @@ export class AvoidingActor extends Actor {
             this.goalSpeed = 0;
           }
           else {
-            //this.goalSpeed = this.info.maxSpeed;
+            this.goalSpeed = this.info.maxSpeed;
             
             // TODO: Maybe try variable speed based on turning radius again later
             // TODO: Slow down for turns if turn speed is slower?
-            this.goalSpeed = Math.min( 
-              this.info.maxSpeed, 
-              closest.dist * this.info.turnSpeed / ( Math.PI / 2 ) 
-            );
+            // this.goalSpeed = Math.min( 
+            //   this.info.maxSpeed, 
+            //   closest.dist * this.info.turnSpeed / ( Math.PI / 2 ) 
+            // );
           }
 
           const fromLeft = Math.abs( deltaAngle( this.angle, combinedCone.left ) );

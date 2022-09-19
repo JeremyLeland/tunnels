@@ -69,19 +69,19 @@
     entities.forEach( e => e.draw( ctx ) );
     player.draw( ctx );
 
-    ctx.beginPath();
-    entities.forEach( e => {
-      player.boundingLines.forEach( pLine => {
-        e.boundingLines.forEach( eLine => {
-          ctx.moveTo( pLine.x1, pLine.y1 );
-          ctx.lineTo( eLine.x1, eLine.y1 );
-        } );
-      } );
-    } );
-    ctx.strokeStyle = 'yellow';
-    ctx.globalAlpha = 0.1;
-    ctx.stroke();
-    ctx.globalAlpha = 1;
+    // ctx.beginPath();
+    // entities.forEach( e => {
+    //   player.boundingLines.forEach( pLine => {
+    //     e.boundingLines.forEach( eLine => {
+    //       ctx.moveTo( pLine.x1, pLine.y1 );
+    //       ctx.lineTo( eLine.x1, eLine.y1 );
+    //     } );
+    //   } );
+    // } );
+    // ctx.strokeStyle = 'yellow';
+    // ctx.globalAlpha = 0.1;
+    // ctx.stroke();
+    // ctx.globalAlpha = 1;
 
     const avoidCones = new AvoidCones();
     entities.forEach( e =>
