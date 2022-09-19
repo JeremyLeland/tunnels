@@ -47,14 +47,18 @@
   }
 
   class Alien extends AvoidingActor {
+    gun = new Gun( ActorInfo.alien.gun, this );
     
     constructor( values ) {
       super( values, ActorInfo.alien );
+
+      this.gun.isShooting = true;
     }
 
     update( dt ) {
       this.avoidList = world.entities.filter( e => e instanceof Alien || e instanceof Wall );
 
+      this.gun.update( dt );
       super.update( dt );
     }
   }

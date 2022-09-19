@@ -1,4 +1,12 @@
 export const GunInfo = {
+  bite: {
+    maxAmmo: 3,
+    timeBetweenShots: 1000,
+    bulletsPerShot: 1,
+    spread: 0,
+    reloadTime: 2000,
+    bulletInfoKey: 'bite',
+  },
   rifle: {
     maxAmmo: 30,
     timeBetweenShots: 100,
@@ -18,6 +26,19 @@ export const GunInfo = {
 }
 
 export const BulletInfo = {
+  bite: {
+    type: 'attack',
+    life: 1,
+    damage: 10,
+    speed: 0,
+    lifeSpan: 100,
+    size: 10,
+    boundingPoints: [
+      [ -1,  0 ],
+      [  1, -1 ],
+      [  1,  1 ],
+    ],
+  },
   rifle: {
     type: 'attack',
     life: 1,
@@ -48,6 +69,8 @@ export const BulletInfo = {
   }
 }
 
+const CirclePath = new Path2D( 'M 0 -0.5 A 0.5 0.5 0 0 1 0 0.5 A 0.5 0.5 0 0 1 0 -0.5' );
+
 export const WallInfo = {
   rock: {
     type: 'wall',
@@ -64,7 +87,7 @@ export const WallInfo = {
         size: 4,
         drawPaths: [ {
           fillStyle: 'saddlebrown',
-          path: new Path2D( 'M 0 -0.5 A 0.5 0.5 0 0 1 0 0.5 A 0.5 0.5 0 0 1 0 -0.5' ),
+          path: CirclePath,
         } ],
       }
     },
@@ -73,6 +96,19 @@ export const WallInfo = {
 }
 
 const GUN_W = 0.15, GUN_LEN = 1.7;
+
+
+function getBloodParticle( color ) {
+  return {
+    type: 'particle',
+    lifeSpan: 500,
+    size: 3,
+    drawPaths: [ {
+      fillStyle: color,
+      path: CirclePath,
+    } ],
+  }
+}
 
 export const ActorInfo = {
   marine: {
@@ -95,14 +131,9 @@ export const ActorInfo = {
     hit: {
       types: [ 'attack' ],
       count: 10,
-      spread: 1,
-      maxSpeed: 0.1,
-      particle: {
-        type: 'particle',
-        size: 4,
-        fillStyle: 'red',
-        path: new Path2D( 'M 0 -0.5 A 0.5 0.5 0 0 1 0 0.5 A 0.5 0.5 0 0 1 0 -0.5' ),
-      },
+      spread: 2,
+      maxSpeed: 0.05,
+      particle: getBloodParticle( 'red' ),
     },
     drawPaths: [ {
       fillStyle: 'gray',
@@ -125,7 +156,7 @@ export const ActorInfo = {
     type: 'actor',
     life: 50,
     damage: 1,
-    maxSpeed: 0.05,
+    maxSpeed: 0.06,
     turnSpeed: 0.008,
     accelSpeed: 0.0005,
     size: 10,
@@ -134,20 +165,16 @@ export const ActorInfo = {
       [  1, -1 ],
       [  1,  1 ],
     ],
+    gun: {
+      gunInfoKey: 'bite',
+      offset: { front: 1, side: 0, angle: 0 }
+    },
     hit: {
       types: [ 'attack' ],
       count: 10,
       spread: 2,
       maxSpeed: 0.05,
-      particle: {
-        type: 'particle',
-        lifeSpan: 500,
-        size: 3,
-        drawPaths: [ {
-          fillStyle: 'cyan',
-          path: new Path2D( 'M 0 -0.5 A 0.5 0.5 0 0 1 0 0.5 A 0.5 0.5 0 0 1 0 -0.5' ),
-        } ],
-      },
+      particle: getBloodParticle( 'cyan' ),
     },
     drawPaths: [ {
       fillStyle: 'green',
