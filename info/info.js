@@ -6,6 +6,7 @@ export const GunInfo = {
     spread: 0,
     reloadTime: 2000,
     bulletInfoKey: 'bite',
+    range: 10,
   },
   rifle: {
     maxAmmo: 30,
@@ -14,6 +15,7 @@ export const GunInfo = {
     spread: 0.1,
     reloadTime: 1000,
     bulletInfoKey: 'rifle',
+    range: 300,
   },
   shotgun: {
     maxAmmo: 8,
@@ -22,6 +24,7 @@ export const GunInfo = {
     spread: 0.2,
     reloadTime: 1500,
     bulletInfoKey: 'shotgun',
+    range: 200,
   }
 }
 
@@ -115,7 +118,7 @@ export const ActorInfo = {
     type: 'actor',
     life: 100,
     damage: 1,
-    maxSpeed: 0.1,
+    maxSpeed: 0.05,
     turnSpeed: 0.008,
     accelSpeed: 0.0005,
     size: 14,
@@ -124,6 +127,7 @@ export const ActorInfo = {
       [  2.0,  0 ],
       [ -0.5,  1 ],
     ],
+    avoids: [ 'actor', 'wall' ],
     guns: [ {
       gunInfoKey: 'rifle',
       offset: { front: 2.6, side: 0, angle: 0 }
@@ -154,7 +158,7 @@ export const ActorInfo = {
   },
   alien: {
     type: 'actor',
-    life: 50,
+    life: 100,
     damage: 1,
     maxSpeed: 0.06,
     turnSpeed: 0.008,
@@ -165,6 +169,7 @@ export const ActorInfo = {
       [  1, -1 ],
       [  1,  1 ],
     ],
+    avoids: [ 'actor', 'wall' ],
     guns: [ {
       gunInfoKey: 'bite',
       offset: { front: 2.6, side: 0, angle: 0 }

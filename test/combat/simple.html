@@ -11,7 +11,7 @@
   import { ActorInfo } from '../../info/info.js';
   
 
-  class Marine extends Actor {
+  class Marine extends AvoidingActor {
     constructor( values ) {
       super( values, ActorInfo.marine );
     }
@@ -19,7 +19,7 @@
     draw( ctx ) {
       super.draw( ctx );
 
-      this.#drawBar( ctx, 'red', 1, -14, -34, 28 );
+      this.#drawBar( ctx, 'red', this.life / this.info.life, -14, -34, 28 );
       this.#drawBar( ctx, 'yellow', this.guns[ 0 ].getUIPercentage(), -14, -28, 28 );
     }
 
@@ -39,26 +39,19 @@
   class Alien extends AvoidingActor {
     constructor( values ) {
       super( values, ActorInfo.alien );
-
-      this.isShooting = true;
-    }
-
-    update( dt ) {
-      this.avoidList = world.entities.filter( e => e instanceof Alien || e instanceof Wall );
-
-      super.update( dt );
     }
   }
 
   const game = new Game();
   const world = new World();
 
-  const player = new Marine( { x: 300, y: 300 } );
+  const player = new Marine( { x: 600, y: 300 } );
   world.entities.push( player );
 
-  for ( let i = 0; i < 1; i ++ ) {
+  for ( let i = 0; i < 5; i ++ ) {
     const alien = new Alien( { x: 50 + i * 50, y: 50 } );
     alien.target = player;
+    // player.target = alien;
     world.entities.push( alien );
   }
 

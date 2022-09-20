@@ -8,16 +8,16 @@ export class Gun {
   timeUntilReady = 0;
   isReloading = false;
 
-  #info;
+  info;
   #owner;
 
   constructor( values, owner ) {
     Object.assign( this, values );
 
-    this.#info = GunInfo[ this.gunInfoKey ];
+    this.info = GunInfo[ this.gunInfoKey ];
     this.#owner = owner;
 
-    this.ammo = this.#info.maxAmmo;
+    this.ammo = this.info.maxAmmo;
   }
 
   update( dt ) {
@@ -27,12 +27,12 @@ export class Gun {
       this.isReloading = false;
 
       if ( this.#owner.isShooting && this.ammo > 0 ) {
-        for ( let i = 0; i < this.#info.bulletsPerShot; i ++ ) {
+        for ( let i = 0; i < this.info.bulletsPerShot; i ++ ) {
           const values = this.#owner.getOffset( this.offset );
 
-          values.angle += this.#info.spread * ( -0.5 + Math.random() );
+          values.angle += this.info.spread * ( -0.5 + Math.random() );
           
-          values.bulletInfoKey = this.#info.bulletInfoKey;
+          values.bulletInfoKey = this.info.bulletInfoKey;
           values.dx = this.#owner.dx;
           values.dy = this.#owner.dy;
           
@@ -43,11 +43,11 @@ export class Gun {
 
         if ( this.ammo == 0 ) {
           this.isReloading = true;
-          this.ammo = this.#info.maxAmmo;
-          this.timeUntilReady = this.#info.reloadTime;
+          this.ammo = this.info.maxAmmo;
+          this.timeUntilReady = this.info.reloadTime;
         }
         else {
-          this.timeUntilReady = this.#info.timeBetweenShots;
+          this.timeUntilReady = this.info.timeBetweenShots;
         }
       }
     }
@@ -55,7 +55,7 @@ export class Gun {
 
   getUIPercentage() {
     return this.isReloading ? 
-      1 - this.timeUntilReady / this.#info.reloadTime : 
-      this.ammo / this.#info.maxAmmo;
+      1 - this.timeUntilReady / this.info.reloadTime : 
+      this.ammo / this.info.maxAmmo;
   }
 }

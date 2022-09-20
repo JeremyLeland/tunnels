@@ -1,5 +1,4 @@
 import { Actor } from '../src/Actor.js';
-import { Entity } from './Entity.js';
 import { AvoidCones } from './AvoidCones.js';
 
 const AVOID_DIST = 100, CLOSE_ENOUGH = 50;
@@ -11,6 +10,10 @@ export class AvoidingActor extends Actor {
   #avoidCones;
 
   update( dt ) {
+    if ( this.target instanceof Actor && !this.target.isAlive ) {
+      this.target = null;
+    }
+
     if ( this.target ) {
       const cx = this.target.x - this.x;
       const cy = this.target.y - this.y;
@@ -18,9 +21,11 @@ export class AvoidingActor extends Actor {
 
       // TODO: How to account for target size? Should we be using a line from bounding box instead?
       //       Maybe getClosestPoint from the various bounding box lines?
-      const goalDist = this.info.size + ( this.target.info?.size ?? 0 );
+      const goalDist = this.info.size + ( this.target.info?.size ?? 0 ) + this.guns[ 0 ].info.range;
 
-      if ( targetDist /*- this.speed * dt*/ > goalDist ) {
+      if ( targetDist > goalDist ) {
+        this.isShooting = false;
+
         const maxDist = Math.min( targetDist + this.info.size, AVOID_DIST );
         
         this.#avoidCones = new AvoidCones();
@@ -68,9 +73,15 @@ export class AvoidingActor extends Actor {
       }
       else {
         // close enough
-        this.target = null;
+        // this.target = null;
         this.goalSpeed = 0;
+
+        // TODO: Avoid friendly fire!
+        this.isShooting = true;
       }
+    }
+    else {
+      this.isShooting = false;
     }
 
     super.update( dt );

@@ -16,7 +16,13 @@ export class World {
       }
       
       let updateTime = Math.min( closestHit.time, dt );
-      this.entities.forEach( e => e.update( updateTime ) );
+      this.entities.forEach( e => {
+        if ( e.info.avoids ) {
+          e.avoidList = this.entities.filter( other => e.info.avoids.includes( other.info.type ) );
+        }
+        
+        e.update( updateTime ); 
+      } );
       
       if ( closestHit.time < dt ) {
         closestHit.entities.forEach( e => e.hitWith( closestHit ) );  
