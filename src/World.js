@@ -9,7 +9,7 @@ export class World {
         for ( let j = i + 1; j < this.entities.length; j ++ ) {
           const hit = this.entities[ i ].getHit( this.entities[ j ] );
           
-          if ( 0 < hit.time && hit.time < closestHit.time ) {
+          if ( 0 <= hit.time && hit.time < closestHit.time ) {
             closestHit = hit;
           }
         }

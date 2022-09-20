@@ -96,17 +96,33 @@ export class Entity {
 
     if ( this.info.hit?.types?.includes( other.info.type ) || 
          other.info.hit?.types?.includes( this.info.type ) ) {
+      
+      const dx = this.dx - other.dx;
+      const dy = this.dy - other.dy;
+
       this.boundingLines.forEach( thisLine => {
         other.boundingLines.forEach( otherLine => {
-          let hit = thisLine.getHit( { x: otherLine.x1, y: otherLine.y1, dx: other.dx, dy: other.dy } );
 
-          if ( 0 < hit.time && hit.time < closestHit.time ) {
+          // TODO: Move all this into some grand Line vs Line collision function?
+          let lineHit = thisLine.getLineHit( otherLine );
+          if ( 0 <= lineHit.uA && lineHit.uA <= 1 &&
+               0 <= lineHit.uB && lineHit.uB <= 1 ) {
+            closestHit = {
+              time: 0,
+              position: lineHit.position,
+              entities: [ this, other ],
+            };
+          }
+          
+          let hit = thisLine.getHit( { x: otherLine.x1, y: otherLine.y1, dx: -dx, dy: -dy } );
+
+          if ( 0 <= hit.time && hit.time < closestHit.time ) {
             closestHit = hit;
           }
 
-          hit = otherLine.getHit( { x: thisLine.x1, y: thisLine.y1, dx: this.dx, dy: this.dy } );
+          hit = otherLine.getHit( { x: thisLine.x1, y: thisLine.y1, dx: dx, dy: dy } );
 
-          if ( 0 < hit.time && hit.time < closestHit.time ) {
+          if ( 0 <= hit.time && hit.time < closestHit.time ) {
             closestHit = hit;
           }
         } );

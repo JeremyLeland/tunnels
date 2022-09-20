@@ -31,12 +31,12 @@ export const BulletInfo = {
     life: 1,
     damage: 10,
     speed: 0,
-    lifeSpan: 100,
+    lifeSpan: 1,
     size: 10,
     boundingPoints: [
-      [ -1,  0 ],
-      [  1, -1 ],
-      [  1,  1 ],
+      [ -1, -1 ],
+      [  1,  0 ],
+      [ -1,  1 ],
     ],
   },
   rifle: {
@@ -126,7 +126,7 @@ export const ActorInfo = {
     ],
     guns: [ {
       gunInfoKey: 'rifle',
-      offset: { front: 2, side: 0, angle: 0 }
+      offset: { front: 2.6, side: 0, angle: 0 }
     } ],
     hit: {
       types: [ 'attack' ],
@@ -167,7 +167,7 @@ export const ActorInfo = {
     ],
     guns: [ {
       gunInfoKey: 'bite',
-      offset: { front: 1, side: 0, angle: 0 }
+      offset: { front: 2.6, side: 0, angle: 0 }
     } ],
     hit: {
       types: [ 'attack' ],
