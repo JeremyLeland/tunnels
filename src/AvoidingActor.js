@@ -4,80 +4,90 @@ import { AvoidCones } from './AvoidCones.js';
 const AVOID_DIST = 100, CLOSE_ENOUGH = 50;
 
 export class AvoidingActor extends Actor {
-  target;
   avoidList = [];
+  targetList = [];
 
   #avoidCones;
+  #target;
 
   update( dt ) {
-    if ( this.target instanceof Actor && !this.target.isAlive ) {
-      this.target = null;
-    }
+    // Find target
+    const targetInfo = this.targetList.filter( e => e.isAlive ).map( entity => {
+      const cx = entity.x - this.x;
+      const cy = entity.y - this.y;
+      return { 
+        entity: entity, 
+        dist: Math.hypot( cx, cy ), 
+        angle: Math.atan2( cy, cx ) 
+      }; 
+    } );
 
-    if ( this.target ) {
-      const cx = this.target.x - this.x;
-      const cy = this.target.y - this.y;
-      const targetDist = Math.hypot( cx, cy );
+    const closestTarget = targetInfo.reduce( 
+      ( closest, e ) => e.dist < closest.dist ? e : closest, { dist: Infinity }
+    );
 
+    this.#target = closestTarget.entity;
+
+    if ( closestTarget.entity ) {
       // TODO: How to account for target size? Should we be using a line from bounding box instead?
       //       Maybe getClosestPoint from the various bounding box lines?
-      const goalDist = this.info.size + ( this.target.info?.size ?? 0 ) + this.guns[ 0 ].info.range;
+      const attackDist = this.info.size + ( closestTarget.entity.info?.size ?? 0 ) + this.guns[ 0 ].info.range;
 
-      if ( targetDist > goalDist ) {
+      // TODO: We may only want to avoid nearby walls, but we want to know if walls are between us and our target
+      //       What if our gun range is greater than avoid dist?
+      const maxDist = Math.min( closestTarget.dist /*+ this.info.size */, AVOID_DIST );
+      
+      this.#avoidCones = new AvoidCones( this, this.avoidList.filter( e => e != this && e != closestTarget.entity ), maxDist );
+      
+      this.goalAngle = closestTarget.angle;
+
+      let closestDist = Infinity;
+
+      const combinedCone = this.#avoidCones.getCones().find( combined => 
+        betweenAngles( this.goalAngle, combined.left, combined.right )
+      );
+
+      if ( combinedCone ) {
+        const closest = combinedCone.cones.filter( cone =>
+          betweenAngles( this.angle, cone.left, cone.right, false )
+        ).reduce( 
+          ( closest, e ) => e.dist < closest.dist ? e : closest, { dist: Infinity }
+        );
+
+        closestDist = closest.dist;
+      }
+
+      const AIM_DIST = 0.4;   // TODO: base on gun spread? lead target?
+      if ( closestTarget.dist < closestDist && 
+           closestTarget.dist < attackDist &&
+           Math.abs( this.angle - closestTarget.angle ) < AIM_DIST ) {
+        this.isShooting = true;
+        this.goalSpeed = 0;
+      }
+      else {
         this.isShooting = false;
 
-        const maxDist = Math.min( targetDist + this.info.size, AVOID_DIST );
-        
-        this.#avoidCones = new AvoidCones();
-        this.avoidList.forEach( e => {
-          if ( e != this && e != this.target ) {
-            this.#avoidCones.addCones( AvoidCones.conesBetweenEntities( this, e, maxDist ) )
-          }
-        } );
-
-        this.goalAngle = Math.atan2( cy, cx );
-        const combinedCone = this.#avoidCones.getCones().find( combined => 
-          betweenAngles( this.goalAngle, combined.left, combined.right )
-        );
-        
-        if ( combinedCone ) {
-          const inFront = combinedCone.cones.filter( cone =>
-            betweenAngles( this.angle, cone.left, cone.right, false )
-          );
-
-          let closest = inFront.reduce( 
-            ( closest, e ) => e.dist < closest.dist ? e : closest, { dist: Infinity }
-          );
+        // TODO: Need to re-think Close Enough -- the real question is whether this is as close as we can get
+        //       Hard to answer!
+        if ( closestDist < AVOID_DIST /*|| closestTarget.dist < CLOSE_ENOUGH*/ ) {
+          this.goalSpeed = 0;
+        }
+        else {
+          this.goalSpeed = this.info.maxSpeed;
           
-          if ( closest.dist < AVOID_DIST || targetDist < CLOSE_ENOUGH ) {
-            this.goalSpeed = 0;
-          }
-          else {
-            this.goalSpeed = this.info.maxSpeed;
-            
-            // TODO: Maybe try variable speed based on turning radius again later
-            // TODO: Slow down for turns if turn speed is slower?
-            // this.goalSpeed = Math.min( 
-            //   this.info.maxSpeed, 
-            //   closest.dist * this.info.turnSpeed / ( Math.PI / 2 ) 
-            // );
-          }
+          // TODO: Maybe try variable speed based on turning radius again later
+          // TODO: Slow down for turns if turn speed is slower?
+          // this.goalSpeed = Math.min( 
+          //   this.info.maxSpeed, 
+          //   closest.dist * this.info.turnSpeed / ( Math.PI / 2 ) 
+          // );
+        }
 
+        if ( combinedCone ) {
           const fromLeft = Math.abs( deltaAngle( this.angle, combinedCone.left ) );
           const fromRight = Math.abs( deltaAngle( this.angle, combinedCone.right ) );
           this.goalAngle = fromLeft < fromRight ? combinedCone.left : combinedCone.right;
         }
-        else {
-          this.goalSpeed = this.info.maxSpeed;
-        }     
-      }
-      else {
-        // close enough
-        // this.target = null;
-        this.goalSpeed = 0;
-
-        // TODO: Avoid friendly fire!
-        this.isShooting = true;
       }
     }
     else {
@@ -90,14 +100,15 @@ export class AvoidingActor extends Actor {
   draw( ctx ) {
     super.draw( ctx );
 
+    ctx.fillStyle = 'red';
     this.#avoidCones?.draw( this.x, this.y, ctx );
 
-    // if ( this.target ) {
-    //   ctx.beginPath();
-    //   ctx.moveTo( this.x, this.y );
-    //   ctx.lineTo( this.target.x, this.target.y );
-    //   ctx.strokeStyle = 'yellow';
-    //   ctx.stroke();
+    if ( this.#target ) {
+      ctx.beginPath();
+      ctx.moveTo( this.x, this.y );
+      ctx.lineTo( this.#target.x, this.#target.y );
+      ctx.strokeStyle = 'yellow';
+      ctx.stroke();
 
     //   ctx.beginPath();
     //   ctx.moveTo( this.x, this.y );
@@ -107,29 +118,7 @@ export class AvoidingActor extends Actor {
     //   );
     //   ctx.strokeStyle = 'lime';
     //   ctx.stroke();
-    // }
-  }
-
-  drawAvoidCones( avoidCones, ctx ) {
-    ctx.strokeStyle = 'white';
-    ctx.fillStyle = 'red';
-    avoidCones.forEach( combinedCone => { 
-      ctx.beginPath();
-      ctx.moveTo( this.x, this.y );
-      ctx.arc( this.x, this.y, 100, combinedCone.left, combinedCone.right );
-      ctx.closePath();
-      ctx.stroke();
-      
-      ctx.globalAlpha = 0.1;
-      combinedCone.cones.forEach( cone => {
-        ctx.beginPath();
-        ctx.moveTo( this.x, this.y );
-        ctx.arc( this.x, this.y, 100, cone.left, cone.right );
-        ctx.closePath();
-        ctx.fill();
-      } );
-      ctx.globalAlpha = 1;
-    } );
+    }
   }
 }
 

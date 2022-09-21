@@ -60,7 +60,7 @@
     player.draw( ctx );
 
     const avoidCones = player.getAvoidCones( entities, 1000 );
-    player.drawAvoidCones( avoidCones, ctx );
+    avoidCones.draw( player.x, player.y, ctx );
   }
 
   function addEntity( x, y ) {

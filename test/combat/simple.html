@@ -45,13 +45,13 @@
   const game = new Game();
   const world = new World();
 
-  const player = new Marine( { x: 600, y: 300 } );
+  const player = new Marine( { x: 300, y: 300 } );
   world.entities.push( player );
 
   for ( let i = 0; i < 5; i ++ ) {
     const alien = new Alien( { x: 50 + i * 50, y: 50 } );
     alien.target = player;
-    // player.target = alien;
+    player.target = alien;
     world.entities.push( alien );
   }
 

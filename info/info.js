@@ -115,7 +115,7 @@ function getBloodParticle( color ) {
 
 export const ActorInfo = {
   marine: {
-    type: 'actor',
+    type: 'marine',
     life: 100,
     damage: 1,
     maxSpeed: 0.05,
@@ -127,7 +127,8 @@ export const ActorInfo = {
       [  2.0,  0 ],
       [ -0.5,  1 ],
     ],
-    avoids: [ 'actor', 'wall' ],
+    avoids: [ 'alien', 'marine', 'wall' ],
+    targets: [ 'alien' ],
     guns: [ {
       gunInfoKey: 'rifle',
       offset: { front: 2.6, side: 0, angle: 0 }
@@ -157,7 +158,7 @@ export const ActorInfo = {
     } ],
   },
   alien: {
-    type: 'actor',
+    type: 'alien',
     life: 100,
     damage: 1,
     maxSpeed: 0.06,
@@ -169,7 +170,8 @@ export const ActorInfo = {
       [  1, -1 ],
       [  1,  1 ],
     ],
-    avoids: [ 'actor', 'wall' ],
+    avoids: [ 'alien', 'marine', 'wall' ],
+    targets: [ 'marine' ],
     guns: [ {
       gunInfoKey: 'bite',
       offset: { front: 2.6, side: 0, angle: 0 }

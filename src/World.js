@@ -16,12 +16,16 @@ export class World {
       }
       
       let updateTime = Math.min( closestHit.time, dt );
-      this.entities.forEach( e => {
-        if ( e.info.avoids ) {
-          e.avoidList = this.entities.filter( other => e.info.avoids.includes( other.info.type ) );
+      this.entities.forEach( entity => {
+        if ( entity.info.avoids ) {
+          entity.avoidList = this.entities.filter( other => entity.info.avoids.includes( other.info.type ) );
         }
-        
-        e.update( updateTime ); 
+
+        if ( entity.info.targets ) {
+          entity.targetList = this.entities.filter( other => entity.info.targets.includes( other.info.type ) );
+        }
+
+        entity.update( updateTime );
       } );
       
       if ( closestHit.time < dt ) {

@@ -1,7 +1,13 @@
 export class AvoidCones {
   #combinedCones = [];
   
-  static conesBetweenEntities( a, b, maxDist ) {
+  constructor( fromEntity, toList, maxDist ) {
+    toList.forEach( toEntity =>
+      this.addCones( AvoidCones.conesBetweenEntities( fromEntity, toEntity, maxDist ) )
+    );
+  }
+
+  static conesBetweenEntities( a, b, maxDist = Infinity ) {
     const cones = [];
 
     b.boundingLines.forEach( bLine => {
@@ -87,7 +93,7 @@ export class AvoidCones {
 
   draw( x, y, ctx ) {
     ctx.strokeStyle = 'white';
-    ctx.fillStyle = 'red';
+    // ctx.fillStyle = 'red';
     this.#combinedCones.forEach( combinedCone => { 
       ctx.beginPath();
       ctx.moveTo( x, y );
