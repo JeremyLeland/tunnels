@@ -11,48 +11,14 @@
   import { ActorInfo } from '../../info/info.js';
   
 
-  class Marine extends AvoidingActor {
-    constructor( values ) {
-      super( values, ActorInfo.marine );
-    }
-
-    draw( ctx ) {
-      super.draw( ctx );
-
-      this.#drawBar( ctx, 'red', this.life / this.info.life, -14, -34, 28 );
-      this.#drawBar( ctx, 'yellow', this.guns[ 0 ].getUIPercentage(), -14, -28, 28 );
-    }
-
-    #drawBar( ctx, color, val, offsetX, offsetY, width ) {
-      const bar = new Path2D();
-      bar.rect(
-        this.x + offsetX, this.y + offsetY, 
-        width * val, 4
-      );
-
-      ctx.fillStyle = color;
-      ctx.fill( bar );
-      ctx.stroke( bar );
-    }
-  }
-
-  class Alien extends AvoidingActor {
-    constructor( values ) {
-      super( values, ActorInfo.alien );
-    }
-  }
-
   const game = new Game();
   const world = new World();
 
-  const player = new Marine( { x: 300, y: 300 } );
-  world.entities.push( player );
+  world.entities.push( new AvoidingActor( { x: 400, y: 400 }, ActorInfo.marine ) );
+  world.entities.push( new AvoidingActor( { x: 350, y: 350 }, ActorInfo.marine ) );
 
   for ( let i = 0; i < 5; i ++ ) {
-    const alien = new Alien( { x: 50 + i * 50, y: 50 } );
-    alien.target = player;
-    player.target = alien;
-    world.entities.push( alien );
+    world.entities.push( new AvoidingActor( { x: 50 + i * 50, y: 50 }, ActorInfo.alien ) );
   }
 
   world.entities.push( 
@@ -65,19 +31,13 @@
   );
 
   game.update = ( dt ) => {
-    if ( !game.keysPressed.has( ' ' ) ) {
-      //player.target = { x: game.mouse.x, y: game.mouse.y };
-      player.goalAngle = Math.atan2( game.mouse.y - player.y, game.mouse.x - player.x );
-      player.isShooting = game.mouse.down;
-
-      world.update( dt );
-    }
+    world.update( dt );
   };
 
   game.draw = ( ctx ) => {
     world.draw( ctx );
-  };
 
-  
+    world.entities.filter( e => e instanceof Actor ).forEach( e => e.drawUI( ctx ) );
+  };
 
 </script>

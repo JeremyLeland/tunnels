@@ -160,8 +160,8 @@ export class Entity {
 
     ctx.restore();
 
-    ctx.strokeStyle = 'red';
-    this.boundingLines?.forEach( line => line.draw( ctx ) );
+    // ctx.strokeStyle = 'red';
+    // this.boundingLines?.forEach( line => line.draw( ctx ) );
   }
 
   drawEntity( ctx ) {

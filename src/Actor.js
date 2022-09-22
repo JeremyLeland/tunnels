@@ -40,7 +40,16 @@ export class Actor extends Entity {
 
     this.guns.forEach( gun => gun.update( dt ) );
   }
+
+  drawUI( ctx ) {
+    const WIDTH = this.info.size * 2;
+    const HEIGHT = 4;
+
+    drawBar( ctx, 'red', this.life / this.info.life, this.x - WIDTH / 2, this.y - WIDTH - HEIGHT - 2, WIDTH, HEIGHT );
+    drawBar( ctx, 'dimgray', this.guns[ 0 ].getUIPercentage(), this.x - WIDTH / 2, this.y - WIDTH, WIDTH, HEIGHT );
+  }
 }
+
 
 function approach( current, goal, speed, dt ) {
   if ( goal < current ) {
@@ -63,4 +72,12 @@ function fixAngleTo( angle, otherAngle ) {
   }
 
   return angle;
+}
+
+function drawBar( ctx, color, val, x, y, width, height ) {
+  ctx.fillStyle = color;
+  ctx.fillRect( x, y, width * val, height );
+  
+  ctx.strokeStyle = 'white';
+  ctx.strokeRect( x, y, width, height );
 }

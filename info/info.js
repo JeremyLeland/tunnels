@@ -135,7 +135,7 @@ export const ActorInfo = {
     } ],
     hit: {
       types: [ 'attack' ],
-      count: 10,
+      count: 5,
       spread: 2,
       maxSpeed: 0.05,
       particle: getBloodParticle( 'red' ),
@@ -178,7 +178,7 @@ export const ActorInfo = {
     } ],
     hit: {
       types: [ 'attack' ],
-      count: 10,
+      count: 5,
       spread: 2,
       maxSpeed: 0.05,
       particle: getBloodParticle( 'cyan' ),

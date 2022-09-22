@@ -100,16 +100,17 @@ export class AvoidingActor extends Actor {
   draw( ctx ) {
     super.draw( ctx );
 
-    ctx.fillStyle = 'red';
-    this.#avoidCones?.draw( this.x, this.y, ctx );
+    // ctx.fillStyle = 'red';
+    // this.#avoidCones?.draw( this.x, this.y, ctx );
 
-    if ( this.#target ) {
-      ctx.beginPath();
-      ctx.moveTo( this.x, this.y );
-      ctx.lineTo( this.#target.x, this.#target.y );
-      ctx.strokeStyle = 'yellow';
-      ctx.stroke();
-
+    // if ( this.#target ) {
+    //   ctx.beginPath();
+    //   ctx.moveTo( this.x, this.y );
+    //   ctx.lineTo( this.#target.x, this.#target.y );
+    //   ctx.strokeStyle = 'yellow';
+    //   ctx.stroke();
+    // }
+    
     //   ctx.beginPath();
     //   ctx.moveTo( this.x, this.y );
     //   ctx.lineTo( 
@@ -118,7 +119,6 @@ export class AvoidingActor extends Actor {
     //   );
     //   ctx.strokeStyle = 'lime';
     //   ctx.stroke();
-    }
   }
 }
 
