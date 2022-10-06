@@ -12,9 +12,16 @@
   
   const game = new Game();
   const world = new World();
+  
+  // World first, so we can see actors when they get stuck
+  const json = JSON.parse( await ( await fetch( '../../levels/test4.json' ) ).text() );
 
-  world.entities.push( new AvoidingActor( { x: 400, y: 400 }, ActorInfo.marine ) );
-  world.entities.push( new AvoidingActor( { x: 350, y: 350 }, ActorInfo.marine ) );
+  json.walls.forEach( points => {
+    world.entities.push( new Wall( points ) );
+  } );
+
+  // world.entities.push( new AvoidingActor( { x: 400, y: 400 }, ActorInfo.marine ) );
+  // world.entities.push( new AvoidingActor( { x: 350, y: 350 }, ActorInfo.marine ) );
 
   for ( let i = 0; i < 5; i ++ ) {
     world.entities.push( new AvoidingActor( { x: 150 + i * 50, y: 150 }, ActorInfo.alien ) );
@@ -24,14 +31,12 @@
     world.entities.push( new AvoidingActor( { x: 450 + i * 50, y: 650 }, ActorInfo.alien ) );
   }
 
-  const json = JSON.parse( await ( await fetch( '../../levels/test4.json' ) ).text() );
-
-  json.walls.forEach( points => {
-    world.entities.push( new Wall( points ) );
-  } );
+  
 
   game.update = ( dt ) => {
-    world.update( dt );
+    if ( !game.keysPressed.has( ' ' ) ) {
+      world.update( dt );
+    }
   };
 
   game.draw = ( ctx ) => {

@@ -1,16 +1,27 @@
 import { Actor } from '../src/Actor.js';
 import { AvoidCones } from './AvoidCones.js';
 
-const AVOID_DIST = 100, CLOSE_ENOUGH = 50;
+const AVOID_DIST = 50, CLOSE_ENOUGH = 50;
+
+const DRAW_DEBUG = false;
 
 export class AvoidingActor extends Actor {
   avoidList = [];
   targetList = [];
 
+  wanderAngle = 0;
+  timeUntilWander = 0;
+  TIME_BETWEEN_WANDERS = 3000;
+
   #avoidCones;
   #target;
 
-  update( dt ) {
+
+  // TODO: Add Wander support. 
+  //       Maybe make wander a range from their start position? So they can wander locally, or an entire level
+  //       Make wander based on goalAngle, not a specific location. Pick a random direction every x seconds?
+
+  #closestTarget( range ) {
     // Find target
     const targetInfo = this.targetList.filter( e => e.isAlive ).map( entity => {
       const cx = entity.x - this.x;
@@ -26,9 +37,17 @@ export class AvoidingActor extends Actor {
       ( closest, e ) => e.dist < closest.dist ? e : closest, { dist: Infinity }
     );
 
-    this.#target = closestTarget.entity;
+    if ( closestTarget.dist < range ) {
+      this.#target = closestTarget.entity;
+      return closestTarget;
+    }
+  }
+  
+  update( dt ) {
+    
+    const closestTarget = this.#closestTarget( 500 );
 
-    if ( closestTarget.entity ) {
+    if ( closestTarget?.entity ) {
       // TODO: How to account for target size? Should we be using a line from bounding box instead?
       //       Maybe getClosestPoint from the various bounding box lines?
       const attackDist = this.info.size + ( closestTarget.entity.info?.size ?? 0 ) + this.guns[ 0 ].info.range;
@@ -92,6 +111,44 @@ export class AvoidingActor extends Actor {
     }
     else {
       this.isShooting = false;
+
+      this.timeUntilWander -= dt;
+      if ( this.timeUntilWander <= 0 ) {
+        this.wanderAngle = ( Math.random() - 0.5 ) * Math.PI * 2;
+        this.timeUntilWander = this.TIME_BETWEEN_WANDERS;
+      }
+
+      this.goalAngle = this.wanderAngle;
+
+      this.#avoidCones = new AvoidCones( this, this.avoidList.filter( e => e != this ), AVOID_DIST );
+      
+      const combinedCone = this.#avoidCones.getCones().find( combined => 
+        betweenAngles( this.goalAngle, combined.left, combined.right, false )
+      );
+
+      if ( combinedCone ) {
+        const closest = combinedCone.cones.filter( cone =>
+          betweenAngles( this.angle, cone.left, cone.right, false )
+        ).reduce( 
+          ( closest, e ) => e.dist < closest.dist ? e : closest, { dist: Infinity }
+        );
+
+        if ( closest.dist < AVOID_DIST ) {
+          this.goalSpeed = 0;
+        }
+        else {
+          this.goalSpeed = this.info.maxSpeed;
+        }
+
+        // TODO: Keep from going back and forth if we're right in the middle
+
+        const fromLeft = Math.abs( deltaAngle( this.angle, combinedCone.left ) );
+        const fromRight = Math.abs( deltaAngle( this.angle, combinedCone.right ) );
+        this.goalAngle = fromLeft < fromRight ? combinedCone.left : combinedCone.right;
+      }
+      else {
+        this.goalSpeed = this.info.maxSpeed;
+      }
     }
 
     super.update( dt );
@@ -100,25 +157,39 @@ export class AvoidingActor extends Actor {
   draw( ctx ) {
     super.draw( ctx );
 
-    // ctx.fillStyle = 'red';
-    // this.#avoidCones?.draw( this.x, this.y, ctx );
+    if ( DRAW_DEBUG ) {
+      // Avoid cones
+      ctx.fillStyle = 'red';
+      this.#avoidCones?.draw( this.x, this.y, ctx );
 
-    // if ( this.#target ) {
-    //   ctx.beginPath();
-    //   ctx.moveTo( this.x, this.y );
-    //   ctx.lineTo( this.#target.x, this.#target.y );
-    //   ctx.strokeStyle = 'yellow';
-    //   ctx.stroke();
-    // }
-    
-    //   ctx.beginPath();
-    //   ctx.moveTo( this.x, this.y );
-    //   ctx.lineTo( 
-    //     this.x + Math.cos( this.goalAngle ) * 100, 
-    //     this.y + Math.sin( this.goalAngle ) * 100,
-    //   );
-    //   ctx.strokeStyle = 'lime';
-    //   ctx.stroke();
+      // if ( this.#target ) {
+      //   ctx.beginPath();
+      //   ctx.moveTo( this.x, this.y );
+      //   ctx.lineTo( this.#target.x, this.#target.y );
+      //   ctx.strokeStyle = 'yellow';
+      //   ctx.stroke();
+      // }
+
+      // Wander
+      ctx.beginPath();
+      ctx.moveTo( this.x, this.y );
+      ctx.lineTo( 
+        this.x + Math.cos( this.wanderAngle ) * 150, 
+        this.y + Math.sin( this.wanderAngle ) * 150,
+      );
+      ctx.strokeStyle = 'yellow';
+      ctx.stroke();
+      
+      // Goal
+      ctx.beginPath();
+      ctx.moveTo( this.x, this.y );
+      ctx.lineTo( 
+        this.x + Math.cos( this.goalAngle ) * 150, 
+        this.y + Math.sin( this.goalAngle ) * 150,
+      );
+      ctx.strokeStyle = 'lime';
+      ctx.stroke();
+    } 
   }
 }
 

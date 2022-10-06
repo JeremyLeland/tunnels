@@ -31,11 +31,14 @@ export class AvoidCones {
     const cy2 = line.y2 - y;
     const h2 = Math.hypot( cx2, cy2 );
 
-    if ( h1 < maxDist || h2 < maxDist ) {
+    const closest = line.getClosestPoint( x, y );
+    const dist = Math.hypot( closest.x - x, closest.y - y );
+
+    if ( dist < maxDist ) {
       const angle1 = Math.atan2( cy1, cx1 );
       const angle2 = Math.atan2( cy2, cx2 );
 
-      const r = radius;   // TODO: Plus some buffer space?
+      const r = radius * 2;   // *2 = buffer space
       const spread1 = Math.asin( Math.min( 1, r / h1 ) );
       const spread2 = Math.asin( Math.min( 1, r / h2 ) );
 
@@ -43,8 +46,6 @@ export class AvoidCones {
       const right1 = fixAngle( angle1 + spread1 );
       const left2 = fixAngle( angle2 - spread2 );
       const right2 = fixAngle( angle2 + spread2 );
-
-      const dist = Math.min( h1, h2 );
       
       return deltaAngle( angle1, angle2 ) > 0 ?
         { x: x, y: y, left: left1, right: right2, dist: dist, avoids: line } : 
