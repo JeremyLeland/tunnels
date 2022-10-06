@@ -20,14 +20,14 @@
     world.entities.push( new Wall( points ) );
   } );
 
-  // world.entities.push( new AvoidingActor( { x: 400, y: 400 }, ActorInfo.marine ) );
+  world.entities.push( new AvoidingActor( { x: 400, y: 400 }, ActorInfo.marine ) );
   // world.entities.push( new AvoidingActor( { x: 350, y: 350 }, ActorInfo.marine ) );
 
-  for ( let i = 0; i < 5; i ++ ) {
+  for ( let i = 0; i < 1; i ++ ) {
     world.entities.push( new AvoidingActor( { x: 150 + i * 50, y: 150 }, ActorInfo.alien ) );
   }
 
-  for ( let i = 0; i < 5; i ++ ) {
+  for ( let i = 0; i < 1; i ++ ) {
     world.entities.push( new AvoidingActor( { x: 450 + i * 50, y: 650 }, ActorInfo.alien ) );
   }
 
