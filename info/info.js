@@ -131,7 +131,7 @@ export const ActorInfo = {
     targets: [ 'alien' ],
     guns: [ {
       gunInfoKey: 'rifle',
-      offset: { front: 2.6, side: 0, angle: 0 }
+      offset: { front: 2.2, side: 0, angle: 0 }
     } ],
     hit: {
       types: [ 'attack' ],
