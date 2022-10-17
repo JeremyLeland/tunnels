@@ -13,24 +13,25 @@
   const game = new Game();
   const world = new World();
   
-  // World first, so we can see actors when they get stuck
-  const json = JSON.parse( await ( await fetch( '../../levels/test4.json' ) ).text() );
-
-  json.walls.forEach( points => {
-    world.entities.push( new Wall( points ) );
-  } );
-
+  
   world.entities.push( new AvoidingActor( { x: 350, y: 350 }, ActorInfo.marine ) );
   world.entities.push( new AvoidingActor( { x: 400, y: 380 }, ActorInfo.marine ) );
 
   for ( let i = 0; i < 5; i ++ ) {
-    world.entities.push( new AvoidingActor( { x: 150 + i * 50, y: 150 }, ActorInfo.alien ) );
+   world.entities.push( new AvoidingActor( { x: 150 + i * 50, y: 150 }, ActorInfo.alien ) );
   }
 
   for ( let i = 0; i < 3; i ++ ) {
     world.entities.push( new AvoidingActor( { x: 550 + i * 50, y: 300 }, ActorInfo.alien ) );
     world.entities.push( new AvoidingActor( { x: 450 + i * 50, y: 650 }, ActorInfo.alien ) );
   }
+
+  // World last, so we can better see the avoid cones being created for walls
+  const json = JSON.parse( await ( await fetch( '../../levels/test4.json' ) ).text() );
+
+  json.walls.forEach( points => {
+    world.entities.push( new Wall( points ) );
+  } );
 
   
 
@@ -45,5 +46,11 @@
 
     world.entities.filter( e => e instanceof Actor ).forEach( e => e.drawUI( ctx ) );
   };
+
+  document.addEventListener( 'mousedown', ( e ) => {
+    const moveTarget = { x: e.offsetX, y: e.offsetY };
+
+    world.entities.filter( e => e.info.type == 'marine' ).forEach( e => e.moveTarget = moveTarget );
+  } );
 
 </script>

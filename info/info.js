@@ -172,6 +172,10 @@ export const ActorInfo = {
     ],
     avoids: [ 'alien', 'marine', 'wall' ],
     targets: [ 'marine' ],
+    wander: {
+      radius: 100,
+      time: 3000,
+    },
     guns: [ {
       gunInfoKey: 'bite',
       offset: { front: 2.6, side: 0, angle: 0 }

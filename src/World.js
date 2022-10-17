@@ -18,11 +18,11 @@ export class World {
       let updateTime = Math.min( closestHit.time, dt );
       this.entities.forEach( entity => {
         if ( entity.info.avoids ) {
-          entity.avoidList = this.entities.filter( other => entity.info.avoids.includes( other.info.type ) );
+          entity.avoidList = this.entities.filter( other => other != entity && entity.info.avoids.includes( other.info.type ) );
         }
 
         if ( entity.info.targets ) {
-          entity.targetList = this.entities.filter( other => entity.info.targets.includes( other.info.type ) );
+          entity.targetList = this.entities.filter( other => other != entity && entity.info.targets.includes( other.info.type ) );
         }
 
         entity.update( updateTime );

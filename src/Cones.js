@@ -7,12 +7,11 @@ export class Cones {
   
   constructor( fromEntity, toList ) {
     toList.forEach( toEntity => {
-      if ( fromEntity != toEntity ) {
-        this.cones.push( ...Cones.conesBetweenEntities( fromEntity, toEntity ) )
-      }
+      this.cones.push( ...Cones.conesBetweenEntities( fromEntity, toEntity ) )
     } );
   }
 
+  // TODO: Should we just grab one big cone for all of them, so less comparison later?
   static conesBetweenEntities( a, b ) {
     const cones = [];
 
@@ -35,12 +34,12 @@ export class Cones {
     const h2 = Math.hypot( cx2, cy2 );
 
     const closest = line.getClosestPoint( x, y );
-    const dist = Math.hypot( closest.x - x, closest.y - y );
+    const dist = Math.hypot( closest.x - x, closest.y - y ) /*- radius*/;   // TODO: Remove radius from dist? Or deal with elsewhere?
 
     const angle1 = Math.atan2( cy1, cx1 );
     const angle2 = Math.atan2( cy2, cx2 );
 
-    const r = radius * 2;   // *2 = buffer space
+    const r = radius;
     const spread1 = Math.asin( Math.min( 1, r / h1 ) );
     const spread2 = Math.asin( Math.min( 1, r / h2 ) );
 

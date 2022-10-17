@@ -1,9 +1,9 @@
 import { Actor } from '../src/Actor.js';
 import { Cones } from './Cones.js';
 
-const AVOID_DIST = 50, TARGET_DIST = 200, CLOSE_ENOUGH = 50;
+const AVOID_DIST = 20, TARGET_DIST = 200, CLOSE_ENOUGH = 50;
 
-const DEBUG_CONES = false, DEBUG_ANGLES = false;
+const DEBUG_CONES = true, DEBUG_ANGLES = true;
 
 export class AvoidingActor extends Actor {
   avoidList = [];
@@ -13,17 +13,15 @@ export class AvoidingActor extends Actor {
   attackTarget;
 
   timeUntilWander = 0;
-  TIME_BETWEEN_WANDERS = 3000;
+  // TIME_BETWEEN_WANDERS = 3000;
 
   #debug = {};
 
   #closestTarget( range ) {
-    const targetInfo = this.targetList.filter( e => e.isAlive ).map( entity => {
-      return { 
-        entity: entity, 
-        dist: Math.hypot( entity.x - this.x, entity.y - this.y ),
-      }; 
-    } );
+    const targetInfo = this.targetList.filter( e => e.isAlive ).map( entity => ( {
+      entity: entity, 
+      dist: Math.hypot( entity.x - this.x, entity.y - this.y ),
+    } ) );
 
     const closestTarget = targetInfo.reduce( 
       ( closest, e ) => e.dist < closest.dist ? e : closest, { dist: Infinity }
@@ -36,53 +34,71 @@ export class AvoidingActor extends Actor {
   
   update( dt ) {
     
-    const cones = new Cones( this, this.avoidList );
+    const inFrontDists = this.avoidList.map( entity => {
+      const closestTime = entity.boundingLines.map( line => 
+        line.getTimeToHit( this.x, this.y, Math.cos( this.angle ), Math.sin( this.angle ) )
+      ).reduce(
+        ( closest, time ) => 0 < time && time < closest ? time : closest, Infinity
+      );
 
-    const inFront = cones.getCones( this.angle ).reduce( 
+      return {
+        entity: entity,
+        dist: closestTime,
+      };
+    } );
+
+    const inFront = inFrontDists.reduce( 
       ( closest, e ) => e.dist < closest.dist ? e : closest, { dist: Infinity }
     );
     this.#debug.inFront = inFront;
 
     this.attackTarget = this.#closestTarget( TARGET_DIST );
 
-    // TODO: Only wander if we've set this in our info
-    if ( this.TIME_BETWEEN_WANDERS ) {
+    if ( this.info.wander ) {
       this.timeUntilWander -= dt;
       if ( this.timeUntilWander <= 0 ) {
         // TODO: Base this on a range from home base?
         const wanderAngle = ( Math.random() - 0.5 ) * Math.PI * 2;
         this.moveTarget = {
-          x: this.x + Math.cos( wanderAngle ) * 100,
-          y: this.y + Math.sin( wanderAngle ) * 100,
+          x: this.x + Math.cos( wanderAngle ) * this.info.wander.radius,
+          y: this.y + Math.sin( wanderAngle ) * this.info.wander.radius,
         };
-        this.timeUntilWander = this.TIME_BETWEEN_WANDERS;
+        this.timeUntilWander = this.info.wander.time;
       }
     }
 
     const target = this.attackTarget ?? this.moveTarget;
-    const targetDist  = Math.hypot( target.x - this.x, target.y - this.y ) - this.info.size - ( target.info?.size ?? 0 );
-    const targetAngle = Math.atan2( target.y - this.y, target.x - this.x );
 
-    // TODO: Don't add buffer in Cones, add buffer in avoidance (so that inFront is more accurate for aiming)
+    if ( target ) {
+      const targetDist  = Math.hypot( target.x - this.x, target.y - this.y ) - this.info.size - ( target.info?.size ?? 0 );
+      const targetAngle = Math.atan2( target.y - this.y, target.x - this.x );
+      
 
-    if ( inFront?.entity == target ) {
-      const inSight = Math.abs( targetAngle - this.angle ) < 0.4; // TODO: constant for 0.4?
-      const inRange = targetDist < this.guns[ 0 ].info.range;
-
-      this.isShooting = inSight && inRange;
-      this.goalSpeed = inRange ? 0 : this.info.maxSpeed;
-      this.goalAngle = targetAngle;
-    } 
+      if ( inFront?.entity == target ) {
+        const inSight = Math.abs( targetAngle - this.angle ) < 0.1; // TODO: make this an aim constant?
+        const inRange = targetDist < this.guns[ 0 ].info.range;
+        
+        this.isShooting = inSight && inRange;
+        this.goalSpeed = inRange ? 0 : this.info.maxSpeed;
+        this.goalAngle = targetAngle;
+      } 
+      else {
+        this.isShooting = false;
+        
+        this.goalSpeed = inFront.dist < AVOID_DIST || Math.abs( targetDist ) < 10 ? 0 : this.info.maxSpeed;
+        
+        const maxDist = Math.min( targetDist, AVOID_DIST );
+        
+        // TODO: Call this with avoidList - target, so we don't need to make getAvoidCones more awkward?
+        const avoidCones = new Cones( this, this.avoidList ).getAvoidCones( targetAngle, target, maxDist );
+        this.#debug.avoidCones = avoidCones;
+        
+        this.goalAngle = avoidCones ? closestAngleTo( this.angle, avoidCones.left, avoidCones.right ) : targetAngle;
+      }
+    }
     else {
       this.isShooting = false;
-
-      this.goalSpeed = inFront.dist < AVOID_DIST || targetDist < 10 ? 0 : this.info.maxSpeed;
-
-      const maxDist = Math.min( targetDist, AVOID_DIST );
-      const avoidCones = cones.getAvoidCones( targetAngle, target, maxDist );
-      this.#debug.avoidCones = avoidCones;
-      
-      this.goalAngle = avoidCones ? closestAngleTo( this.angle, avoidCones.left, avoidCones.right ) : targetAngle;
+      this.goalSpeed = 0;
     }
 
     super.update( dt );
