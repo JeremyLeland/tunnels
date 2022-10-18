@@ -3,7 +3,7 @@ import { Cones } from './Cones.js';
 
 const AVOID_DIST = 20, TARGET_DIST = 200, CLOSE_ENOUGH = 50;
 
-const DEBUG_CONES = true, DEBUG_ANGLES = true;
+const DEBUG_CONES = false, DEBUG_ANGLES = false;
 
 export class AvoidingActor extends Actor {
   avoidList = [];

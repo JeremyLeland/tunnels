@@ -1,0 +1,43 @@
+<title>Tunnels</title>
+<link rel="stylesheet" href="./style.css">
+
+<script type="module">
+  import { Game } from './src/Game.js';
+  import { Actor } from './src/Actor.js';
+  import { AvoidingActor } from './src/AvoidingActor.js';
+  import { World } from './src/World.js';
+  import { Wall } from './src/Wall.js';
+
+  import { ActorInfo } from './info/info.js';
+  
+  const game = new Game();
+  const world = new World();
+  
+
+  const json = JSON.parse( await ( await fetch( './levels/test6.json' ) ).text() );
+
+  const walls = json.walls.map( points => new Wall( points ) );
+  const entities = json.entities.map( values => 
+    new AvoidingActor( values, ActorInfo[ values.type ] ) 
+  );
+  
+  world.entities.push( ...walls );
+  world.entities.push( ...entities );
+  
+  game.update = ( dt ) => {
+    world.update( dt );
+  };
+
+  game.draw = ( ctx ) => {
+    world.draw( ctx );
+
+    world.entities.filter( e => e instanceof Actor ).forEach( e => e.drawUI( ctx ) );
+  };
+
+  document.addEventListener( 'mousedown', ( e ) => {
+    const moveTarget = { x: e.offsetX, y: e.offsetY };
+
+    world.entities.filter( e => e.info.type == 'marine' ).forEach( e => e.moveTarget = moveTarget );
+  } );
+
+</script>
