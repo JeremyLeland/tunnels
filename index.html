@@ -1,12 +1,16 @@
 <title>Tunnels</title>
 <link rel="stylesheet" href="./style.css">
 
+<body>
+  <div id="remaining"><span id="numLeft"></span> enemies left</div>
+  <div class="center" id="victory">Level Clear</div>
+</body>
+
 <script type="module">
   import { Game } from './src/Game.js';
-  import { Actor } from './src/Actor.js';
-  import { AvoidingActor } from './src/AvoidingActor.js';
   import { World } from './src/World.js';
   import { Wall } from './src/Wall.js';
+  import { AvoidingActor } from './src/AvoidingActor.js';
 
   import { ActorInfo } from './info/info.js';
   
@@ -23,15 +27,25 @@
   
   world.entities.push( ...walls );
   world.entities.push( ...entities );
+
+  const ui = {};
+  [ 'numLeft', 'victory' ].forEach( e => ui[ e ] = document.getElementById( e ) );
   
   game.update = ( dt ) => {
     world.update( dt );
+
+    const numEnemies = world.entities.filter( e => e.info.type == 'alien' ).length;
+    ui.numLeft.innerText = numEnemies;
+
+    if ( numEnemies == 0 ) {
+      ui.victory.style.visibility = 'visible';
+    }
   };
 
   game.draw = ( ctx ) => {
     world.draw( ctx );
 
-    world.entities.filter( e => e instanceof Actor ).forEach( e => e.drawUI( ctx ) );
+    world.entities.filter( e => e.info.type == 'marine' ).forEach( e => e.drawUI( ctx ) );
   };
 
   document.addEventListener( 'mousedown', ( e ) => {
