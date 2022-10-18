@@ -20,8 +20,8 @@ export class Wall extends Entity {
     } );
 
     const a = points.at( hullPointIndex - 1 );
-    const b = points.at( hullPointIndex     );
-    const c = points.at( hullPointIndex + 1 );
+    const b = points[ hullPointIndex ];
+    const c = points[ ( hullPointIndex + 1 ) % points.length ];
 
     // https://en.wikipedia.org/wiki/Curve_orientation
     const det = ( b[ 0 ] * c[ 1 ] + a[ 0 ] * b[ 1 ] + a[ 1 ] * c[ 0 ] ) - 
