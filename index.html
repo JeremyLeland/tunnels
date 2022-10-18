@@ -18,7 +18,7 @@
   const world = new World();
   
 
-  const json = JSON.parse( await ( await fetch( './levels/test6.json' ) ).text() );
+  const json = JSON.parse( await ( await fetch( './levels/test7.json' ) ).text() );
 
   const walls = json.walls.map( points => new Wall( points ) );
   const entities = json.entities.map( values => 
