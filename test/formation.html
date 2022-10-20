@@ -1,0 +1,67 @@
+<title>Moving in formation</title>
+<link rel="stylesheet" href="../style.css">
+
+<script type="module">
+  import { Game } from '../src/Game.js';
+  import { AvoidingActor } from '../src/AvoidingActor.js';
+  import { World } from '../src/World.js';
+  
+  import { ActorInfo } from '../info/info.js';
+  
+  const game = new Game();
+  const world = new World();
+  
+  for ( let i = 0; i < 5; i ++ ) {
+    world.entities.push( new AvoidingActor( { x: 350 + i * 40, y: 350 + i * 40 }, ActorInfo.marine ) );
+  }
+  
+  game.update = ( dt ) => {
+    world.update( dt );
+  };
+
+  game.draw = ( ctx ) => {
+    world.draw( ctx );
+
+    world.entities.forEach( marine => {
+      if ( marine.moveTarget ) {
+        ctx.beginPath();
+        ctx.moveTo( marine.x, marine.y );
+        ctx.lineTo( marine.moveTarget.x, marine.moveTarget.y );
+        ctx.strokeStyle = 'cyan';
+        ctx.stroke();  
+      }
+    } );
+  };
+
+  document.addEventListener( 'mousedown', ( e ) => {
+    const moveTarget = { x: e.offsetX, y: e.offsetY };
+
+    const marines = world.entities.filter( e => e.info.type == 'marine' );
+
+    const center = { x: 0, y: 0 };
+
+    marines.forEach( marine => {
+      center.x += marine.x;
+      center.y += marine.y;
+    } );
+
+    center.x /= marines.length;
+    center.y /= marines.length;
+
+    const moveAngle = Math.atan2( moveTarget.y - center.y, moveTarget.x - center.x );
+
+    const offsets = marines.map( marine => ( {
+      marine: marine,
+      offset: ( marine.x - moveTarget.x ) * Math.sin( moveAngle ) + ( marine.y - moveTarget.y ) * -Math.cos( moveAngle )
+    } ) ).sort( ( a, b ) => a.offset - b.offset );
+
+    const SPACING = ActorInfo.marine.size * 2.5;
+    const adjust = 0.5 * ( offsets.length - 1 );
+
+    offsets.forEach( ( e, index ) => e.marine.moveTarget = { 
+      x: moveTarget.x + ( index - adjust ) * SPACING * Math.sin( moveAngle ),
+      y: moveTarget.y + ( index - adjust ) * SPACING * -Math.cos( moveAngle ),
+    } );
+  } );
+
+</script>
