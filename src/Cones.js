@@ -1,62 +1,62 @@
 export class Cones {
   cones = [];
-
-  // TODO: Make all the cones, regardless of maxDist
-  //       Then, getCombinedCones( maxDist ) will combine them for given distance
-  // This way, we can reuse the cones to figure out what's in front of us?
   
-  constructor( fromEntity, toList ) {
+  constructor( fromEntity, toList, maxDist ) {
     toList.forEach( toEntity => {
-      this.cones.push( ...Cones.conesBetweenEntities( fromEntity, toEntity ) )
+      this.cones.push( ...Cones.conesBetweenEntities( fromEntity, toEntity, maxDist ) )
     } );
   }
 
   // TODO: Should we just grab one big cone for all of them, so less comparison later?
-  static conesBetweenEntities( a, b ) {
+  static conesBetweenEntities( a, b, maxDist ) {
     const cones = [];
 
     b.boundingLines.forEach( bLine => {
-      const cone = Cones.coneFromLine( a.x, a.y, a.info.size, bLine );
-      cone.entity = b;
-      cones.push( cone );
+      const cone = Cones.coneFromLine( a.x, a.y, a.info.size, bLine, maxDist );
+      if ( cone ) {
+        cone.entity = b;
+        cones.push( cone );
+      }
     } );
 
     return cones;
   }
 
-  static coneFromLine( x, y, radius, line ) {
-    const cx1 = line.x1 - x;
-    const cy1 = line.y1 - y;
-    const h1 = Math.hypot( cx1, cy1 );
-
-    const cx2 = line.x2 - x;
-    const cy2 = line.y2 - y;
-    const h2 = Math.hypot( cx2, cy2 );
-
+  static coneFromLine( x, y, radius, line, maxDist ) {
     const closest = line.getClosestPoint( x, y );
     const dist = Math.hypot( closest.x - x, closest.y - y ) /*- radius*/;   // TODO: Remove radius from dist? Or deal with elsewhere?
 
-    const angle1 = Math.atan2( cy1, cx1 );
-    const angle2 = Math.atan2( cy2, cx2 );
+    if ( dist < maxDist ) {
+      const cx1 = line.x1 - x;
+      const cy1 = line.y1 - y;
+      const h1 = Math.hypot( cx1, cy1 );
+  
+      const cx2 = line.x2 - x;
+      const cy2 = line.y2 - y;
+      const h2 = Math.hypot( cx2, cy2 );
 
-    const r = radius;
-    const spread1 = Math.asin( Math.min( 1, r / h1 ) );
-    const spread2 = Math.asin( Math.min( 1, r / h2 ) );
-
-    const left1 = fixAngle( angle1 - spread1 );
-    const right1 = fixAngle( angle1 + spread1 );
-    const left2 = fixAngle( angle2 - spread2 );
-    const right2 = fixAngle( angle2 + spread2 );
-    
-    return deltaAngle( angle1, angle2 ) > 0 ?
-      { x: x, y: y, left: left1, right: right2, dist: dist } : 
-      { x: x, y: y, left: left2, right: right1, dist: dist };
+      const angle1 = Math.atan2( cy1, cx1 );
+      const angle2 = Math.atan2( cy2, cx2 );
+  
+      const r = radius;
+      const spread1 = Math.asin( Math.min( 1, r / h1 ) );
+      const spread2 = Math.asin( Math.min( 1, r / h2 ) );
+  
+      const left1 = fixAngle( angle1 - spread1 );
+      const right1 = fixAngle( angle1 + spread1 );
+      const left2 = fixAngle( angle2 - spread2 );
+      const right2 = fixAngle( angle2 + spread2 );
+      
+      return deltaAngle( angle1, angle2 ) > 0 ?
+        { x: x, y: y, left: left1, right: right2, dist: dist } : 
+        { x: x, y: y, left: left2, right: right1, dist: dist };
+    }
   }
 
-  getAvoidCones( angle, ignoreEntity, maxDist ) {
+  getAvoidCones( angle, ignoreEntity ) {
     const combinedCones = [];
 
-    const cones = this.cones.filter( c => c.entity != ignoreEntity && c.dist < maxDist );
+    const cones = this.cones.filter( c => c.entity != ignoreEntity );
 
     cones.forEach( cone => {
       const newCombined = Object.assign( { cones: [ cone ] }, cone );

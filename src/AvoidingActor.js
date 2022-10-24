@@ -90,7 +90,7 @@ export class AvoidingActor extends Actor {
         const maxDist = Math.min( targetDist, AVOID_DIST );
         
         // TODO: Call this with avoidList - target, so we don't need to make getAvoidCones more awkward?
-        const avoidCones = new Cones( this, this.avoidList ).getAvoidCones( targetAngle, target, maxDist );
+        const avoidCones = new Cones( this, this.avoidList, maxDist ).getAvoidCones( targetAngle, target );
         this.#debug.avoidCones = avoidCones;
         
         this.goalAngle = avoidCones ? closestAngleTo( this.angle, avoidCones.left, avoidCones.right ) : targetAngle;
