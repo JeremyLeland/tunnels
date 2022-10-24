@@ -18,7 +18,7 @@
   const world = new World();
   
 
-  const json = JSON.parse( await ( await fetch( './levels/test7.json' ) ).text() );
+  const json = JSON.parse( await ( await fetch( './levels/test6.json' ) ).text() );
 
   const walls = json.walls.map( points => new Wall( points ) );
   const entities = json.entities.map( values => 
@@ -43,15 +43,57 @@
   };
 
   game.draw = ( ctx ) => {
+    const marines = world.entities.filter( e => e.info.type == 'marine' );
+
+    marines.forEach( marine => {
+      marine.drawUI( ctx );
+
+      if ( marine.moveTarget ) {
+        ctx.beginPath();
+        ctx.moveTo( marine.moveTarget.x, marine.moveTarget.y );
+        ctx.lineTo( marine.x, marine.y );
+        ctx.strokeStyle = 'cyan';
+        ctx.setLineDash( [ 5, 5 ] );
+        ctx.stroke();
+        ctx.setLineDash( [] );
+      }
+
+    } );
+
     world.draw( ctx );
 
-    world.entities.filter( e => e.info.type == 'marine' ).forEach( e => e.drawUI( ctx ) );
+    marines.forEach( marine => marine.drawUI( ctx ) );
   };
 
   document.addEventListener( 'mousedown', ( e ) => {
     const moveTarget = { x: e.offsetX, y: e.offsetY };
 
-    world.entities.filter( e => e.info.type == 'marine' ).forEach( e => e.moveTarget = moveTarget );
+    const marines = world.entities.filter( e => e.info.type == 'marine' );
+
+    const center = { x: 0, y: 0 };
+
+    marines.forEach( marine => {
+      center.x += marine.x;
+      center.y += marine.y;
+    } );
+
+    center.x /= marines.length;
+    center.y /= marines.length;
+
+    const moveAngle = Math.atan2( moveTarget.y - center.y, moveTarget.x - center.x );
+
+    const offsets = marines.map( marine => ( {
+      marine: marine,
+      offset: ( marine.x - moveTarget.x ) * Math.sin( moveAngle ) + ( marine.y - moveTarget.y ) * -Math.cos( moveAngle )
+    } ) ).sort( ( a, b ) => a.offset - b.offset );
+
+    const SPACING = ActorInfo.marine.size * 2.5;
+    const adjust = 0.5 * ( offsets.length - 1 );
+
+    offsets.forEach( ( e, index ) => e.marine.moveTarget = { 
+      x: moveTarget.x + ( index - adjust ) * SPACING * Math.sin( moveAngle ),
+      y: moveTarget.y + ( index - adjust ) * SPACING * -Math.cos( moveAngle ),
+    } );
   } );
 
 </script>

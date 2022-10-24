@@ -15,7 +15,7 @@ export const GunInfo = {
     spread: 0.1,
     reloadTime: 1000,
     bulletInfoKey: 'rifle',
-    range: 300,
+    range: 200,
   },
   shotgun: {
     maxAmmo: 8,
@@ -24,7 +24,7 @@ export const GunInfo = {
     spread: 0.2,
     reloadTime: 1500,
     bulletInfoKey: 'shotgun',
-    range: 200,
+    range: 150,
   }
 }
 

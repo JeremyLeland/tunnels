@@ -107,6 +107,11 @@ export class AvoidingActor extends Actor {
   draw( ctx ) {
     super.draw( ctx );
 
+    // ctx.beginPath();
+    // ctx.arc( this.x, this.y, this.info.size + this.guns[ 0 ].info.range, 0, Math.PI * 2 );
+    // ctx.strokeStyle = 'red';
+    // ctx.stroke();
+
     if ( DEBUG_CONES ) {
       if ( this.#debug.inFront ) {
         ctx.fillStyle = 'green';
