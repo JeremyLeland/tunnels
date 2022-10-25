@@ -24,7 +24,7 @@ export class Cones {
 
   static coneFromLine( x, y, radius, line, maxDist ) {
     const closest = line.getClosestPoint( x, y );
-    const dist = Math.hypot( closest.x - x, closest.y - y ) /*- radius*/;   // TODO: Remove radius from dist? Or deal with elsewhere?
+    const dist = Math.max( 0, Math.hypot( closest.x - x, closest.y - y ) - radius );   // TODO: Remove radius from dist? Or deal with elsewhere?
 
     if ( dist < maxDist ) {
       const cx1 = line.x1 - x;
@@ -38,7 +38,7 @@ export class Cones {
       const angle1 = Math.atan2( cy1, cx1 );
       const angle2 = Math.atan2( cy2, cx2 );
   
-      const r = radius;
+      const r = radius * 1.3;   // *1.3 = buffer space
       const spread1 = Math.asin( Math.min( 1, r / h1 ) );
       const spread2 = Math.asin( Math.min( 1, r / h2 ) );
   
