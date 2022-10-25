@@ -1,5 +1,24 @@
+import { Wall } from './Wall.js';
+import { AvoidingActor } from './AvoidingActor.js';
+import { ActorInfo } from '../info/info.js';
+
 export class World {
   entities = [];
+
+  static async fromFile( path ) {
+    const json = JSON.parse( await ( await fetch( path ) ).text() );    // TODO: error handling
+    return new World( json );
+  }
+
+  constructor( json ) {
+    const walls = json.walls.map( points => new Wall( points ) );
+    const entities = json.entities.map( values => 
+      new AvoidingActor( values, ActorInfo[ values.type ] ) 
+    );
+    
+    this.entities.push( ...walls );
+    this.entities.push( ...entities );
+  }
 
   update( dt ) {    
     for ( let tries = 0; dt > 0 && tries < 8; tries ++ ) {

@@ -14,23 +14,18 @@
 
   import { ActorInfo } from './info/info.js';
   
+  
+  let levelIndex = 0;
+  const levels = [
+    './levels/test6.json',
+    './levels/test7.json',
+  ];
+
+  const ui = Object.fromEntries( [ 'numLeft', 'victory' ].map( e => [ e, document.getElementById( e ) ] ) );
+
+  const world = await World.fromFile( levels[ levelIndex ] );
+  
   const game = new Game();
-  const world = new World();
-  
-
-  const json = JSON.parse( await ( await fetch( './levels/test6.json' ) ).text() );
-
-  const walls = json.walls.map( points => new Wall( points ) );
-  const entities = json.entities.map( values => 
-    new AvoidingActor( values, ActorInfo[ values.type ] ) 
-  );
-  
-  world.entities.push( ...walls );
-  world.entities.push( ...entities );
-
-  const ui = {};
-  [ 'numLeft', 'victory' ].forEach( e => ui[ e ] = document.getElementById( e ) );
-  
   game.update = ( dt ) => {
     world.update( dt );
 
@@ -64,6 +59,27 @@
 
     marines.forEach( marine => marine.drawUI( ctx ) );
   };
+
+  // async function loadLevel( path ) {
+  //   world = await World.fromFile( path );
+  // }
+
+  // function prevLevel() {
+  //   levelIndex = Math.max( 0, levelIndex - 1 );
+  //   loadLevel( levels[ levelIndex ] );
+  // }
+  
+  // function nextLevel() {
+  //   levelIndex = Math.min( levels.length - 1, levelIndex + 1 );
+  //   loadLevel( levels[ levelIndex ] );
+  // }
+
+  // document.addEventListener( 'keydown', ( e ) => {
+  //   switch( e.code ) {
+  //     case 'KeyN':  nextLevel();  break;
+  //     case 'KeyP':  prevLevel();  break;
+  //   }
+  // } );
 
   document.addEventListener( 'mousedown', ( e ) => {
     const moveTarget = { x: e.offsetX, y: e.offsetY };

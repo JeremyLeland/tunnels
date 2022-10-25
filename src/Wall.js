@@ -18,6 +18,7 @@ export class Wall extends Entity {
         hullPointIndex = index;
       }
     } );
+    this.path.lineTo( points[ 0 ][ 0 ], points[ 0 ][ 1 ] );
 
     const a = points.at( hullPointIndex - 1 );
     const b = points[ hullPointIndex ];
