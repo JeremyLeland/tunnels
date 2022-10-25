@@ -2,12 +2,13 @@
 <link rel="stylesheet" href="./style.css">
 
 <body>
+  <div id="layers"></div>
   <div id="remaining"><span id="numLeft"></span> enemies left</div>
   <div class="center" id="victory">Level Clear</div>
 </body>
 
 <script type="module">
-  import { Game } from './src/Game.js';
+  import { GameUpdate } from './src/GameUpdate.js';
   import { World } from './src/World.js';
   import { Wall } from './src/Wall.js';
   import { AvoidingActor } from './src/AvoidingActor.js';
@@ -15,18 +16,24 @@
   import { ActorInfo } from './info/info.js';
   
   
+  const groundLayer = createLayer( 1000, 1000 );
+  const actorsLayer = createLayer( 1000, 1000 );
+
+  const layersDiv = document.getElementById( 'layers' );
+  layersDiv.appendChild( groundLayer.canvas );
+  layersDiv.appendChild( actorsLayer.canvas );
+
+  const ui = Object.fromEntries( [ 'numLeft', 'victory' ].map( e => [ e, document.getElementById( e ) ] ) );
+
   let levelIndex = 0;
   const levels = [
     './levels/test6.json',
     './levels/test7.json',
   ];
 
-  const ui = Object.fromEntries( [ 'numLeft', 'victory' ].map( e => [ e, document.getElementById( e ) ] ) );
+  let world;
 
-  const world = await World.fromFile( levels[ levelIndex ] );
-  
-  const game = new Game();
-  game.update = ( dt ) => {
+  const gameUpdate = new GameUpdate( ( dt ) => {
     world.update( dt );
 
     const numEnemies = world.entities.filter( e => e.info.type == 'alien' ).length;
@@ -35,11 +42,22 @@
     if ( numEnemies == 0 ) {
       ui.victory.style.visibility = 'visible';
     }
-  };
 
-  game.draw = ( ctx ) => {
+    drawActors();
+  } );
+
+  function drawGround() {
+    const ctx = groundLayer;
+    ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
+    const walls = world.entities.filter( e => e.info.type == 'wall' );
+    walls.forEach( wall => wall.draw( ctx ) );
+  }
+
+  function drawActors() {
+    const ctx = actorsLayer;
+    ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
+    
     const marines = world.entities.filter( e => e.info.type == 'marine' );
-
     marines.forEach( marine => {
       marine.drawUI( ctx );
 
@@ -52,34 +70,38 @@
         ctx.stroke();
         ctx.setLineDash( [] );
       }
-
     } );
 
-    world.draw( ctx );
+    world.entities.filter( e => e.info.type != 'wall' ).forEach( e => e.draw( actorsLayer ) );
 
-    marines.forEach( marine => marine.drawUI( ctx ) );
-  };
+    marines.forEach( marine => marine.drawUI( actorsLayer ) );
+  }
 
-  // async function loadLevel( path ) {
-  //   world = await World.fromFile( path );
-  // }
+  loadLevel( levels[ 0 ] );
 
-  // function prevLevel() {
-  //   levelIndex = Math.max( 0, levelIndex - 1 );
-  //   loadLevel( levels[ levelIndex ] );
-  // }
+  async function loadLevel( path ) {
+    gameUpdate.stop();
+    world = await World.fromFile( path );
+    drawGround();
+    gameUpdate.start();
+  }
+
+  function prevLevel() {
+    levelIndex = Math.max( 0, levelIndex - 1 );
+    loadLevel( levels[ levelIndex ] );
+  }
   
-  // function nextLevel() {
-  //   levelIndex = Math.min( levels.length - 1, levelIndex + 1 );
-  //   loadLevel( levels[ levelIndex ] );
-  // }
+  function nextLevel() {
+    levelIndex = Math.min( levels.length - 1, levelIndex + 1 );
+    loadLevel( levels[ levelIndex ] );
+  }
 
-  // document.addEventListener( 'keydown', ( e ) => {
-  //   switch( e.code ) {
-  //     case 'KeyN':  nextLevel();  break;
-  //     case 'KeyP':  prevLevel();  break;
-  //   }
-  // } );
+  document.addEventListener( 'keydown', ( e ) => {
+    switch( e.code ) {
+      case 'KeyN':  nextLevel();  break;
+      case 'KeyP':  prevLevel();  break;
+    }
+  } );
 
   document.addEventListener( 'mousedown', ( e ) => {
     const moveTarget = { x: e.offsetX, y: e.offsetY };
@@ -111,5 +133,19 @@
       y: moveTarget.y + ( index - adjust ) * SPACING * -Math.cos( moveAngle ),
     } );
   } );
+
+  function createLayer( width, height ) {
+    const canvas = document.createElement( 'canvas' );
+    
+    canvas.width = width * devicePixelRatio;
+    canvas.height = height * devicePixelRatio;
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+
+    const ctx = canvas.getContext( '2d' );
+    ctx.scale( devicePixelRatio, devicePixelRatio );
+
+    return ctx;
+  }
 
 </script>

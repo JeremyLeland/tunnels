@@ -1,0 +1,34 @@
+<link rel="stylesheet" href="../style.css">
+
+<div id="layers">
+</div>
+
+<script>
+  const layersDiv = document.getElementById( 'layers' );
+
+  const ground = createLayer( 2000, 2000 );
+  const actors = createLayer( 2000, 2000 );
+
+  layersDiv.appendChild( ground.canvas );
+  layersDiv.appendChild( actors.canvas );
+  
+  ground.fillStyle = 'tan';
+  ground.fillRect( 0, 0, 2000, 2000 );
+
+  actors.fillStyle = 'blue';
+  actors.fillRect( 100, 100, 100, 100 );
+
+  function createLayer( width, height ) {
+    const canvas = document.createElement( 'canvas' );
+    
+    canvas.width = width * devicePixelRatio;
+    canvas.height = height * devicePixelRatio;
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+
+    const ctx = canvas.getContext( '2d' );
+    ctx.scale( devicePixelRatio, devicePixelRatio );
+
+    return ctx;
+  }
+</script>
