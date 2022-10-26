@@ -6,7 +6,7 @@ export const GunInfo = {
     spread: 0,
     reloadTime: 2000,
     bulletInfoKey: 'bite',
-    range: 10,
+    range: 20,
   },
   rifle: {
     maxAmmo: 30,
@@ -45,7 +45,7 @@ export const BulletInfo = {
   rifle: {
     type: 'attack',
     life: 1,
-    damage: 10,
+    damage: 5,
     speed: 0.9,
     size: 2,
     boundingPoints: [
@@ -59,7 +59,7 @@ export const BulletInfo = {
   shotgun: {
     type: 'attack',
     life: 1,
-    damage: 10,
+    damage: 5,
     speed: 1.2,
     size: 1,
     boundingPoints: [
@@ -161,7 +161,7 @@ export const ActorInfo = {
     type: 'alien',
     life: 100,
     damage: 1,
-    maxSpeed: 0.06,
+    maxSpeed: 0.08,
     turnSpeed: 0.008,
     accelSpeed: 0.0005,
     size: 10,
@@ -173,6 +173,7 @@ export const ActorInfo = {
     avoids: [ 'alien', 'marine', 'wall' ],
     targets: [ 'marine' ],
     wander: {
+      speed: 0.02,
       radius: 100,
       time: 3000,
     },

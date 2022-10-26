@@ -11,6 +11,7 @@ export class AvoidingActor extends Actor {
 
   moveTarget;
   attackTarget;
+  wanderTarget;
 
   timeUntilWander = 0;
   // TIME_BETWEEN_WANDERS = 3000;
@@ -59,7 +60,7 @@ export class AvoidingActor extends Actor {
       if ( this.timeUntilWander <= 0 ) {
         // TODO: Base this on a range from home base?
         const wanderAngle = ( Math.random() - 0.5 ) * Math.PI * 2;
-        this.moveTarget = {
+        this.wanderTarget = {
           x: this.x + Math.cos( wanderAngle ) * this.info.wander.radius,
           y: this.y + Math.sin( wanderAngle ) * this.info.wander.radius,
         };
@@ -67,14 +68,14 @@ export class AvoidingActor extends Actor {
       }
     }
 
-    const target = this.attackTarget ?? this.moveTarget;
+    const target = this.attackTarget ?? this.moveTarget ?? this.wanderTarget;
 
     if ( target ) {
       const targetDist  = Math.hypot( target.x - this.x, target.y - this.y ) - this.info.size - ( target.info?.size ?? 0 );
       const targetAngle = Math.atan2( target.y - this.y, target.x - this.x );
 
-      // TODO: Clean this up (detecting if we have arrived at move target)
-      if ( !target.type && Math.abs( targetDist ) < 10 ) {
+      // TODO: Detect move/wander target arrival separately above?
+      if ( target == this.moveTarget && Math.abs( targetDist ) < 10 ) {
         this.moveTarget = null;
       }
       
@@ -89,7 +90,8 @@ export class AvoidingActor extends Actor {
       else {
         this.isShooting = false;
         
-        this.goalSpeed = inFront.dist < AVOID_DIST ? 0 : this.info.maxSpeed;
+        this.goalSpeed = inFront.dist < AVOID_DIST ? 0 : 
+          ( target == this.wanderTarget ? this.info.wander.speed : this.info.maxSpeed );
         
         const maxDist = Math.min( targetDist, AVOID_DIST );
         
