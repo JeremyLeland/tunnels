@@ -24,7 +24,7 @@ export class Cones {
 
   static coneFromLine( x, y, radius, line, maxDist ) {
     const closest = line.getClosestPoint( x, y );
-    const dist = Math.max( 0, Math.hypot( closest.x - x, closest.y - y ) - radius );   // TODO: Remove radius from dist? Or deal with elsewhere?
+    const dist = Math.max( 0, Math.hypot( closest.x - x, closest.y - y ) - radius );
 
     if ( dist < maxDist ) {
       const cx1 = line.x1 - x;

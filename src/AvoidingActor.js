@@ -72,8 +72,12 @@ export class AvoidingActor extends Actor {
     if ( target ) {
       const targetDist  = Math.hypot( target.x - this.x, target.y - this.y ) - this.info.size - ( target.info?.size ?? 0 );
       const targetAngle = Math.atan2( target.y - this.y, target.x - this.x );
-      
 
+      // TODO: Clean this up (detecting if we have arrived at move target)
+      if ( !target.type && Math.abs( targetDist ) < 10 ) {
+        this.moveTarget = null;
+      }
+      
       if ( inFront?.entity == target ) {
         const inSight = Math.abs( targetAngle - this.angle ) < 0.1; // TODO: make this an aim constant?
         const inRange = targetDist < this.guns[ 0 ].info.range;
@@ -81,11 +85,11 @@ export class AvoidingActor extends Actor {
         this.isShooting = inSight && inRange;
         this.goalSpeed = inRange ? 0 : this.info.maxSpeed;
         this.goalAngle = targetAngle;
-      } 
+      }
       else {
         this.isShooting = false;
         
-        this.goalSpeed = inFront.dist < AVOID_DIST || Math.abs( targetDist ) < 10 ? 0 : this.info.maxSpeed;
+        this.goalSpeed = inFront.dist < AVOID_DIST ? 0 : this.info.maxSpeed;
         
         const maxDist = Math.min( targetDist, AVOID_DIST );
         
