@@ -13,7 +13,6 @@ body {
 }
 
 div { position: absolute; }
-canvas { position: absolute; }
 
 .center {
   width: 100%;
@@ -23,17 +22,7 @@ canvas { position: absolute; }
   justify-content: center;
 }
 
-#layers {
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  height: 100%;
-}
-
-#remaining { top: 0; }
-
 #victory {
-  top: 0;
   font-size: 26;
   visibility: hidden;
 }

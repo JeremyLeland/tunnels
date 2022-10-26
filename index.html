@@ -2,27 +2,19 @@
 <link rel="stylesheet" href="./style.css">
 
 <body>
-  <div id="layers"></div>
   <div id="remaining"><span id="numLeft"></span> enemies left</div>
   <div class="center" id="victory">Level Clear</div>
 </body>
 
 <script type="module">
-  import { GameUpdate } from './src/GameUpdate.js';
+  import { Game } from './src/Game.js';
   import { World } from './src/World.js';
   import { Wall } from './src/Wall.js';
   import { AvoidingActor } from './src/AvoidingActor.js';
 
   import { ActorInfo } from './info/info.js';
   
-  
-  const groundLayer = createLayer( 1000, 1000 );
-  const actorsLayer = createLayer( 1000, 1000 );
-
-  const layersDiv = document.getElementById( 'layers' );
-  layersDiv.appendChild( groundLayer.canvas );
-  layersDiv.appendChild( actorsLayer.canvas );
-
+  const game = new Game();
   const ui = Object.fromEntries( [ 'numLeft', 'victory' ].map( e => [ e, document.getElementById( e ) ] ) );
 
   let levelIndex = 0;
@@ -33,7 +25,8 @@
 
   let world;
 
-  const gameUpdate = new GameUpdate( ( dt ) => {
+  
+  game.update = ( dt ) => {
     world.update( dt );
 
     const numEnemies = world.entities.filter( e => e.info.type == 'alien' ).length;
@@ -42,19 +35,9 @@
     if ( numEnemies == 0 ) {
       ui.victory.style.visibility = 'visible';
     }
+  };
 
-    drawActors();
-  } );
-
-  function drawGround() {
-    const ctx = groundLayer;
-    ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
-    const walls = world.entities.filter( e => e.info.type == 'wall' );
-    walls.forEach( wall => wall.draw( ctx ) );
-  }
-
-  function drawActors() {
-    const ctx = actorsLayer;
+  game.draw = ( ctx ) => {
     ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
     
     const marines = world.entities.filter( e => e.info.type == 'marine' );
@@ -72,18 +55,19 @@
       }
     } );
 
-    world.entities.filter( e => e.info.type != 'wall' ).forEach( e => e.draw( actorsLayer ) );
+    world.draw( ctx );
 
-    marines.forEach( marine => marine.drawUI( actorsLayer ) );
+    marines.forEach( marine => marine.drawUI( ctx ) );
   }
 
   loadLevel( levels[ 0 ] );
 
   async function loadLevel( path ) {
-    gameUpdate.stop();
+    game.stop();
+    ui.victory.style.visibility = 'hidden';
+
     world = await World.fromFile( path );
-    drawGround();
-    gameUpdate.start();
+    game.start();
   }
 
   function prevLevel() {
@@ -133,19 +117,5 @@
       y: moveTarget.y + ( index - adjust ) * SPACING * -Math.cos( moveAngle ),
     } );
   } );
-
-  function createLayer( width, height ) {
-    const canvas = document.createElement( 'canvas' );
-    
-    canvas.width = width * devicePixelRatio;
-    canvas.height = height * devicePixelRatio;
-    canvas.style.width = width + 'px';
-    canvas.style.height = height + 'px';
-
-    const ctx = canvas.getContext( '2d' );
-    ctx.scale( devicePixelRatio, devicePixelRatio );
-
-    return ctx;
-  }
 
 </script>
