@@ -25,12 +25,14 @@
 
   let world;
 
-  
+  let remaining;
   game.update = ( dt ) => {
     world.update( dt );
 
     const numEnemies = world.entities.filter( e => e.info.type == 'alien' ).length;
-    ui.numLeft.innerText = numEnemies;
+    if ( remaining != numEnemies ) {
+      ui.numLeft.innerText = remaining = numEnemies;
+    }
 
     if ( numEnemies == 0 ) {
       ui.victory.style.visibility = 'visible';
