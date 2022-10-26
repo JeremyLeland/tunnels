@@ -2,7 +2,8 @@
 <link rel="stylesheet" href="../style.css">
 
 <body>
-  <canvas id="canvas" width="800px" height="800px"></canvas>
+  <div id="palette" style="bottom: 0"></div>
+  <canvas id="canvas" oncontextmenu="return false;" width="1000px" height="1000px"></canvas>
 </body>
 
 <script type="module">
@@ -13,43 +14,80 @@
   import { Curve } from '../src/Curve.js';
   import { CellMap } from '../src/CellMap.js';
   import { Level } from '../src/Level.js';
+  import { AvoidingActor } from '../src/AvoidingActor.js';
 
-  const width = 800, height = 800;
+  let currentType = 'wall';
+
+  const paletteDiv = document.getElementById( 'palette' );
+  [ 'wall', 'marine', 'alien' ].forEach( type => {
+    const button = document.createElement( 'button' );
+    button.innerText = type;
+    button.onclick = () => currentType = type;
+    paletteDiv.appendChild( button );
+  } );
+
+  const width = 1000, height = 1000;
   const seeds = Array.from( Array( 100 ), _ => ( {
     x: Math.random() * width, 
     y: Math.random() * height
   } ) );
 
   const delaunay = Delaunay.from( seeds, ( e ) => e.x, ( e ) => e.y );
-  const voronoi = delaunay.voronoi( [ 20, 20, width - 20, height - 20 ] );
+  const voronoi = delaunay.voronoi( [ 0, 0, width, height ] );
 
   let lines = [];
   const cellMap = CellMap.fromVoronoi( voronoi );
   let pathMap;
 
-  const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
+  const canvas = document.getElementById( 'canvas' );
+  const ctx = canvas.getContext( '2d' );
   
   cellMap.cells.forEach( cell => cell.drawDebug( ctx ) );
 
+  let entities = [];
+
 
   let mouseX = 0, mouseY = 0, mouseDown = false;
-  document.addEventListener( 'mousedown', ( e ) => {
+  canvas.addEventListener( 'mousedown', ( e ) => {
     mouseDown = true;
-    removeUnderMouse();
+
+    if ( currentType == 'wall' ) {
+      removeUnderMouse();
+    }
+    else {
+      if ( e.button == 0 )  addEntity( mouseX, mouseY );
+      if ( e.button == 2 )  removeEntity( mouseX, mouseY );
+    }
     draw();
   } );
-  document.addEventListener( 'mousemove', ( e ) => {
+  canvas.addEventListener( 'mousemove', ( e ) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
 
-    if ( mouseDown ) {
+    if ( mouseDown && currentType == 'wall' ) {
       removeUnderMouse();
       draw();
     }
   } );
-  document.addEventListener( 'mouseup', ( e ) => mouseDown = false );
+  canvas.addEventListener( 'mouseup', ( e ) => mouseDown = false );
 
   document.addEventListener( 'keypress', ( e ) => outputLevel() );
+
+  function addEntity( x, y ) {
+    entities.push( new AvoidingActor( { type: currentType, x: x, y: y } ) );
+  }
+
+  function removeEntity( x, y ) {
+    if ( entities.length > 0 ) {
+      let closest = entities.map( 
+        e => ( { entity: e, dist: Math.hypot( e.x - x, e.y - y ) } )
+      ).reduce(
+        ( closest, e ) => e.dist < closest.dist ? e : closest
+      );
+      
+      entities = entities.filter( a => a != closest.entity );
+    }
+  }
 
   function removeUnderMouse() {
     const cell = cellMap.cells.find( cell => cell.contains( mouseX, mouseY ) );
@@ -78,6 +116,8 @@
 
     ctx.strokeStyle = 'orange';
     lines.forEach( line => line.draw( ctx ) );
+
+    entities.forEach( a => a.draw( ctx ) );
   }
 
   function getCaveLines( cellMap ) {
@@ -117,6 +157,7 @@
 
     const json = {};
 
+    json.entities = entities.map( actor => ( { type: actor.type, x: actor.x, y: actor.y } ) );
     json.walls = cellMap.getEdgeLoops().map( loop => loop.map( line => [ line.x1, line.y1 ] ) );
 
     console.log( JSON.stringify( json ) );

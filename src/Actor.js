@@ -1,6 +1,8 @@
 import { Entity } from './Entity.js';
 import { Gun } from './Gun.js';
 
+import { ActorInfo } from '../info/info.js';
+
 export class Actor extends Entity {
   speed = 0;
 
@@ -10,10 +12,10 @@ export class Actor extends Entity {
   isShooting = false;
   guns = [];
 
-  constructor( values, actorInfo ) {
-    super( values, actorInfo );
+  constructor( values ) {
+    super( values, ActorInfo[ values.type ] );
 
-    actorInfo.guns?.forEach( gunValues => 
+    this.info.guns?.forEach( gunValues => 
       this.guns.push( new Gun( gunValues, this ) ) 
     );
   }

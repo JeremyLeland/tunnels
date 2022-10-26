@@ -1,6 +1,5 @@
 import { Wall } from './Wall.js';
 import { AvoidingActor } from './AvoidingActor.js';
-import { ActorInfo } from '../info/info.js';
 
 export class World {
   entities = [];
@@ -12,9 +11,7 @@ export class World {
 
   constructor( json ) {
     const walls = json.walls.map( points => new Wall( points ) );
-    const entities = json.entities.map( values => 
-      new AvoidingActor( values, ActorInfo[ values.type ] ) 
-    );
+    const entities = json.entities.map( values => new AvoidingActor( values ) );
     
     this.entities.push( ...walls );
     this.entities.push( ...entities );
