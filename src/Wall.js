@@ -5,11 +5,19 @@ export class Wall extends Entity {
   constructor( points ) {
     super( {}, Object.assign( { boundingPoints: points }, WallInfo.rock ) );
 
+    let minX = points[ 0 ][ 0 ], maxX = points[ 0 ][ 0 ];
+    let minY = points[ 0 ][ 1 ], maxY = points[ 0 ][ 1 ];
+
     let hullPointIndex = 0;
 
     this.path = new Path2D();
     points.forEach( ( point, index ) => {
       this.path.lineTo( point[ 0 ], point[ 1 ] );
+
+      minX = Math.min( minX, point[ 0 ] );
+      minY = Math.min( minY, point[ 1 ] );
+      maxX = Math.max( maxX, point[ 0 ] );
+      maxY = Math.max( maxY, point[ 1 ] );
 
       // Left-most, top-most point should be on convex hull
       const hullPoint = points[ hullPointIndex ];
@@ -29,7 +37,8 @@ export class Wall extends Entity {
                 ( a[ 1 ] * b[ 0 ] + b[ 1 ] * c[ 0 ] + a[ 0 ] * c[ 1 ] );
     
     if ( det < 0 ) {
-      this.path.rect( 0, 0, 1000, 1000 );   // TODO: Don't hard-code this
+      const BUFFER = 20;
+      this.path.rect( minX - BUFFER, minY - BUFFER, maxX + BUFFER * 2, maxY + BUFFER * 2 );
     }
   }
 

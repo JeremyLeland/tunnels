@@ -1,9 +1,19 @@
 <title>Cell Maze Editor</title>
 <link rel="stylesheet" href="../style.css">
 
+<style>
+  #world {
+    overflow: scroll;
+    width: 100%;
+    height: 100%;
+  }
+</style>
+
 <body>
-  <div id="palette" style="bottom: 0"></div>
-  <canvas id="canvas" oncontextmenu="return false;" width="1000px" height="1000px"></canvas>
+  <div id="world">
+    <canvas id="canvas" oncontextmenu="return false;" width="2000px" height="1000px"></canvas>
+  </div>
+  <div id="palette"></div>
 </body>
 
 <script type="module">
@@ -26,8 +36,8 @@
     paletteDiv.appendChild( button );
   } );
 
-  const width = 1000, height = 1000;
-  const seeds = Array.from( Array( 100 ), _ => ( {
+  const width = 2000, height = 1000;
+  const seeds = Array.from( Array( 200 ), _ => ( {
     x: Math.random() * width, 
     y: Math.random() * height
   } ) );
@@ -61,8 +71,8 @@
     draw();
   } );
   canvas.addEventListener( 'mousemove', ( e ) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
+    mouseX = e.offsetX;
+    mouseY = e.offsetY;
 
     if ( mouseDown && currentType == 'wall' ) {
       removeUnderMouse();

@@ -19,6 +19,7 @@
 
   let levelIndex = 0;
   const levels = [
+    './levels/scrollTest.json',
     './levels/test8.json',
     './levels/test6.json',
     './levels/test7.json',
@@ -83,15 +84,21 @@
     loadLevel( levels[ levelIndex ] );
   }
 
+  const SCROLL = 20;
+
   document.addEventListener( 'keydown', ( e ) => {
     switch( e.code ) {
       case 'KeyN':  nextLevel();  break;
       case 'KeyP':  prevLevel();  break;
+      case 'KeyW': case 'KeyUp':    game.scroll.y += SCROLL;  break;
+      case 'KeyA': case 'KeyLeft':  game.scroll.x += SCROLL;  break;
+      case 'KeyS': case 'KeyDown':  game.scroll.y -= SCROLL;  break;
+      case 'KeyD': case 'KeyRight': game.scroll.x -= SCROLL;  break;
     }
   } );
 
   document.addEventListener( 'mousedown', ( e ) => {
-    const moveTarget = { x: e.offsetX, y: e.offsetY };
+    const moveTarget = { x: e.offsetX - game.scroll.x, y: e.offsetY - game.scroll.y };
 
     const marines = world.entities.filter( e => e.info.type == 'marine' );
 
