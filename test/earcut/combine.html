@@ -1,0 +1,30 @@
+<title>Hover over earcut triangles</title>
+<link rel="stylesheet" href="../../style.css">
+
+<canvas id="canvas" width="800px" height="800px"></canvas>
+
+<script type="module">
+  import { CellMap } from './CellMap.js';
+
+  const json = JSON.parse( await ( await fetch( './test1.json' ) ).text() );
+
+  const cellMap = new CellMap( json.walls );
+ 
+  
+  let mouseX = 0, mouseY = 0;
+  document.addEventListener( 'mousemove', ( e ) => {
+    mouseX = e.offsetX;
+    mouseY = e.offsetY;
+    draw();
+  } );
+
+  const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
+  draw();
+  
+  function draw() {
+    ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
+    ctx.strokeStyle = 'brown';
+    cellMap.draw( ctx );
+  }
+  
+</script>
