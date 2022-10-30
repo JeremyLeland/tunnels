@@ -46,6 +46,15 @@ export class CellMap {
     } );
   }
 
+  merge( cellIndex, edgeIndex ) {
+    const cell = this.cells[ cellIndex ];
+    const other = cell.links[ edgeIndex ];
+
+    if ( other ) {
+      cell.merge( edgeIndex );
+      this.cells = this.cells.filter( c => c != other );
+    }
+  }
   
   removeCell( cell ) {
     cell.unlinkAll();

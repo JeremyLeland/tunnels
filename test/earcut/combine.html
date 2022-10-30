@@ -9,8 +9,17 @@
   const json = JSON.parse( await ( await fetch( './test1.json' ) ).text() );
 
   const cellMap = new CellMap( json.walls );
- 
-  
+
+  const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
+  draw();
+
+  cellMap.merge( 0, 2 );
+  draw();
+  cellMap.merge( 1, 2 );
+  draw();
+  cellMap.merge( 2, 2 );
+  draw();
+
   let mouseX = 0, mouseY = 0;
   document.addEventListener( 'mousemove', ( e ) => {
     mouseX = e.offsetX;
@@ -18,9 +27,6 @@
     draw();
   } );
 
-  const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
-  draw();
-  
   function draw() {
     ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
     ctx.strokeStyle = 'brown';

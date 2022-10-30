@@ -36,18 +36,23 @@ export class Cell {
     );
   }
 
-  merge( index ) {
-    const other = this.links[ index ];
-    if ( other ) {
-      const otherIndex = other.links.findIndex( link => link == this );
-      
-      const extract = ( arr ) => arr.slice( otherIndex + 1 ).concat( arr.slice( 0, otherIndex ) );
+  merge( edgeIndex ) {
+    const other = this.links[ edgeIndex ];
+    other.links.forEach( ( otherLink, i ) => {
+      if ( otherLink == this ) {
+        const extract = ( arr ) => arr.slice( i + 1 ).concat( arr.slice( 0, i ) );
 
-      this.edges.splice( index, 1, ...extract( other.edges ) );
-      this.links.splice( index, 1, ...extract( other.links ) );
-    }
+        this.edges.splice( edgeIndex, 1, ...extract( other.edges ) );
+        this.links.splice( edgeIndex, 1, ...extract( other.links ) );
 
-    this.updateCenter();
+        this.#updateCenter();
+      }
+      // Update other linked cells to point to us
+      else {
+        const neighborLinkIndex = otherLink.links.findIndex( l => l == other );
+        otherLink.links[ neighborLinkIndex ] = this;
+      }
+    } );
   }
 
   unlink( index ) {
