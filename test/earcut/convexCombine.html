@@ -1,0 +1,54 @@
+<title>Combine earcut triangles</title>
+<link rel="stylesheet" href="../../style.css">
+
+<canvas id="canvas" width="800px" height="800px"></canvas>
+
+<script type="module">
+  import { CellMap } from './CellMap.js';
+
+  const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
+  
+  const json = JSON.parse( await ( await fetch( './test1.json' ) ).text() );
+  const cellMap = new CellMap( json.walls );
+
+  let found;
+  do {
+    found = false;
+
+    // TODO: Is there a way to get this all in one pass?
+    // Need to account for cells being removed or edges being added, somehow...
+    for ( let c = 0; c < cellMap.cells.length; c ++ ) {
+      for ( let e = 0; e < cellMap.cells[ c ].edges.length; e ++ ) {
+        if ( cellMap.cells[ c ].isConvexEdge( e ) ) {
+          cellMap.merge( c, e );
+          found = true;
+        }
+      }
+    }
+  }
+  while ( found );
+
+
+  let mouseX = 0, mouseY = 0;
+  document.addEventListener( 'mousemove', ( e ) => {
+    mouseX = e.offsetX;
+    mouseY = e.offsetY;
+    draw();
+  } );
+
+  draw();
+
+  function draw() {
+    ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
+    
+    cellMap.draw( ctx );
+
+    const hover = cellMap.cells.find( cell => cell.contains( mouseX, mouseY ) );
+    if ( hover ) {
+      hover.draw( ctx, 'green' );
+    }
+  }
+
+  
+  
+</script>

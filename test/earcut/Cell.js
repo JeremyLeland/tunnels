@@ -36,19 +36,37 @@ export class Cell {
     );
   }
 
-  merge( edgeIndex ) {
-    const other = this.links[ edgeIndex ];
+  isConvexEdge( index ) {
+    const other = this.links[ index ];
+    if ( other ) {
+      const otherIndex = other.links.findIndex( l => l == this );
+
+      const thisBeforeEdgeStart = this.edges.at( index - 1 ).slope.angle;
+      const otherAfterEdgeStart = other.edges[ ( otherIndex + 1 ) % other.edges.length ].slope.angle;
+
+      const otherBeforeEdgeEnd = other.edges.at( otherIndex - 1 ).slope.angle;
+      const thisAfterEdgeEnd = this.edges[ ( index + 1 ) % this.edges.length ].slope.angle;
+
+      return ( Math.PI + deltaAngle( thisBeforeEdgeStart, otherAfterEdgeStart ) < Math.PI && 
+               Math.PI + deltaAngle( otherBeforeEdgeEnd,  thisAfterEdgeEnd    ) < Math.PI );
+    }
+
+    return false;
+  }
+
+  merge( index ) {
+    const other = this.links[ index ];
     other.links.forEach( ( otherLink, i ) => {
       if ( otherLink == this ) {
         const extract = ( arr ) => arr.slice( i + 1 ).concat( arr.slice( 0, i ) );
 
-        this.edges.splice( edgeIndex, 1, ...extract( other.edges ) );
-        this.links.splice( edgeIndex, 1, ...extract( other.links ) );
+        this.edges.splice( index, 1, ...extract( other.edges ) );
+        this.links.splice( index, 1, ...extract( other.links ) );
 
         this.#updateCenter();
       }
       // Update other linked cells to point to us
-      else {
+      else if ( otherLink ) {
         const neighborLinkIndex = otherLink.links.findIndex( l => l == other );
         otherLink.links[ neighborLinkIndex ] = this;
       }
@@ -71,13 +89,13 @@ export class Cell {
     }
   }
 
-  draw( ctx ) {
+  draw( ctx, color = 'cyan' ) {
     ctx.beginPath();
     ctx.arc( this.x, this.y, 3, 0, Math.PI * 2 );
     ctx.fillStyle = 'red';
     ctx.fill();
 
-    ctx.fillStyle = ctx.strokeStyle = 'cyan';
+    ctx.fillStyle = ctx.strokeStyle = color;
 
     ctx.save();
     ctx.globalAlpha = 0.2;
@@ -100,4 +118,12 @@ export class Cell {
       }
     } );
   }
+}
+
+function fixAngle( a ) {
+  return a > Math.PI ? a - Math.PI * 2 : a < -Math.PI ? a + Math.PI * 2 : a;
+}
+
+function deltaAngle( a, b ) {
+  return fixAngle( b - a );
 }
