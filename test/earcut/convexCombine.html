@@ -14,24 +14,28 @@
 
   const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
   
-  const json = JSON.parse( await ( await fetch( '../../levels/scrollTest.json' ) ).text() );
+  const mapPath = './test1.json'; //'../../levels/scrollTest.json';
+  const json = JSON.parse( await ( await fetch( mapPath ) ).text() );
   const cellMap = new CellMap( json.walls );
 
-  function doOneMerge() {
+  function doMerges() {
     for ( let c = 0; c < cellMap.cells.length; c ++ ) {
       for ( let e = 0; e < cellMap.cells[ c ].edges.length; e ++ ) {
         if ( cellMap.cells[ c ].isConvexEdge( e ) ) {
           cellMap.merge( c, e );
-          return true;
+          e = -1;   // start this cell over
         }
       }
     }
-
-    return false;
   }
 
-  while ( doOneMerge() ) {}
+  const label = 'Merges';
 
+  console.time( label );
+  doMerges();
+  console.timeEnd( label );
+
+  console.log( 'Num cells: ' + cellMap.cells.length );
 
   let mouseX = 0, mouseY = 0;
   document.addEventListener( 'mousemove', ( e ) => {
