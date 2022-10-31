@@ -1,0 +1,74 @@
+<title>Choose formations based on walls</title>
+<link rel="stylesheet" href="../../style.css">
+
+<style>
+  body {
+    overflow: scroll;
+  }
+</style>
+
+<canvas id="canvas" width="1000px" height="1000px"></canvas>
+
+<script type="module">
+  import { CellMap } from './CellMap.js';
+
+  const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
+  
+  const mapPath = '../../levels/test6.json';
+  const json = JSON.parse( await ( await fetch( mapPath ) ).text() );
+  const cellMap = new CellMap( json.walls );
+
+  for ( let c = 0; c < cellMap.cells.length; c ++ ) {
+    for ( let e = 0; e < cellMap.cells[ c ].edges.length; e ++ ) {
+      if ( cellMap.cells[ c ].isConvexEdge( e ) ) {
+        cellMap.merge( c, e );
+        e = -1;   // start this cell over
+      }
+    }
+  }
+
+  let mouseX = 0, mouseY = 0;
+  document.addEventListener( 'mousemove', ( e ) => {
+    mouseX = e.offsetX;
+    mouseY = e.offsetY;
+    draw();
+  } );
+
+  draw();
+
+  function draw() {
+    ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
+
+    cellMap.draw( ctx );
+
+    const startCell = cellMap.cells.find( cell => cell.contains( mouseX, mouseY ) );
+
+    if ( startCell ) {
+      startCell.draw( ctx, 'green' );
+
+      doIt( startCell, startCell, -1, 0 );
+      doIt( startCell, startCell,  1, 0 );
+    }
+  }
+
+  function doIt( cell, fromCell, dx, dy ) {
+    const edgeIndex = cell.edges.findIndex( ( edge, index ) => {
+      if ( cell.links[ index ] != fromCell ) {
+        const time = edge.getTimeToHit( mouseX, mouseY, dx, dy );
+        return 0 < time && time < Infinity;
+      }
+    } );
+
+    const link = cell.links[ edgeIndex ];
+
+    ctx.strokeStyle = link ? 'yellow' : 'red';
+    cell.edges[ edgeIndex ].draw( ctx );
+
+    if ( link ) {
+      doIt( link, cell, dx, dy );
+    }
+  }
+
+  
+  
+</script>

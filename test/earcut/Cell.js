@@ -1,4 +1,4 @@
-import { Line } from "../../src/Line.js";
+import { Line } from './Line.js';
 
 export class Cell {
   x = 0;
