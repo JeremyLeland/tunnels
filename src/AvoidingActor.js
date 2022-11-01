@@ -1,5 +1,6 @@
 import { Actor } from '../src/Actor.js';
 import { Cones } from './Cones.js';
+import { Entity } from './Entity.js';
 
 const AVOID_DIST = 20, TARGET_DIST = 200, CLOSE_ENOUGH = 50;
 
@@ -19,37 +20,29 @@ export class AvoidingActor extends Actor {
   #debug = {};
 
   #closestTarget( range ) {
-    const targetInfo = this.targetList.filter( e => e.isAlive ).map( entity => ( {
+    const allTargets = this.targetList.filter( e => e.isAlive ).map( entity => ( {
       entity: entity, 
-      dist: Math.hypot( entity.x - this.x, entity.y - this.y ),
+      angle: Math.atan2( entity.y - this.y, entity.x - this.x ),
+      dist:  Math.hypot( entity.x - this.x, entity.y - this.y ),
     } ) );
-
-    const closestTarget = targetInfo.reduce( 
-      ( closest, e ) => e.dist < closest.dist ? e : closest, { dist: Infinity }
+    
+    const visibleTargets = allTargets.filter( target =>
+      target.entity == Entity.firstRayHit( 
+        this.x, this.y, 
+        Math.cos( target.angle ), Math.sin( target.angle ), 
+        this.avoidList 
+      ).entity
     );
 
-    if ( closestTarget.dist < range ) {
-      return closestTarget.entity;
-    }
+    return visibleTargets.reduce( 
+      ( closest, e ) => e.dist < closest.dist ? e : closest, { dist: range }
+    ).entity;
   }
   
   update( dt ) {
-    
-    const inFrontDists = this.avoidList.map( entity => {
-      const closestTime = entity.boundingLines.map( line => 
-        line.getTimeToHit( this.x, this.y, Math.cos( this.angle ), Math.sin( this.angle ) )
-      ).reduce(
-        ( closest, time ) => 0 < time && time < closest ? time : closest, Infinity
-      );
 
-      return {
-        entity: entity,
-        dist: closestTime,
-      };
-    } );
-
-    const inFront = inFrontDists.reduce( 
-      ( closest, e ) => e.dist < closest.dist ? e : closest, { dist: Infinity }
+    const inFront = Entity.firstRayHit( 
+      this.x, this.y, Math.cos( this.angle ), Math.sin( this.angle ), this.avoidList 
     );
     this.#debug.inFront = inFront;
 

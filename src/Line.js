@@ -149,6 +149,23 @@ export class Line {
   //   } );
   // }
 
+  // Based on: https://www.jeffreythompson.org/collision-detection/line-line.php
+  getRayHit( x, y, dx, dy ) {
+    const thisDX = this.x2 - this.x1;
+    const thisDY = this.y2 - this.y1;
+    const D = ( dy * thisDX - dx * thisDY );
+
+    // TODO: Need to account for edges with radius -- see how we did this in pong Wall
+    // Just return all the info like in pong wall (including time, position, normal)
+
+    const ux = this.x1 - x;
+    const uy = this.y1 - y;
+
+    const us = ( dx * uy - dy * ux ) / D;
+
+    return ( 0 <= us && us <= 1 ) ? ( thisDX * uy - thisDY * ux ) / D : Infinity;
+  }
+
   getHit( other ) {
     const thisDX = this.x2 - this.x1;
     const thisDY = this.y2 - this.y1;

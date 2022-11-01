@@ -17,6 +17,13 @@ export class Entity {
 
   info = {};
   createdEntities = [];
+
+  static firstRayHit( x, y, dx, dy, entities ) {
+    const dists = entities.map( entity => entity.getRayHit( x, y, dx, dy ) );
+    return dists.reduce( 
+      ( closest, e ) => e.dist < closest.dist ? e : closest, { dist: Infinity }
+    );
+  }
   
   constructor( values, info ) {
     Object.assign( this, values );
@@ -89,6 +96,20 @@ export class Entity {
         );
       }
     }
+  }
+
+  getRayHit( x, y, dx, dy ) {
+    const closestTime = this.boundingLines.map( line => 
+      line.getRayHit( x, y, dx, dy )
+    ).reduce(
+      ( closest, time ) => 0 < time && time < closest ? time : closest, 
+      Infinity
+    );
+
+    return {
+      entity: this,
+      dist: closestTime,
+    };
   }
 
   getHit( other ) {
