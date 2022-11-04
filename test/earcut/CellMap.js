@@ -29,9 +29,6 @@ export class CellMap {
       this.cells.push( new Cell( [ c, b, a ] ) );
     }
 
-    // TODO: Links!
-    // TODO: Find links by looking for line with opposite x1,y1 and x2,y2 ?
-    // Make all the cells to start with, then add the links
     this.cells.forEach( cell => {
       cell.edges.forEach( ( edge, edgeIndex ) => {
         for ( let i = 0; i < this.cells.length; i ++ ) {
@@ -44,6 +41,10 @@ export class CellMap {
         }
       } );
     } );
+  }
+
+  cellAt( x, y ) {
+    return this.cells.find( cell => cell.contains( x, y ) );
   }
 
   merge( cellIndex, edgeIndex ) {

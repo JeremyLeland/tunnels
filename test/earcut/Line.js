@@ -42,6 +42,61 @@ export class Line {
     ctx.stroke();
   }
 
+  distanceTo( x, y ) {
+    return ( x - this.x1 ) * this.normal.x + ( y - this.y1 ) * this.normal.y;
+  }
+
+  // Based on: https://www.jeffreythompson.org/collision-detection/line-line.php
+  getRayHit( x, y, dx, dy ) {
+    const thisDX = this.x2 - this.x1;
+    const thisDY = this.y2 - this.y1;
+    const D = ( dy * thisDX - dx * thisDY );
+
+    // TODO: Need to account for edges with radius -- see how we did this in pong Wall
+    // Just return all the info like in pong wall (including time, position, normal)
+
+    const ux = this.x1 - x;
+    const uy = this.y1 - y;
+
+    const us = ( dx * uy - dy * ux ) / D;
+
+    return ( 0 <= us && us <= 1 ) ? ( thisDX * uy - thisDY * ux ) / D : Infinity;
+  }
+
+  // Based on: https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+  // See also: http://paulbourke.net/geometry/pointlineplane/
+  getProjection( line ) {
+    const px = this.x2 - this.x1;
+    const py = this.y2 - this.y1;
+
+    const D = ( ( px * px ) + ( py * py ) );
+    const u1 = Math.max( 0, Math.min( 1, 
+      ( ( line.x1 - this.x1 ) * px + ( line.y1 - this.y1 ) * py ) / D
+    ) );
+    const u2 = Math.max( 0, Math.min( 1, 
+      ( ( line.x2 - this.x1 ) * px + ( line.y2 - this.y1 ) * py ) / D
+    ) );
+    
+    return u1 == u2 ? null : new Line( 
+      this.x1 + u1 * px, this.y1 + u1 * py,
+      this.x1 + u2 * px, this.y1 + u2 * py,
+    );
+  }
+
+  getCone( x, y, radius = 0 ) {
+    const cx1 = this.x1 + this.slope.x * radius - x;
+    const cy1 = this.y1 + this.slope.y * radius - y;
+    const angle1 = Math.atan2( cy1, cx1 );
+
+    const cx2 = this.x2 - this.slope.x * radius - x;
+    const cy2 = this.y2 - this.slope.y * radius - y;
+    const angle2 = Math.atan2( cy2, cx2 );
+    
+    return deltaAngle( angle1, angle2 ) > 0 ?
+      { left: angle1, right: angle2 } : 
+      { left: angle2, right: angle1 };
+  }
+
 
   // getLineHit( other ) {
   //   return this.getHit( {
@@ -144,6 +199,11 @@ export class Line {
     ) );
     
     return { x: this.x1 + u * px, y: this.y1 + u * py };
+  }
+
+  getClosestDist( x, y ) {
+    const point = this.getClosestPoint( x, y );
+    return Math.hypot( x - point.x, y - point.y );
   }
 }
 

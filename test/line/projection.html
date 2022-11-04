@@ -1,0 +1,42 @@
+<title>Projecting line segments</title>
+<link rel="stylesheet" href="../../style.css">
+
+<body>
+  <canvas id="canvas" oncontextmenu="return false;" width="800px" height="800px"></canvas>
+</body>
+
+<script type="module">
+  
+  import { Line } from '../../src/Line.js';
+
+  let line = new Line( 100, 100, 150, 150 );
+  let other = new Line( 200, 200, 200, 100 );
+
+  const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
+  draw();
+  
+  document.addEventListener( 'mousedown', ( e ) => {
+    if ( e.button == 0 ) {
+      line = new Line( 100, 100, e.clientX, e.clientY );
+    }
+    if ( e.button == 2 ) {
+      other = new Line( 200, 200, e.clientX, e.clientY );
+    }
+    draw();
+  } );
+
+  function draw() {
+    ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
+
+    ctx.strokeStyle = 'yellow';
+    line.draw( ctx );
+    ctx.strokeStyle = 'orange';
+    other.draw( ctx );
+
+    const proj = other.getProjection( line );
+
+    ctx.strokeStyle = 'red';
+    proj?.draw( ctx );
+  }
+  
+</script>

@@ -1,38 +1,107 @@
 <title>Simple Pathfinding</title>
-<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../../style.css">
 
 <body></body>
 
 <script type="module">
 
-  import { Game } from '../src/Game.js';
-  import { PathfindingActor } from '../src/PathfindingActor.js';
-  import { Level } from '../src/Level.js';
+  import { Game } from '../../src/Game.js';
+  // import { World } from '../../src/World.js';
+  import { Wall } from '../../src/Wall.js';
+  import { Actor } from '../../src/Actor.js';
+  import * as Pathfinding from '../../src/Pathfinding.js';
+  import * as Util from '../../src/Util.js';
+
+  import { CellMap } from '../earcut/CellMap.js';
   
-  const json = await ( await fetch( '../levels/test3.json' ) ).text();
-  const level = Level.fromJson( json );
-  
-  const player = new PathfindingActor();
-  player.spawnInCell( level.cellMap.cells[ 0 ] );
+  const json = JSON.parse( await ( await fetch( '../../levels/squadMove.json' ) ).text() );
+  const cellMap = new CellMap( json.walls );
+
+  for ( let c = 0; c < cellMap.cells.length; c ++ ) {
+    for ( let e = 0; e < cellMap.cells[ c ].edges.length; e ++ ) {
+      if ( cellMap.cells[ c ].isConvexEdge( e ) ) {
+        cellMap.merge( c, e );
+        e = -1;   // start this cell over
+      }
+    }
+  }
+
+  //const world = new World( json );
+
+  const player = new Actor( { x: 320, y: 220, type: 'marine' } );
+  // world.entities.push( player );
 
   const game = new Game();
-  // game.scroll = { x: 32, y: 32 };
+  game.start();
+
+  let waypoints, endPos, cone;
 
   game.update = ( dt ) => {
+    
+
+    // TODO: Back to PathfindingActor, and just bump other Actors out of the way?
+    // Use edges as waypoints
+    // Get cone to next waypoint (bonus: find smallest viable cone from next several waypoints?)
+    // Aim for goal if possible, otherwise clamp to cone
+    if ( endPos ) {
+      const goalAngle = Math.atan2( endPos.y - player.y, endPos.x - player.x );
+
+      if ( waypoints ) {
+
+        if ( waypoints.length > 0 && waypoints[ 0 ].distanceTo( player.x, player.y ) < 0 ) {
+          waypoints.shift();
+        }
+
+        if ( waypoints.length > 0 ) {
+          cone = waypoints[ 0 ].getCone( player.x, player.y /*, player.info.size * 2*/ );
+          player.goalAngle = Util.clampAngle( goalAngle, cone.left, cone.right );
+        }
+        else {
+          player.goalAngle = goalAngle;
+        }
+        
+        player.goalSpeed = player.info.maxSpeed;
+      }
+    }
+
+    // Or, back to AvoidCones, but specifically by the first object in our way?
+
+    // TODO: Keyboard object to get keydown state (like we used to do with game)
+    // TODO: is clamp() failing because left > right? (other side of +/- Math.PI line)
+
     player.update( dt );
   };
 
   game.draw = ( ctx ) => {
-    level.draw( ctx );
+    cellMap.draw( ctx );
     player.draw( ctx );
+
+    if ( cone ) {
+      ctx.fillStyle = '#ff02';
+      ctx.beginPath();
+      ctx.moveTo( player.x, player.y );
+      ctx.arc( player.x, player.y, 100, cone.left, cone.right );
+      ctx.fill();
+    }
   };
 
   document.addEventListener( 'mousedown', e => {
-    const x = e.clientX - game.scroll.x;
-    const y = e.clientY - game.scroll.y;
-    const cell = level.cellMap.closestCellTo( x, y );
-    if ( cell ) {
-      player.target = { x: x, y: y, cell: cell }
+    endPos = {
+      x: e.clientX - game.scroll.x, 
+      y: e.clientY - game.scroll.y
+    };
+
+    const endCell = cellMap.cellAt( endPos.x, endPos.y );
+    if ( endCell ) {
+      const startCell = cellMap.cellAt( player.x, player.y );
+
+      const path = Pathfinding.getPath( startCell, endCell );
+
+      waypoints = [];
+      for ( let i = 0; i < path?.length - 1; i ++ ) {
+        const edgeIndex = path[ i ].links.findIndex( link => link == path[ i + 1 ] );
+        waypoints.push( path[ i ].edges[ edgeIndex ] );
+      }      
     }
   } );
 

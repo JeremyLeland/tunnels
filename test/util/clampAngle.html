@@ -1,0 +1,63 @@
+<title>Clamp Angle</title>
+<link rel="stylesheet" href="../../style.css">
+
+<body>
+  <canvas id="canvas" oncontextmenu="return false;" width="800px" height="800px"></canvas>
+</body>
+
+<script type="module">
+  import * as Util from '../../src/Util.js';
+  
+  let center = { x: 400, y: 400 };
+  let left = -1, right = 1;
+
+  let angle = 0;
+  document.addEventListener( 'mousedown', ( e ) => {
+    const ang = Math.atan2( e.clientY - center.y, e.clientX - center.x );
+
+    if ( e.button == 0 )  left = ang;
+    if ( e.button == 2 )  right = ang;
+  
+    draw();
+  } );
+
+  document.addEventListener( 'mousemove', ( e ) => {
+    angle = Math.atan2( e.clientY - center.y, e.clientX - center.x );
+
+    draw();
+  } );
+
+  const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
+  draw();
+
+  function draw() {
+    ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
+
+    ctx.fillStyle = 'yellow';
+    ctx.beginPath();
+    ctx.arc( center.x, center.y, 5, 0, Math.PI * 2 );
+    ctx.fill();
+    
+    ctx.fillStyle = '#f003';
+    ctx.beginPath();
+    ctx.moveTo( center.x, center.y );
+    ctx.arc( center.x, center.y, 100, left, right );
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.strokeStyle = 'white';
+    ctx.beginPath();
+    ctx.moveTo( center.x, center.y );
+    ctx.lineTo( center.x + Math.cos( angle ) * 100, center.y + Math.sin( angle ) * 100 );
+    ctx.stroke();
+
+    const clamped = Util.clampAngle( angle, left, right );
+
+    ctx.strokeStyle = 'green';
+    ctx.beginPath();
+    ctx.moveTo( center.x, center.y );
+    ctx.lineTo( center.x + Math.cos( clamped ) * 100, center.y + Math.sin( clamped ) * 100 );
+    ctx.stroke();
+  }
+  
+</script>

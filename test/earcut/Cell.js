@@ -31,9 +31,7 @@ export class Cell {
   }
 
   contains( x, y ) {
-    return this.edges.every( edge =>
-      0 < ( x - edge.x1 ) * edge.normal.x + ( y - edge.y1 ) * edge.normal.y
-    );
+    return this.edges.every( edge => edge.distanceTo( x, y ) > 0 );
   }
 
   isConvexEdge( index ) {

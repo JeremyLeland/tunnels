@@ -166,6 +166,40 @@ export class Line {
     return ( 0 <= us && us <= 1 ) ? ( thisDX * uy - thisDY * ux ) / D : Infinity;
   }
 
+  // Based on: https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+  // See also: http://paulbourke.net/geometry/pointlineplane/
+  getProjection( line ) {
+    const px = this.x2 - this.x1;
+    const py = this.y2 - this.y1;
+
+    const D = ( ( px * px ) + ( py * py ) );
+    const u1 = Math.max( 0, Math.min( 1, 
+      ( ( line.x1 - this.x1 ) * px + ( line.y1 - this.y1 ) * py ) / D
+    ) );
+    const u2 = Math.max( 0, Math.min( 1, 
+      ( ( line.x2 - this.x1 ) * px + ( line.y2 - this.y1 ) * py ) / D
+    ) );
+    
+    return u1 == u2 ? null : new Line( 
+      this.x1 + u1 * px, this.y1 + u1 * py,
+      this.x1 + u2 * px, this.y1 + u2 * py,
+    );
+  }
+
+  getCone( x, y, radius = 0 ) {
+    const cx1 = this.x1 + this.slope.x * radius - x;
+    const cy1 = this.y1 + this.slope.y * radius - y;
+    const angle1 = Math.atan2( cy1, cx1 );
+
+    const cx2 = this.x2 - this.slope.x * radius - x;
+    const cy2 = this.y2 - this.slope.y * radius - y;
+    const angle2 = Math.atan2( cy2, cx2 );
+    
+    return deltaAngle( angle1, angle2 ) > 0 ?
+      { left: angle1, right: angle2 } : 
+      { left: angle2, right: angle1 };
+  }
+
   getHit( other ) {
     const thisDX = this.x2 - this.x1;
     const thisDY = this.y2 - this.y1;
