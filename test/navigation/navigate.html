@@ -44,30 +44,37 @@
     // Get cone to next waypoint (bonus: find smallest viable cone from next several waypoints?)
     // Aim for goal if possible, otherwise clamp to cone
     if ( endPos ) {
+      if ( waypoints?.length > 0 && waypoints[ 0 ].distanceTo( player.x, player.y ) < 0 ) {
+        waypoints.shift();
+      }
+
       const goalAngle = Math.atan2( endPos.y - player.y, endPos.x - player.x );
 
-      if ( waypoints ) {
+      if ( waypoints?.length > 0 ) {
+        cone = waypoints[ 0 ].getCone( player.x, player.y /*, player.info.size * 2*/ );
+        player.goalAngle = Util.clampAngle( goalAngle, cone.left, cone.right );
+        player.goalSpeed = player.info.maxSpeed;
+      }
+      else {
+        waypoints = null;
+        cone = null;
+        player.goalAngle = goalAngle;
 
-        if ( waypoints.length > 0 && waypoints[ 0 ].distanceTo( player.x, player.y ) < 0 ) {
-          waypoints.shift();
-        }
+        const goalDist = Math.hypot( endPos.x - player.x, endPos.y - player.y );
 
-        if ( waypoints.length > 0 ) {
-          cone = waypoints[ 0 ].getCone( player.x, player.y /*, player.info.size * 2*/ );
-          player.goalAngle = Util.clampAngle( goalAngle, cone.left, cone.right );
+        if ( goalDist < player.speed * dt ) {
+          player.x = endPos.x;
+          player.y = endPos.y;
+          endPos = null;
+          player.goalSpeed = 0;
         }
         else {
-          player.goalAngle = goalAngle;
+          player.goalSpeed = player.info.maxSpeed;
         }
-        
-        player.goalSpeed = player.info.maxSpeed;
       }
     }
 
-    // Or, back to AvoidCones, but specifically by the first object in our way?
-
     // TODO: Keyboard object to get keydown state (like we used to do with game)
-    // TODO: is clamp() failing because left > right? (other side of +/- Math.PI line)
 
     player.update( dt );
   };
@@ -86,14 +93,13 @@
   };
 
   document.addEventListener( 'mousedown', e => {
-    endPos = {
-      x: e.clientX - game.scroll.x, 
-      y: e.clientY - game.scroll.y
-    };
+    const x = e.clientX - game.scroll.x;
+    const y = e.clientY - game.scroll.y;
 
-    const endCell = cellMap.cellAt( endPos.x, endPos.y );
+    const endCell = cellMap.cellAt( x, y );
     if ( endCell ) {
       const startCell = cellMap.cellAt( player.x, player.y );
+      endPos = { x: x, y: y };
 
       const path = Pathfinding.getPath( startCell, endCell );
 
