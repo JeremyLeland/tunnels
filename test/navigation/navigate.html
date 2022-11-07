@@ -51,7 +51,15 @@
       const goalAngle = Math.atan2( endPos.y - player.y, endPos.x - player.x );
 
       if ( waypoints?.length > 0 ) {
-        cone = waypoints[ 0 ].getCone( player.x, player.y /*, player.info.size * 2*/ );
+        cone = waypoints[ 0 ].getCone( player.x, player.y /*, player.info.size * 2*/ )
+        for ( let i = 1; i < waypoints.length; i ++ ) {
+          const nextCone = waypoints[ i ].getCone( player.x, player.y /*, player.info.size * 2*/ );
+          const overlap = Util.overlappingCone( cone, nextCone );
+          if ( overlap ) {
+            cone = overlap;
+          }
+        }
+
         player.goalAngle = Util.clampAngle( goalAngle, cone.left, cone.right );
         player.goalSpeed = player.info.maxSpeed;
       }
