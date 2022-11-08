@@ -12,7 +12,7 @@
   import * as Pathfinding from '../../src/Pathfinding.js';
   import * as Util from '../../src/Util.js';
 
-  import { CellMap } from '../earcut/CellMap.js';
+  import { CellMap } from '../cdt/CellMap.js';
   
   const json = JSON.parse( await ( await fetch( '../../levels/squadMove.json' ) ).text() );
   const cellMap = new CellMap( json.walls );

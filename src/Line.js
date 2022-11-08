@@ -149,6 +149,10 @@ export class Line {
   //   } );
   // }
 
+  distanceTo( x, y ) {
+    return ( x - this.x1 ) * this.normal.x + ( y - this.y1 ) * this.normal.y;
+  }
+
   // Based on: https://www.jeffreythompson.org/collision-detection/line-line.php
   getRayHit( x, y, dx, dy ) {
     const thisDX = this.x2 - this.x1;

@@ -19,7 +19,7 @@
 
   let levelIndex = 0;
   const levels = [
-    // './levels/scrollTest.json',
+    './levels/squadMove.json',
     './levels/test6.json',
     './levels/test7.json',
     './levels/test8.json',
@@ -119,7 +119,7 @@
       offset: ( marine.x - moveTarget.x ) * Math.sin( moveAngle ) + ( marine.y - moveTarget.y ) * -Math.cos( moveAngle )
     } ) ).sort( ( a, b ) => a.offset - b.offset );
 
-    const SPACING = ActorInfo.marine.size * 2.5;
+    const SPACING = ActorInfo.marine.size * 3;
     const adjust = 0.5 * ( offsets.length - 1 );
 
     offsets.forEach( ( e, index ) => e.marine.moveTarget = { 

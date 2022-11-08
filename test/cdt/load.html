@@ -5,37 +5,14 @@
 
 <script type="module">
   import '../../lib/poly2tri.js';
+  import { CellMap } from './CellMap.js';
 
   const json = JSON.parse( await ( await fetch( '../../levels/squadMove.json' ) ).text() );
 
-  var contour = json.walls[ 0 ].map( point => 
-    new poly2tri.Point( point[ 0 ], point[ 1 ] )
-  );
-  var swctx = new poly2tri.SweepContext(contour);
-
-  for ( let i = 1; i < json.walls.length; i ++ ) { 
-    var hole = json.walls[ i ].map( point =>
-      new poly2tri.Point( point[ 0 ], point[ 1 ] )
-    );
-    swctx.addHole(hole);
-  }
-
-  swctx.triangulate();
-  var triangles = swctx.getTriangles();
+  const cellMap = new CellMap( json.walls );
+  cellMap.mergeConvex();
 
   const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
+  cellMap.draw( ctx );
 
-  ctx.strokeStyle = 'yellow';
-  ctx.fillStyle = '#ff03';
-
-  triangles.forEach(t => {
-    ctx.beginPath();
-    t.getPoints().forEach( p => {
-        ctx.lineTo( p.x, p.y );
-    });
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    // or t.getPoint(0), t.getPoint(1), t.getPoint(2)
-  });
 </script>
