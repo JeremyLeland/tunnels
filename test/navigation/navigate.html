@@ -6,29 +6,14 @@
 <script type="module">
 
   import { Game } from '../../src/Game.js';
-  // import { World } from '../../src/World.js';
-  import { Wall } from '../../src/Wall.js';
-  import { Actor } from '../../src/Actor.js';
-  import * as Pathfinding from '../../src/Pathfinding.js';
-  import * as Util from '../../src/Util.js';
-
-  import { CellMap } from '../cdt/CellMap.js';
+  import { World } from '../../src/World.js';
+  import { PathfindingActor } from '../../src/PathfindingActor.js';
   
   const json = JSON.parse( await ( await fetch( '../../levels/squadMove.json' ) ).text() );
-  const cellMap = new CellMap( json.walls );
 
-  for ( let c = 0; c < cellMap.cells.length; c ++ ) {
-    for ( let e = 0; e < cellMap.cells[ c ].edges.length; e ++ ) {
-      if ( cellMap.cells[ c ].isConvexEdge( e ) ) {
-        cellMap.merge( c, e );
-        e = -1;   // start this cell over
-      }
-    }
-  }
+  const world = new World( json );
 
-  //const world = new World( json );
-
-  const player = new Actor( { x: 320, y: 220, type: 'marine' } );
+  const player = new PathfindingActor( { x: 320, y: 220, type: 'marine' } );
   // world.entities.push( player );
 
   const game = new Game();
@@ -38,85 +23,21 @@
 
   game.update = ( dt ) => {
     
-
     // TODO: Back to PathfindingActor, and just bump other Actors out of the way?
-    // Use edges as waypoints
-    // Get cone to next waypoint (bonus: find smallest viable cone from next several waypoints?)
-    // Aim for goal if possible, otherwise clamp to cone
-    if ( endPos ) {
-      if ( waypoints?.length > 0 && waypoints[ 0 ].distanceTo( player.x, player.y ) < 0 ) {
-        waypoints.shift();
-      }
-
-      const goalAngle = Math.atan2( endPos.y - player.y, endPos.x - player.x );
-
-      if ( waypoints?.length > 0 ) {
-        cone = waypoints[ 0 ].getCone( player.x, player.y /*, player.info.size * 2*/ )
-        for ( let i = 1; i < waypoints.length; i ++ ) {
-          const nextCone = waypoints[ i ].getCone( player.x, player.y /*, player.info.size * 2*/ );
-          const overlap = Util.overlappingCone( cone, nextCone );
-          if ( overlap ) {
-            cone = overlap;
-          }
-        }
-
-        player.goalAngle = Util.clampAngle( goalAngle, cone.left, cone.right );
-        player.goalSpeed = player.info.maxSpeed;
-      }
-      else {
-        waypoints = null;
-        cone = null;
-        player.goalAngle = goalAngle;
-
-        const goalDist = Math.hypot( endPos.x - player.x, endPos.y - player.y );
-
-        if ( goalDist < player.speed * dt ) {
-          player.x = endPos.x;
-          player.y = endPos.y;
-          endPos = null;
-          player.goalSpeed = 0;
-        }
-        else {
-          player.goalSpeed = player.info.maxSpeed;
-        }
-      }
-    }
-
-    // TODO: Keyboard object to get keydown state (like we used to do with game)
-
-    player.update( dt );
+    
+    player.update( dt, world );
   };
 
   game.draw = ( ctx ) => {
-    cellMap.draw( ctx );
+    world.draw( ctx );
     player.draw( ctx );
-
-    if ( cone ) {
-      ctx.fillStyle = '#ff02';
-      ctx.beginPath();
-      ctx.moveTo( player.x, player.y );
-      ctx.arc( player.x, player.y, 100, cone.left, cone.right );
-      ctx.fill();
-    }
   };
 
   document.addEventListener( 'mousedown', e => {
     const x = e.clientX - game.scroll.x;
     const y = e.clientY - game.scroll.y;
 
-    const endCell = cellMap.cellAt( x, y );
-    if ( endCell ) {
-      const startCell = cellMap.cellAt( player.x, player.y );
-      endPos = { x: x, y: y };
-
-      const path = Pathfinding.getPath( startCell, endCell );
-
-      waypoints = [];
-      for ( let i = 0; i < path?.length - 1; i ++ ) {
-        const edgeIndex = path[ i ].links.findIndex( link => link == path[ i + 1 ] );
-        waypoints.push( path[ i ].edges[ edgeIndex ] );
-      }      
-    }
+    player.target = { x: x, y: y };
   } );
 
 </script>

@@ -1,8 +1,13 @@
 import { Wall } from './Wall.js';
 import { AvoidingActor } from './AvoidingActor.js';
 
+import { CellMap } from '../test/cdt/CellMap.js';
+import * as Pathfinding from './Pathfinding.js';
+
 export class World {
   entities = [];
+
+  #cellMap;
 
   static async fromFile( path ) {
     const json = JSON.parse( await ( await fetch( path ) ).text() );    // TODO: error handling
@@ -15,6 +20,26 @@ export class World {
     
     this.entities.push( ...walls );
     this.entities.push( ...entities );
+
+    this.#cellMap = new CellMap( json.walls );
+    this.#cellMap.mergeConvex();
+  }
+
+  getPathBetween( start, end ) {
+    const startCell = this.#cellMap.cellAt( start.x, start.y );
+    const endCell = this.#cellMap.cellAt( end.x, end.y );
+
+    if ( startCell && endCell ) {
+      const path = Pathfinding.getPath( startCell, endCell );
+
+      const waypoints = [];
+      for ( let i = 0; i < path?.length - 1; i ++ ) {
+        const edgeIndex = path[ i ].links.findIndex( link => link == path[ i + 1 ] );
+        waypoints.push( path[ i ].edges[ edgeIndex ] );
+      }
+
+      return waypoints;
+    }
   }
 
   update( dt ) {    
@@ -60,6 +85,9 @@ export class World {
   }
 
   draw( ctx ) {
+
+    // this.#cellMap.draw( ctx );
+
     this.entities.forEach( e => e.draw( ctx ) );
   }
 }

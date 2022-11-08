@@ -1,130 +1,91 @@
-import { Actor } from '../src/Actor.js';
-import * as Pathfinding from '../src/Pathfinding.js';
+import { Actor } from './Actor.js';
+import * as Util from './Util.js';
 
 export class PathfindingActor extends Actor {
-    size = 10;
-    speed = 0.1;
-    turnSpeed = 0.008;
+  target;
 
-    target;
+  // waypoints;
+  #debug = {};
 
-    cell;
-    path;
-    nextEdge;
+  update( dt, world ) {
+    if ( this.target ) {
+      const waypoints = world.getPathBetween( this, this.target );
+      this.#debug.waypoints = waypoints;
 
-    spawnInCell( cell ) {
-      this.cell = cell;
+      // if ( this.waypoints?.length > 0 && this.waypoints[ 0 ].distanceTo( this.x, this.y ) < 0 ) {
+      //   this.waypoints.shift();
+      // }
 
-      // TODO: Pick random spot on random edge, 
-      //       random distance between that spot and center?
-      // TODO: Maybe that can come from Cell instead, get random spot with given size?
-      this.x = cell.x;
-      this.y = cell.y;
-    }
+      const goalAngle = Math.atan2( this.target.y - this.y, this.target.x - this.x );
 
-    update( dt ) {
-      if ( this.target ) {
-        if ( Math.hypot( this.target.x - this.x, this.target.y - this.y ) > this.speed * dt ) {
-          this.goalAngle = Math.atan2( this.target.y - this.y, this.target.x - this.x );
-
-          if ( !this.path || this.target.cell != this.path[ this.path.length - 1 ] ) {
-            this.path = Pathfinding.getPath( this.cell, this.target.cell );
-            this.nextEdge = null;
+      if ( waypoints?.length > 0 ) {
+        let cone = waypoints[ 0 ].getCone( this.x, this.y /*, this.info.size * 2*/ )
+        for ( let i = 1; i < waypoints.length; i ++ ) {
+          const nextCone = waypoints[ i ].getCone( this.x, this.y /*, this.info.size * 2*/ );
+          const overlap = Util.overlappingCone( cone, nextCone );
+          if ( overlap ) {
+            cone = overlap;
           }
+        }
 
-          if ( this.path && this.path[ 0 ].contains( this.x, this.y ) ) {
-            this.cell = this.path.shift();
+        this.goalAngle = Util.clampAngle( goalAngle, cone.left, cone.right );
+        this.goalSpeed = this.info.maxSpeed;
 
-            if ( this.path.length == 0 ) {
-              this.path = this.nextEdge = null;
-            }
-            else {
-              this.nextEdge = this.cell.edges[ this.cell.links.indexOf( this.path[ 0 ] ) ];
-            }
-          }
+        this.#debug.cone = cone;
+      }
+      else {
+        // this.waypoints = null;
+        this.#debug.cone = null;
+        this.goalAngle = goalAngle;
 
-          // TODO: This fixation on heading to the edge can result in some weird navigation
-          // The links between cells can give us the spirit of what route we should take, but 
-          // maybe it's better to avoid walls than to specifically target cell edges
+        const goalDist = Math.hypot( this.target.x - this.x, this.target.y - this.y );
 
-          if ( this.nextEdge ) {
-            const left = { 
-              x: this.nextEdge.x2 - this.nextEdge.slope.x * this.size,
-              y: this.nextEdge.y2 - this.nextEdge.slope.y * this.size,
-            };
-            const right = { 
-              x: this.nextEdge.x1 + this.nextEdge.slope.x * this.size,
-              y: this.nextEdge.y1 + this.nextEdge.slope.y * this.size,
-            };
-            const leftAngle = Math.atan2( left.y - this.y, left.x - this.x );
-            const rightAngle = Math.atan2( right.y - this.y, right.x - this.x );
-            
-            this.goalAngle = clampAngle( this.goalAngle, leftAngle, rightAngle );
-          }
-
-          super.update( dt );
+        if ( goalDist < this.speed * dt ) {
+          this.x = this.target.x;
+          this.y = this.target.y;
+          this.target = null;
+          this.goalSpeed = 0;
+        }
+        else {
+          this.goalSpeed = this.info.maxSpeed;
         }
       }
     }
 
-    drawEntity( ctx ) {
-      ctx.fillStyle = 'red';
-      ctx.strokeStyle = 'white';
-      ctx.fillRect( -this.size, -this.size, this.size * 2, this.size * 2 );
-      ctx.strokeRect( -this.size, -this.size, this.size * 2, this.size * 2 );
+    super.update( dt );
+  }
+  
+  draw( ctx ) {
+    if ( this.target ) {
+      ctx.save();
+
+      ctx.strokeStyle = 'orange';
+      ctx.setLineDash( [ 4, 2 ] );
+      
+      ctx.beginPath();
+      ctx.moveTo( this.target.x, this.target.y );
+      ctx.lineTo( this.x, this.y );
+      ctx.stroke();
+      
+      ctx.restore();
     }
 
-    draw( ctx ) {
-      super.draw( ctx );
-      
-      if ( this.target ) {
-        ctx.save();
+    if ( this.#debug.waypoints ) {
+      ctx.strokeStyle = 'yellow';
+      this.#debug.waypoints.forEach( line => line.draw( ctx ) );
 
-        ctx.strokeStyle = 'orange';
-        ctx.setLineDash( [ 4, 2 ] );
-        
-        ctx.beginPath();
-        ctx.moveTo( this.target.x, this.target.y );
-        ctx.lineTo( this.x, this.y );
-        ctx.stroke();
-        
-        ctx.restore();
-      }
-
-      this.cell?.drawShaded( ctx, 'green' );
-      this.path?.forEach( cell => cell.drawShaded( ctx, 'orange' ) );
-      
-      // DEBUG: left and right lines of nextEdge
-      if ( this.nextEdge ) {
-        ctx.beginPath();
-        ctx.moveTo( this.x, this.y )
-        ctx.lineTo( this.nextEdge.x1, this.nextEdge.y1 );
-        ctx.strokeStyle = 'red';
-        ctx.stroke();
-
+      if ( this.#debug.cone ) {
+        ctx.fillStyle = '#ff02';
         ctx.beginPath();
         ctx.moveTo( this.x, this.y );
-        ctx.lineTo( this.nextEdge.x2, this.nextEdge.y2 );
-        ctx.strokeStyle = 'blue';
-        ctx.stroke();
-        
+        ctx.arc( this.x, this.y, 100, this.#debug.cone.left, this.#debug.cone.right );
+        ctx.fill();
       }
     }
-  }
 
-  // TODO: I'd like these to live in one place...can whatever we are
-  // using this for come from Cell instead?
-  export function fixAngle( a ) {
-    return a > Math.PI ? a - Math.PI * 2 : a < -Math.PI ? a + Math.PI * 2 : a;
+    // this.cell?.drawShaded( ctx, 'green' );
+    // this.path?.forEach( cell => cell.drawShaded( ctx, 'orange' ) );
+   
+    super.draw( ctx );
   }
-
-  export function deltaAngle( a, b ) {
-    return fixAngle( b - a );
-  }
-
-  function clampAngle( angle, lower, upper ) {
-    const dLower = deltaAngle( lower, angle );
-    const dUpper = deltaAngle( angle, upper );
-
-    return dLower < 0 ? lower : dUpper < 0 ? upper : angle;
-  }
+}
