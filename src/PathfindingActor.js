@@ -19,9 +19,9 @@ export class PathfindingActor extends Actor {
       const goalAngle = Math.atan2( this.target.y - this.y, this.target.x - this.x );
 
       if ( waypoints?.length > 0 ) {
-        let cone = waypoints[ 0 ].getCone( this.x, this.y /*, this.info.size * 2*/ )
+        let cone = waypoints[ 0 ].getCone( this.x, this.y, this.info.size )
         for ( let i = 1; i < waypoints.length; i ++ ) {
-          const nextCone = waypoints[ i ].getCone( this.x, this.y /*, this.info.size * 2*/ );
+          const nextCone = waypoints[ i ].getCone( this.x, this.y, this.info.size );
           const overlap = Util.overlappingCone( cone, nextCone );
           if ( overlap ) {
             cone = overlap;

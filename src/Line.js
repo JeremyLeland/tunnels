@@ -1,3 +1,5 @@
+import * as Util from './Util.js';
+
 export class Line {
   x1;
   y1;
@@ -89,7 +91,7 @@ export class Line {
     this.slope.x = Math.cos( this.slope.angle );
     this.slope.y = Math.sin( this.slope.angle );
     
-    this.normal.angle = fixAngle( this.slope.angle - Math.PI / 2 );
+    this.normal.angle = Util.fixAngle( this.slope.angle - Math.PI / 2 );
     this.normal.x = Math.cos( this.normal.angle );
     this.normal.y = Math.sin( this.normal.angle );
   }
@@ -112,7 +114,7 @@ export class Line {
   }
 
   getAngleTo( other ) {
-    return deltaAngle( this.slope.angle, other.slope.angle );
+    return Util.deltaAngle( this.slope.angle, other.slope.angle );
   }
 
   getSublines( maxLength ) {
@@ -191,17 +193,26 @@ export class Line {
   }
 
   getCone( x, y, radius = 0 ) {
-    const cx1 = this.x1 + this.slope.x * radius - x;
-    const cy1 = this.y1 + this.slope.y * radius - y;
+    const cx1 = this.x1 - x;
+    const cy1 = this.y1 - y;
     const angle1 = Math.atan2( cy1, cx1 );
+    const h1 = Math.hypot( cx1, cy1 );
 
-    const cx2 = this.x2 - this.slope.x * radius - x;
-    const cy2 = this.y2 - this.slope.y * radius - y;
+    const cx2 = this.x2 - x;
+    const cy2 = this.y2 - y;
     const angle2 = Math.atan2( cy2, cx2 );
+    const h2 = Math.hypot( cx2, cy2 );
+
+    const spread1 = Math.asin( Math.min( 1, radius / h1 ) );
+    const spread2 = Math.asin( Math.min( 1, radius / h2 ) );
+
+    const cone = Util.deltaAngle( angle1, angle2 ) > 0 ?
+      { left: Util.fixAngle( angle1 + spread1 ), right: Util.fixAngle( angle2 - spread2 ) } : 
+      { left: Util.fixAngle( angle2 + spread2 ), right: Util.fixAngle( angle1 - spread1 ) };
     
-    return deltaAngle( angle1, angle2 ) > 0 ?
-      { left: angle1, right: angle2 } : 
-      { left: angle2, right: angle1 };
+    if ( Util.deltaAngle( cone.left, cone.right ) > 0 ) {
+      return cone;
+    }
   }
 
   getHit( other ) {
@@ -301,14 +312,6 @@ export class Line {
   }
 }
 
-function fixAngle( a ) {
-  return a > Math.PI ? a - Math.PI * 2 : a < -Math.PI ? a + Math.PI * 2 : a;
-}
-
-function deltaAngle( a, b ) {
-  return fixAngle( b - a );
-}
-
-function hitTime( x1, y1, x2, y2, x3, y3, x4, y4 ) {
-  return ( ( x4 - x3 ) * ( y1 - y3 ) - ( y4 - y3 ) * ( x1 - x3 ) ) / ( ( y4 - y3 ) * ( x2 - x1 ) - ( x4 - x3 ) * ( y2 - y1 ) );
-}
+// function hitTime( x1, y1, x2, y2, x3, y3, x4, y4 ) {
+//   return ( ( x4 - x3 ) * ( y1 - y3 ) - ( y4 - y3 ) * ( x1 - x3 ) ) / ( ( y4 - y3 ) * ( x2 - x1 ) - ( x4 - x3 ) * ( y2 - y1 ) );
+// }

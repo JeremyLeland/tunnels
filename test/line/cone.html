@@ -15,35 +15,49 @@
   const ctx = document.getElementById( 'canvas' ).getContext( '2d' );
   draw();
   
+  let mouseDown = false;
   document.addEventListener( 'mousedown', ( e ) => {
-    if ( e.button == 0 ) {
-      point = { x: e.clientX, y: e.clientY };
-    }
-    if ( e.button == 2 ) {
-      other = new Line( 200, 200, e.clientX, e.clientY );
-    }
-    draw();
+    mouseDown = true;
+    doMouse( e );
   } );
+  document.addEventListener( 'mouseup', ( e ) => mouseDown = false );
+  document.addEventListener( 'mousemove', ( e ) => doMouse( e ) );
+
+  function doMouse( e ) {
+    if ( mouseDown ) {
+      if ( e.button == 0 ) {
+        point = { x: e.clientX, y: e.clientY };
+      }
+      if ( e.button == 2 ) {
+        other = new Line( 200, 200, e.clientX, e.clientY );
+      }
+      draw();
+    }
+  }
 
   function draw() {
     ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
+
+    const radius = 10;
     
     ctx.fillStyle = 'yellow';
     ctx.beginPath();
-    ctx.arc( point.x, point.y, 2, 0, Math.PI * 2 );
+    ctx.arc( point.x, point.y, radius, 0, Math.PI * 2 );
     ctx.fill();
 
     ctx.strokeStyle = 'orange';
     other.draw( ctx );
 
-    const cone = other.getCone( point.x, point.y, 20 );
+    const cone = other.getCone( point.x, point.y, radius );
 
-    ctx.fillStyle = '#f002';
-    ctx.beginPath();
-    ctx.moveTo( point.x, point.y );
-    ctx.arc( point.x, point.y, 100, cone.left, cone.right );
-    ctx.closePath();
-    ctx.fill();
+    if ( cone ) {
+      ctx.fillStyle = '#f002';
+      ctx.beginPath();
+      ctx.moveTo( point.x, point.y );
+      ctx.arc( point.x, point.y, 100, cone.left, cone.right );
+      ctx.closePath();
+      ctx.fill();
+    }
   }
   
 </script>

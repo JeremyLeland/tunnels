@@ -43,6 +43,10 @@ export function betweenAngles( angle, left, right /*, inclusive = true*/ ) {
 //
 
 export function overlappingCone( a, b ) {
+  if ( a == null || b == null ) {
+    return null;
+  }
+  
   let cone = Object.assign( {}, a );
   let overlap = false;
 
