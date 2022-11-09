@@ -28,9 +28,11 @@ export class PathfindingActor extends Actor {
           }
         }
 
-        this.goalAngle = Util.clampAngle( goalAngle, cone.left, cone.right );
-        this.goalSpeed = this.info.maxSpeed;
-
+        if ( cone ) {
+          this.goalAngle = Util.clampAngle( goalAngle, cone.left, cone.right );
+          this.goalSpeed = this.info.maxSpeed;
+        }
+          
         this.#debug.cone = cone;
       }
       else {
