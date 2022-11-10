@@ -12,6 +12,9 @@ export class PathfindingActor extends Actor {
       const waypoints = world.getPathBetween( this, this.target );
       this.#debug.waypoints = waypoints;
 
+      // TODO: Only recalculate this if something changes.
+      // Or maybe any time we cross our next waypoint?
+      // TODO: Handle moving targets
       // if ( this.waypoints?.length > 0 && this.waypoints[ 0 ].distanceTo( this.x, this.y ) < 0 ) {
       //   this.waypoints.shift();
       // }
@@ -20,15 +23,19 @@ export class PathfindingActor extends Actor {
 
       if ( waypoints?.length > 0 ) {
         let cone = waypoints[ 0 ].getCone( this.x, this.y, this.info.size )
-        for ( let i = 1; i < waypoints.length; i ++ ) {
-          const nextCone = waypoints[ i ].getCone( this.x, this.y, this.info.size );
-          const overlap = Util.overlappingCone( cone, nextCone );
-          if ( overlap ) {
-            cone = overlap;
-          }
-        }
 
         if ( cone ) {
+          for ( let i = 1; i < waypoints.length; i ++ ) {
+            const nextCone = waypoints[ i ].getCone( this.x, this.y, this.info.size );
+            const overlap = Util.overlappingCone( cone, nextCone );
+            if ( overlap ) {
+              cone = overlap;
+            }
+            else {
+              break;
+            }
+          }
+
           this.goalAngle = Util.clampAngle( goalAngle, cone.left, cone.right );
           this.goalSpeed = this.info.maxSpeed;
         }

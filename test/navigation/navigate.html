@@ -14,7 +14,7 @@
   const world = new World( json );
 
   const player = new PathfindingActor( { x: 320, y: 220, type: 'marine' } );
-  // world.entities.push( player );
+  world.entities.push( player );
 
   const game = new Game();
   game.start();
@@ -25,7 +25,7 @@
     
     // TODO: Back to PathfindingActor, and just bump other Actors out of the way?
     
-    player.update( dt, world );
+    world.update( dt, world );
   };
 
   game.draw = ( ctx ) => {

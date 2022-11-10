@@ -192,6 +192,7 @@ export class Line {
     );
   }
 
+  // TODO: Go back to how this was, and ignore the radius? (use repulsion from walls instead?)
   getCone( x, y, radius = 0 ) {
     const cx1 = this.x1 - x;
     const cy1 = this.y1 - y;

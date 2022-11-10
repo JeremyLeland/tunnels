@@ -1,5 +1,5 @@
 import { Wall } from './Wall.js';
-import { AvoidingActor } from './AvoidingActor.js';
+import { PathfindingActor } from './PathfindingActor.js';
 
 import { CellMap } from '../test/cdt/CellMap.js';
 import * as Pathfinding from './Pathfinding.js';
@@ -16,7 +16,7 @@ export class World {
 
   constructor( json ) {
     const walls = json.walls.map( points => new Wall( points ) );
-    const entities = json.entities.map( values => new AvoidingActor( values ) );
+    const entities = json.entities.map( values => new PathfindingActor( values ) );
     
     this.entities.push( ...walls );
     this.entities.push( ...entities );
@@ -66,7 +66,7 @@ export class World {
           entity.targetList = this.entities.filter( other => other != entity && entity.info.targets.includes( other.info.type ) );
         }
 
-        entity.update( updateTime );
+        entity.update( updateTime, this );
       } );
       
       if ( closestHit.time < dt ) {
@@ -86,7 +86,7 @@ export class World {
 
   draw( ctx ) {
 
-    // this.#cellMap.draw( ctx );
+    this.#cellMap.draw( ctx );
 
     this.entities.forEach( e => e.draw( ctx ) );
   }
