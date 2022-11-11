@@ -1,0 +1,80 @@
+<title>Repulsion forces</title>
+<link rel="stylesheet" href="../grid.css">
+
+<body></body>
+
+<script type="module">
+
+  import { Game } from '../../src/Game.js';
+  import { Entity } from '../../src/Entity.js';
+  
+  const game = new Game();
+  game.start();
+
+  const BallInfo = {
+    size: 100,
+    maxSpeed: 0.5,
+    drawPaths: [ {
+      fillStyle: 'blue',
+      path: new Path2D( 'M 0 -0.5 A 0.5 0.5 0 0 1 0 0.5 A 0.5 0.5 0 0 1 0 -0.5' )
+    } ],
+  };
+
+  const AVOID_DIST = 50;
+  
+  const balls = [
+    new Entity( { x: 200, y: 200 }, BallInfo ),
+    new Entity( { x: 400, y: 200 }, BallInfo ),
+    new Entity( { x: 400, y: 400 }, BallInfo ),
+    new Entity( { x: 200, y: 400 }, BallInfo ),
+  ];
+
+  const player = balls[ 0 ];
+  
+  game.update = ( dt ) => {
+    balls.forEach( ball => ball.update( dt ) );
+  };
+
+  game.draw = ( ctx ) => {
+    balls.forEach( ball => {
+      ball.draw( ctx );
+
+      ball.dx = 0;
+      ball.dy = 0;
+    } );
+
+    
+    balls.forEach( from => {
+      balls.forEach( to => {
+        if ( from != to ) {
+          const angle = Math.atan2( to.y - from.y, to.x - from.x );
+          const dist  = Math.hypot( to.x - from.x, to.y - from.y ) - ( to.info.size + from.info.size ) / 2;
+
+          if ( to != player ) {
+            const repulsion = Math.max( 0, 1 - dist / AVOID_DIST );
+            const speed = to.info.maxSpeed * repulsion;
+
+            to.dx += Math.cos( angle ) * speed;
+            to.dy += Math.sin( angle ) * speed;
+
+            ctx.beginPath();
+            ctx.moveTo( to.x, to.y );
+            ctx.lineTo( from.x, from.y );
+            ctx.strokeStyle = `rgba( 255, 0, 0, ${ repulsion } )`;
+            ctx.stroke();
+          }
+        }
+      } );
+    } );
+
+  };
+
+  document.addEventListener( 'mousemove', e => {
+    const x = e.clientX - game.scroll.x;
+    const y = e.clientY - game.scroll.y;
+
+    player.x = x;
+    player.y = y;
+  } );
+
+</script>
