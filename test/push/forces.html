@@ -7,6 +7,7 @@
 
   import { Game } from '../../src/Game.js';
   import { Entity } from '../../src/Entity.js';
+  import { Line } from '../../src/Line.js';
   
   const game = new Game();
   game.start();
@@ -29,6 +30,10 @@
     new Entity( { x: 200, y: 400 }, BallInfo ),
   ];
 
+  const walls = [
+    new Line( 200, 700, 800, 200 ),
+  ];
+
   const player = balls[ 0 ];
   
   game.update = ( dt ) => {
@@ -43,6 +48,9 @@
       ball.dy = 0;
     } );
 
+    ctx.strokeStyle = 'brown';
+    walls.forEach( wall => wall.draw( ctx ) );
+
     
     balls.forEach( from => {
       balls.forEach( to => {
@@ -50,20 +58,28 @@
           const angle = Math.atan2( to.y - from.y, to.x - from.x );
           const dist  = Math.hypot( to.x - from.x, to.y - from.y ) - ( to.info.size + from.info.size ) / 2;
 
-          if ( to != player ) {
-            const repulsion = Math.max( 0, 1 - dist / AVOID_DIST );
-            const speed = to.info.maxSpeed * repulsion;
+          const repulsion = Math.max( 0, 1 - dist / AVOID_DIST );
+          const speed = to.info.maxSpeed * repulsion;
 
-            to.dx += Math.cos( angle ) * speed;
-            to.dy += Math.sin( angle ) * speed;
+          to.dx += Math.cos( angle ) * speed;
+          to.dy += Math.sin( angle ) * speed;
 
-            ctx.beginPath();
-            ctx.moveTo( to.x, to.y );
-            ctx.lineTo( from.x, from.y );
-            ctx.strokeStyle = `rgba( 255, 0, 0, ${ repulsion } )`;
-            ctx.stroke();
-          }
+          ctx.beginPath();
+          ctx.moveTo( to.x, to.y );
+          ctx.lineTo( from.x, from.y );
+          ctx.strokeStyle = `rgba( 255, 0, 0, ${ repulsion } )`;
+          ctx.stroke();
         }
+      } );
+
+      walls.forEach( wall => {
+        const dist = wall.distanceTo( from.x, from.y ) - from.info.size / 2;
+
+        const repulsion = Math.max( 0, 1 - dist / AVOID_DIST );
+        const speed = from.info.maxSpeed * repulsion;
+
+        from.dx += wall.normal.x * speed;
+        from.dy += wall.normal.y * speed;
       } );
     } );
 
