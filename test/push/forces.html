@@ -8,6 +8,8 @@
   import { Game } from '../../src/Game.js';
   import { Entity } from '../../src/Entity.js';
   import { Line } from '../../src/Line.js';
+
+  import { ActorInfo } from '../../info/info.js';
   
   const game = new Game();
   game.start();
@@ -24,14 +26,15 @@
   const AVOID_DIST = 50;
   
   const balls = [
-    new Entity( { x: 200, y: 200 }, BallInfo ),
-    new Entity( { x: 400, y: 200 }, BallInfo ),
-    new Entity( { x: 400, y: 400 }, BallInfo ),
-    new Entity( { x: 200, y: 400 }, BallInfo ),
+    new Entity( { x: 200, y: 200 }, ActorInfo.marine ),
+    new Entity( { x: 400, y: 200 }, ActorInfo.marine ),
+    new Entity( { x: 400, y: 400 }, ActorInfo.marine ),
+    new Entity( { x: 200, y: 400 }, ActorInfo.marine ),
   ];
 
   const walls = [
-    new Line( 200, 700, 800, 200 ),
+    new Line( 200, 600, 400, 500 ),
+    new Line( 500, 500, 700, 300 ),
   ];
 
   const player = balls[ 0 ];
@@ -73,7 +76,8 @@
       } );
 
       walls.forEach( wall => {
-        const dist = wall.distanceTo( from.x, from.y ) - from.info.size / 2;
+        // const dist = wall.distanceTo( from.x, from.y ) - from.info.size / 2;
+        const dist = wall.getRayHit( from.x, from.y, -wall.normal.x, -wall.normal.y ) - from.info.size / 2;
 
         const repulsion = Math.max( 0, 1 - dist / AVOID_DIST );
         const speed = from.info.maxSpeed * repulsion;
