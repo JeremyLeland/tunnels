@@ -21,6 +21,15 @@ export class Game {
     window.onresize();
   }
 
+  redraw() {
+    this.#ctx.clearRect( 0, 0, this.#ctx.canvas.width, this.#ctx.canvas.height );
+
+    this.#ctx.save();
+    this.#ctx.translate( this.scroll.x, this.scroll.y );
+    this.draw( this.#ctx );
+    this.#ctx.restore();
+  }
+
   start() {
     let lastTime;
     const animate = ( now ) => {
@@ -28,12 +37,7 @@ export class Game {
       this.update( now - lastTime );
       lastTime = now;
   
-      this.#ctx.clearRect( 0, 0, this.#ctx.canvas.width, this.#ctx.canvas.height );
-
-      this.#ctx.save();
-      this.#ctx.translate( this.scroll.x, this.scroll.y );
-      this.draw( this.#ctx );
-      this.#ctx.restore();
+      this.redraw();
   
       this.#reqId = requestAnimationFrame( animate );
     };

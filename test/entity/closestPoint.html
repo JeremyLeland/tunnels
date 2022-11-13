@@ -1,0 +1,50 @@
+<title>Repulsion forces</title>
+<link rel="stylesheet" href="../grid.css">
+
+<body></body>
+
+<script type="module">
+
+  import { Game } from '../../src/Game.js';
+  import { Entity } from '../../src/Entity.js';
+
+  import { ActorInfo } from '../../info/info.js';
+
+  
+  const entities = [
+    new Entity( { x: 200, y: 200, angle: 1 }, ActorInfo.marine ),
+    new Entity( { x: 400, y: 200, angle: 2 }, ActorInfo.alien ),
+    
+  ];
+
+  const player = entities[ 0 ];
+  const alien = entities[ 1 ];
+  
+  const game = new Game();
+  game.draw = ( ctx ) => {
+    entities.forEach( entity => {
+      entity.updateBoundingLines();
+      entity.draw( ctx );
+    } );
+
+    const compare = player.getClosestPoints( alien );
+    ctx.strokeStyle = 'yellow';
+    ctx.beginPath();
+    ctx.moveTo( compare.closestA.x, compare.closestA.y );
+    ctx.lineTo( compare.closestB.x, compare.closestB.y );
+    ctx.stroke();
+
+  };
+  game.redraw();
+
+  document.addEventListener( 'mousemove', e => {
+    const x = e.clientX - game.scroll.x;
+    const y = e.clientY - game.scroll.y;
+
+    player.x = x;
+    player.y = y;
+
+    game.redraw();
+  } );
+
+</script>

@@ -1,5 +1,7 @@
 import { Line } from './Line.js';
 
+const DEBUG_BOUNDING = true;
+
 export class Entity {
   x = 0;
   y = 0;
@@ -98,6 +100,40 @@ export class Entity {
     }
   }
 
+  // TODO: distanceToEntity and timeToHitEntity are similar
+  //       distance checks rays against each normal
+  //       timeToHit uses existing dx/dy
+  // Can these be combined/use each other somehow?
+
+  // getClosestRay( other ) {
+  //   const rayHits = [];
+
+  //   this.boundingLines.forEach( thisLine => {
+  //     other.boundingLines.forEach( otherLine => {
+  //       rayHits.push( thisLine.getClosestRay( otherLine ) )
+  //     } );
+  //   } );
+
+  //   return rayHits.reduce(
+  //     ( closest, rayHit ) => 0 < rayHit.time && rayHit.time < closest.time ? rayHit : closest, 
+  //     { time: Infinity }
+  //   );
+  // }
+
+  getClosestPoints( other ) {
+    const lineComps = [];
+
+    this.boundingLines.forEach( thisLine => {
+      other.boundingLines.forEach( otherLine => {
+        lineComps.push( Line.compare( thisLine, otherLine ) )
+      } );
+    } );
+
+    return lineComps.reduce(
+      ( closest, pos ) => pos.distance < closest.distance ? pos : closest
+    );
+  }
+
   getRayHit( x, y, dx, dy ) {
     const closestTime = this.boundingLines.map( line => 
       line.getRayHit( x, y, dx, dy )
@@ -181,8 +217,10 @@ export class Entity {
 
     ctx.restore();
 
-    // ctx.strokeStyle = 'red';
-    // this.boundingLines?.forEach( line => line.draw( ctx ) );
+    if ( DEBUG_BOUNDING ) {
+      ctx.strokeStyle = 'red';
+      this.boundingLines?.forEach( line => line.draw( ctx ) );
+    }
   }
 
   drawEntity( ctx ) {

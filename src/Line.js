@@ -89,11 +89,15 @@ export class Line {
       const uB = ( ( x2 - x1 ) * ( y1 - y3 ) - ( y2 - y1 ) * ( x1 - x3 ) ) / D;
 
       if ( 0 <= uA && uA <= 1 && 0 <= uB && uB <= 1 ) {
+        const intersection = {
+          x: x1 + ( x2 - x1 ) * uA,
+          y: y1 + ( y2 - y1 ) * uA,
+        };
+
         return {
-          intersection: {
-            x: x1 + ( x2 - x1 ) * uA,
-            y: y1 + ( y2 - y1 ) * uA,
-          },
+          closestA: intersection,
+          closestB: intersection,
+          distance: 0,
         }
       }
     }

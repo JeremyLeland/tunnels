@@ -7,21 +7,12 @@
 
   import { Game } from '../../src/Game.js';
   import { Entity } from '../../src/Entity.js';
-  import { Line } from '../../src/Line.js';
+  import { Wall } from '../../src/Wall.js';
 
   import { ActorInfo } from '../../info/info.js';
   
   const game = new Game();
   game.start();
-
-  const BallInfo = {
-    size: 100,
-    maxSpeed: 0.5,
-    drawPaths: [ {
-      fillStyle: 'blue',
-      path: new Path2D( 'M 0 -0.5 A 0.5 0.5 0 0 1 0 0.5 A 0.5 0.5 0 0 1 0 -0.5' )
-    } ],
-  };
 
   const AVOID_DIST = 50;
   
@@ -33,8 +24,8 @@
   ];
 
   const walls = [
-    new Line( 200, 600, 400, 500 ),
-    new Line( 500, 500, 700, 300 ),
+    new Wall( [ [ 200, 600 ], [ 400, 500 ], [ 400, 650 ] ] ),
+    new Wall( [ [ 500, 500 ], [ 700, 300 ], [ 700, 500 ] ] ),
   ];
 
   const player = balls[ 0 ];
@@ -51,15 +42,18 @@
       ball.dy = 0;
     } );
 
-    ctx.strokeStyle = 'brown';
+    // ctx.strokeStyle = 'brown';
     walls.forEach( wall => wall.draw( ctx ) );
 
+    // TODO: Do all pairs once, with nest for loops. Apply forces to both members of each pair.
     
     balls.forEach( from => {
       balls.forEach( to => {
         if ( from != to ) {
-          const angle = Math.atan2( to.y - from.y, to.x - from.x );
-          const dist  = Math.hypot( to.x - from.x, to.y - from.y ) - ( to.info.size + from.info.size ) / 2;
+          const points = from.getClosestPoints( to );
+
+          const angle = Math.atan2( points.closestB.y - points.closestA.y, points.closestB.x - points.closestA.x );
+          const dist  = points.distance;
 
           const repulsion = Math.max( 0, 1 - dist / AVOID_DIST );
           const speed = to.info.maxSpeed * repulsion;
@@ -68,22 +62,27 @@
           to.dy += Math.sin( angle ) * speed;
 
           ctx.beginPath();
-          ctx.moveTo( to.x, to.y );
-          ctx.lineTo( from.x, from.y );
-          ctx.strokeStyle = `rgba( 255, 0, 0, ${ repulsion } )`;
+          ctx.moveTo( points.closestA.x, points.closestA.y );
+          ctx.lineTo( points.closestB.x, points.closestB.y );
+          ctx.strokeStyle = `rgba( 0, 255, 0, ${ repulsion } )`;
           ctx.stroke();
         }
       } );
 
       walls.forEach( wall => {
         // const dist = wall.distanceTo( from.x, from.y ) - from.info.size / 2;
-        const dist = wall.getRayHit( from.x, from.y, -wall.normal.x, -wall.normal.y ) - from.info.size / 2;
+        // const dist = wall.getRayHit( from.x, from.y, -wall.normal.x, -wall.normal.y ) - from.info.size / 2;
+
+        const points = from.getClosestPoints( wall );
+
+        const angle = Math.atan2( points.closestB.y - points.closestA.y, points.closestB.x - points.closestA.x );
+        const dist  = points.distance;
 
         const repulsion = Math.max( 0, 1 - dist / AVOID_DIST );
         const speed = from.info.maxSpeed * repulsion;
 
-        from.dx += wall.normal.x * speed;
-        from.dy += wall.normal.y * speed;
+        from.dx -= Math.cos( angle ) * speed;
+        from.dy -= Math.sin( angle ) * speed;
       } );
     } );
 
