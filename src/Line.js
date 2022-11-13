@@ -105,6 +105,7 @@ export class Line {
     // Nearest points on line segments
     // Based on Lua example from: 
     // https://stackoverflow.com/questions/2824478/shortest-distance-between-two-line-segments
+    // This appears to be based on Sunday's segment distance algorithm, see "Practical Geometry Algorithms"
 
     const rx = b.x1 - a.x1;
     const ry = b.y1 - a.y1;
@@ -122,6 +123,7 @@ export class Line {
     const det = uu * vv - uv * uv;
     let s, t;
 
+    // Parallel case
     if ( det < 1e-6 * uu * vv ) {
       s = Math.max( 0, Math.min( ru / uu, 1 ) );
       t = 0;
@@ -142,6 +144,7 @@ export class Line {
     return {
       closestA: { x: Ax, y: Ay },
       closestB: { x: Bx, y: By },
+      // TODO: Take into account whether we are on wrong side of line (and make dist negative?)
       distance: Math.hypot( Bx - Ax, By - Ay ),
     }
   }
