@@ -75,6 +75,73 @@ export class Line {
     return validLines;
   }
 
+  static compare( a, b ) {
+    // Line vs Line: http://paulbourke.net/geometry/pointlineplane/
+    const x1 = a.x1, y1 = a.y1;
+    const x2 = a.x2, y2 = a.y2;
+    const x3 = b.x1, y3 = b.y1;
+    const x4 = b.x2, y4 = b.y2;
+
+    const D = ( y4 - y3 ) * ( x2 - x1 ) - ( x4 - x3 ) * ( y2 - y1 );
+
+    if ( D != 0 ) {
+      const uA = ( ( x4 - x3 ) * ( y1 - y3 ) - ( y4 - y3 ) * ( x1 - x3 ) ) / D;
+      const uB = ( ( x2 - x1 ) * ( y1 - y3 ) - ( y2 - y1 ) * ( x1 - x3 ) ) / D;
+
+      if ( 0 <= uA && uA <= 1 && 0 <= uB && uB <= 1 ) {
+        return {
+          intersection: {
+            x: x1 + ( x2 - x1 ) * uA,
+            y: y1 + ( y2 - y1 ) * uA,
+          },
+        }
+      }
+    }
+
+    // Nearest points on line segments
+    // Based on Lua example from: 
+    // https://stackoverflow.com/questions/2824478/shortest-distance-between-two-line-segments
+
+    const rx = b.x1 - a.x1;
+    const ry = b.y1 - a.y1;
+    const ux = a.x2 - a.x1;
+    const uy = a.y2 - a.y1;
+    const vx = b.x2 - b.x1;
+    const vy = b.y2 - b.y1;
+
+    const ru = rx * ux + ry * uy;
+    const rv = rx * vx + ry * vy;
+    const uu = ux * ux + uy * uy;
+    const uv = ux * vx + uy * vy;
+    const vv = vx * vx + vy * vy;
+
+    const det = uu * vv - uv * uv;
+    let s, t;
+
+    if ( det < 1e-6 * uu * vv ) {
+      s = Math.max( 0, Math.min( ru / uu, 1 ) );
+      t = 0;
+    }
+    else {
+      s = Math.max( 0, Math.min( ( ru * vv - rv * uv ) / det, 1 ) );
+      t = Math.max( 0, Math.min( ( ru * uv - rv * uu ) / det, 1 ) );
+    }
+
+    const S = Math.max( 0, Math.min( ( t * uv + ru ) / uu, 1 ) );
+    const T = Math.max( 0, Math.min( ( s * uv - rv ) / vv, 1 ) );
+
+    const Ax = a.x1 + S * ux;
+    const Ay = a.y1 + S * uy;
+    const Bx = b.x1 + T * vx;
+    const By = b.y1 + T * vy;
+
+    return {
+      closestA: { x: Ax, y: Ay },
+      closestB: { x: Bx, y: By },
+      distance: Math.hypot( Bx - Ax, By - Ay ),
+    }
+  }
+
   constructor( x1, y1, x2, y2 ) {
     this.x1 = x1;
     this.y1 = y1;
@@ -151,6 +218,8 @@ export class Line {
   //   } );
   // }
 
+  // TODO: Make this "inside of" and include the < 0
+  //       This doesn't take into account whether we're actually inside segment
   distanceTo( x, y ) {
     return ( x - this.x1 ) * this.normal.x + ( y - this.y1 ) * this.normal.y;
   }
