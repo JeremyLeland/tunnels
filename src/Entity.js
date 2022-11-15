@@ -1,6 +1,6 @@
 import { Line } from './Line.js';
 
-const DEBUG_BOUNDING = true;
+const DEBUG_BOUNDING = false;
 
 export class Entity {
   x = 0;

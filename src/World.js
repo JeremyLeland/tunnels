@@ -1,4 +1,5 @@
 import { Wall } from './Wall.js';
+import { Entity } from './Entity.js';
 import { PathfindingActor } from './PathfindingActor.js';
 
 import { CellMap } from '../test/cdt/CellMap.js';
@@ -87,13 +88,28 @@ export class World {
       
       let updateTime = Math.min( closestHit.time, dt );
       this.entities.forEach( entity => {
-        // if ( entity.info.avoids ) {
-        //   entity.avoidList = this.entities.filter( other => other != entity && entity.info.avoids.includes( other.info.type ) );
-        // }
+        if ( entity.info.avoids && entity.info.targets ) {
+          const avoidList = this.entities.filter( other => other != entity && entity.info.avoids.includes( other.info.type ) );
+          const targetList = this.entities.filter( other => other != entity && entity.info.targets.includes( other.info.type ) );
 
-        // if ( entity.info.targets ) {
-        //   entity.targetList = this.entities.filter( other => other != entity && entity.info.targets.includes( other.info.type ) );
-        // }
+          const allTargets = targetList.filter( e => e.isAlive ).map( target => ( {
+            entity: target, 
+            angle: Math.atan2( target.y - entity.y, target.x - entity.x ),
+            dist:  Math.hypot( target.x - entity.x, target.y - entity.y ),
+          } ) );
+          
+          const visibleTargets = allTargets.filter( target =>
+            target.entity == Entity.firstRayHit( 
+              entity.x, entity.y, 
+              Math.cos( target.angle ), Math.sin( target.angle ), 
+              avoidList 
+            ).entity
+          );
+      
+          entity.attackTarget = visibleTargets.reduce( 
+            ( closest, e ) => e.dist < closest.dist ? e : closest, { dist: entity.info.targetRange }
+          ).entity;
+        }
 
         entity.update( updateTime, this );
       } );
@@ -115,7 +131,7 @@ export class World {
 
   draw( ctx ) {
 
-    this.#cellMap.draw( ctx );
+    // this.#cellMap.draw( ctx );
 
     this.entities.forEach( e => e.draw( ctx ) );
   }

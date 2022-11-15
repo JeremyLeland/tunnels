@@ -2,23 +2,13 @@
   "entities": [
     {
       "type": "marine",
-      "x": 269,
-      "y": 345
+      "x": 250,
+      "y": 350
     },
     {
-      "type": "marine",
-      "x": 212,
-      "y": 380
-    },
-    {
-      "type": "marine",
-      "x": 280,
-      "y": 420
-    },
-    {
-      "type": "marine",
-      "x": 334,
-      "y": 379
+      "type": "alien",
+      "x": 400,
+      "y": 400
     }
   ],
   "walls": [

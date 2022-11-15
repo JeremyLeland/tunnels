@@ -19,7 +19,7 @@
 
   let levelIndex = 0;
   const levels = [
-    './levels/squadMove.json',
+    // './levels/squadMove.json',
     './levels/test6.json',
     './levels/test7.json',
     './levels/test8.json',
@@ -101,6 +101,8 @@
     const moveTarget = { x: e.offsetX - game.scroll.x, y: e.offsetY - game.scroll.y };
 
     const marines = world.entities.filter( e => e.info.type == 'marine' );
+
+    // marines.forEach( m => m.moveTarget = moveTarget );
 
     const center = { x: 0, y: 0 };
 

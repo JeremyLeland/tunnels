@@ -129,6 +129,7 @@ export const ActorInfo = {
     ],
     avoids: [ 'alien', 'marine', 'wall' ],
     targets: [ 'alien' ],
+    targetRange: 200,
     guns: [ {
       gunInfoKey: 'rifle',
       offset: { front: 2.2, side: 0, angle: 0 }
@@ -172,6 +173,7 @@ export const ActorInfo = {
     ],
     avoids: [ 'alien', 'marine', 'wall' ],
     targets: [ 'marine' ],
+    targetRange: 200,
     wander: {
       speed: 0.02,
       radius: 100,

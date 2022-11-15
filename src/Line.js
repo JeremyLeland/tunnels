@@ -145,6 +145,7 @@ export class Line {
       closestA: { x: Ax, y: Ay },
       closestB: { x: Bx, y: By },
       // TODO: Take into account whether we are on wrong side of line (and make dist negative?)
+      //       Need to make sure we don't count Entities that are way beyond the line as being "inside"
       distance: Math.hypot( Bx - Ax, By - Ay ),
     }
   }
