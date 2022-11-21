@@ -1,0 +1,125 @@
+<title>Repulsion forces</title>
+<link rel="stylesheet" href="../grid.css">
+
+<body></body>
+
+<script type="module">
+
+  import { Game } from '../../src/Game.js';
+  import { Entity } from '../../src/Entity.js';
+  import { Wall } from '../../src/Wall.js';
+
+  import { ActorInfo } from '../../info/info.js';
+  
+  const game = new Game();
+  game.start();
+
+  const AVOID_DIST = 20;
+  
+  const entities = [
+    new Wall( [ [ 200, 600 ], [ 400, 500 ], [ 400, 650 ] ] ),
+    new Wall( [ [ 500, 500 ], [ 700, 300 ], [ 700, 500 ] ] ),
+    new Entity( { x: 300, y: 300, angle: 0 }, ActorInfo.marine ),
+    new Entity( { x: 400, y: 300, angle: 1 }, ActorInfo.marine ),
+    new Entity( { x: 400, y: 400, angle: 2 }, ActorInfo.marine ),
+    new Entity( { x: 300, y: 400, angle: 3 }, ActorInfo.marine ),
+  ];
+
+  const player = entities[ 2 ];
+  
+  game.update = ( dt ) => {
+    entities.forEach( e => {
+
+      e.goalVector = null;
+      e.avoidVectors = [];
+      e.dodgeVectors = [];
+
+      if ( e.moveTarget ) {
+        const goalAngle = Math.atan2( e.moveTarget.y - e.y, e.moveTarget.x - e.x );
+        const goalDist  = Math.hypot( e.moveTarget.x - e.x, e.moveTarget.y - e.y );
+
+        e.angle = goalAngle;
+
+        if ( goalDist > e.info.moveSpeed * dt ) {
+          e.goalVector = {
+            x: Math.cos( goalAngle ),
+            y: Math.sin( goalAngle ),
+          };
+        }
+      }
+
+      entities.forEach( other => {
+        if ( e != other ) {
+          const p = e.getClosestPoints( other );
+
+          const angle = Math.atan2( p.closestB.y - p.closestA.y, p.closestB.x - p.closestA.x );
+          const dist  = p.distance;
+
+          const repulsion = Math.max( 0, 1 - dist / AVOID_DIST );
+
+          e.avoidVectors.push( {
+            x: -Math.cos( angle ) * repulsion,
+            y: -Math.sin( angle ) * repulsion,
+          } );
+        }
+      } );
+
+      e.moveVector = { x: 0, y: 0 };
+
+      if ( e.goalVector ) {
+        e.moveVector.x += e.goalVector.x;
+        e.moveVector.y += e.goalVector.y;
+      }
+
+      e.avoidVectors.forEach( avoidVector => {
+        e.moveVector.x += avoidVector.x;
+        e.moveVector.y += avoidVector.y;
+      } );
+
+      const moveLength = Math.hypot( e.moveVector.x, e.moveVector.y );
+      if ( moveLength > 1 ) {
+        e.moveVector.x /= moveLength;
+        e.moveVector.y /= moveLength;
+      }
+      
+      const length = e.info.moveSpeed;
+      e.dx = e.moveVector.x * length;
+      e.dy = e.moveVector.y * length;
+
+      e.update( dt );
+    } );
+  };
+
+  game.draw = ( ctx ) => {
+    entities.forEach( e => {
+      e.draw( ctx );
+
+      ctx.lineWidth = 2;
+      if ( e.moveVector ) {
+        ctx.strokeStyle = 'green';
+        drawVector( ctx, e.x, e.y, e.moveVector );
+      }
+
+      e.avoidVectors.forEach( avoidVector => {
+        ctx.strokeStyle = 'yellow';
+        drawVector( ctx, e.x, e.y, avoidVector );
+      } );
+    } );
+
+  };
+
+  document.addEventListener( 'mousemove', e => {
+    const x = e.clientX - game.scroll.x;
+    const y = e.clientY - game.scroll.y;
+
+    player.moveTarget = { x: x, y: y };
+  } );
+
+  function drawVector( ctx, x, y, vector, size = 40 ) {
+    ctx.beginPath();
+    ctx.moveTo( x, y );
+    ctx.lineTo( x + vector.x * size, y + vector.y * size );
+    ctx.stroke();
+  }
+
+</script>

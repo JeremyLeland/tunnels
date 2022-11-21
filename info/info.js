@@ -118,6 +118,7 @@ export const ActorInfo = {
     type: 'marine',
     life: 100,
     damage: 1,
+    moveSpeed: 0.05,
     maxSpeed: 0.05,
     turnSpeed: 0.008,
     accelSpeed: 0.0005,
@@ -161,7 +162,8 @@ export const ActorInfo = {
   alien: {
     type: 'alien',
     life: 100,
-    damage: 1,
+    damage: 0,
+    moveSpeed: 0.05,
     maxSpeed: 0.08,
     turnSpeed: 0.008,
     accelSpeed: 0.0005,
@@ -175,9 +177,8 @@ export const ActorInfo = {
     targets: [ 'marine' ],
     targetRange: 200,
     wander: {
-      speed: 0.02,
-      radius: 100,
-      time: 3000,
+      radius: 500,
+      time: 10000,
     },
     guns: [ {
       gunInfoKey: 'bite',
