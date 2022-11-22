@@ -14,7 +14,7 @@
   const game = new Game();
   game.start();
 
-  const AVOID_DIST = 20;
+  const AVOID_DIST = 20, DODGE_DIST = 100;
   
   const entities = [
     new Wall( [ [ 200, 600 ], [ 400, 500 ], [ 400, 650 ] ] ),
@@ -51,16 +51,38 @@
       entities.forEach( other => {
         if ( e != other ) {
           const p = e.getClosestPoints( other );
-
           const angle = Math.atan2( p.closestB.y - p.closestA.y, p.closestB.x - p.closestA.x );
-          const dist  = p.distance;
-
-          const repulsion = Math.max( 0, 1 - dist / AVOID_DIST );
+          const repulsion = Math.max( 0, 1 - p.distance / AVOID_DIST );
 
           e.avoidVectors.push( {
             x: -Math.cos( angle ) * repulsion,
             y: -Math.sin( angle ) * repulsion,
           } );
+
+          // Distance from other's line of movement
+          const otherSpeed = Math.hypot( other.dx, other.dy );
+          if ( otherSpeed > 0 ) {
+            const otherVector = {
+              x: other.dx / otherSpeed,
+              y: other.dy / otherSpeed,
+            };
+
+            const cx = e.x - other.x;
+            const cy = e.y - other.y;
+
+            const front = cx * otherVector.x + cy * otherVector.y;
+            const side  = cx * otherVector.y - cy * otherVector.x;
+
+            if ( front > 0 ) {
+              const dist = Math.max( 0, 1 - front / DODGE_DIST );
+              const dodge = Math.max( 0, 1 - Math.abs( side ) / AVOID_DIST );
+              
+              e.dodgeVectors.push( {
+                x:  otherVector.y * dist * dodge,
+                y: -otherVector.x * dist * dodge,
+              } );
+            }
+          }
         }
       } );
 
@@ -74,6 +96,11 @@
       e.avoidVectors.forEach( avoidVector => {
         e.moveVector.x += avoidVector.x;
         e.moveVector.y += avoidVector.y;
+      } );
+
+      e.dodgeVectors.forEach( dodgeVector => {
+        e.moveVector.x += dodgeVector.x;
+        e.moveVector.y += dodgeVector.y;
       } );
 
       const moveLength = Math.hypot( e.moveVector.x, e.moveVector.y );
@@ -95,15 +122,27 @@
       e.draw( ctx );
 
       ctx.lineWidth = 2;
-      if ( e.moveVector ) {
+      if ( e.goalVector ) {
         ctx.strokeStyle = 'green';
-        drawVector( ctx, e.x, e.y, e.moveVector );
+        drawVector( ctx, e.x, e.y, e.goalVector );
       }
 
       e.avoidVectors.forEach( avoidVector => {
         ctx.strokeStyle = 'yellow';
         drawVector( ctx, e.x, e.y, avoidVector );
       } );
+
+      e.dodgeVectors.forEach( dodgeVector => {
+        ctx.strokeStyle = 'cyan';
+        drawVector( ctx, e.x, e.y, dodgeVector );
+      } );
+
+      ctx.lineWidth = 1;
+
+      if ( e.moveVector ) {
+        ctx.strokeStyle = 'white';
+        drawVector( ctx, e.x, e.y, e.moveVector );
+      }
     } );
 
   };
