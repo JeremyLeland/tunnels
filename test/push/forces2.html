@@ -26,9 +26,14 @@
   ];
 
   const player = entities[ 2 ];
+
+  entities[ 2 ].moveTarget = { x: 500, y: 300 };
+  entities[ 3 ].moveTarget = { x:   0, y: 300 };
   
   game.update = ( dt ) => {
     entities.forEach( e => {
+
+      // TODO: Integrate this with PathfindingActor, put World back how it was
 
       e.goalVector = null;
       e.avoidVectors = [];

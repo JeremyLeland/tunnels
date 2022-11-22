@@ -6,7 +6,7 @@ import { ActorInfo } from '../info/info.js';
 export class Actor extends Entity {
   speed = 0;
 
-  avoidVector = { x: 0, y: 0 };
+  // avoidVector = { x: 0, y: 0 };
 
   goalSpeed = 0;
   goalAngle = 0;
@@ -36,16 +36,19 @@ export class Actor extends Entity {
       this.info.accelSpeed,
       dt
     );
+
+    // const vx = Math.cos( this.angle ) + this.avoidVector.x;
+    // const vy = Math.sin( this.angle ) + this.avoidVector.y;
   
     this.dx = this.speed * Math.cos( this.angle );
     this.dy = this.speed * Math.sin( this.angle );
 
-    // TODO: Make sure we don't go too fast? Blend this better?
-    this.dx += this.avoidVector.x * this.info.maxSpeed;
-    this.dy += this.avoidVector.y * this.info.maxSpeed;
+    // // TODO: Make sure we don't go too fast? Blend this better?
+    // // this.dx += this.avoidVector.x * this.info.maxSpeed;
+    // // this.dy += this.avoidVector.y * this.info.maxSpeed;
 
-    this.avoidVector.x = 0;
-    this.avoidVector.y = 0;
+    // this.avoidVector.x = 0;
+    // this.avoidVector.y = 0;
 
     super.update( dt );
 

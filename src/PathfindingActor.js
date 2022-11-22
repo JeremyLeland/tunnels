@@ -5,7 +5,8 @@ import * as Util from './Util.js';
 export class PathfindingActor extends Actor {
   moveTarget;
   attackTarget;
-  wanderTarget;
+
+  avoidVector = { x: 0, y: 0 };
 
   timeUntilWander = 0;
 
@@ -29,16 +30,12 @@ export class PathfindingActor extends Actor {
       this.timeUntilWander -= dt;
       if ( this.timeUntilWander <= 0 ) {
         // TODO: Base this on a range from home base?
-        const wanderAngle = ( Math.random() - 0.5 ) * Math.PI * 2;
-        this.wanderTarget = {
-          x: this.x + Math.cos( wanderAngle ) * this.info.wander.radius,
-          y: this.y + Math.sin( wanderAngle ) * this.info.wander.radius,
-        };
+        this.moveTarget = world.getRandomLocation( this.x, this.y, this.info.wander.radius, this.info.size );
         this.timeUntilWander = this.info.wander.time;
       }
     }
 
-    const target = this.attackTarget ?? this.moveTarget ?? this.wanderTarget;
+    const target = this.attackTarget ?? this.moveTarget;
 
     this.isShooting = false;
 
@@ -47,7 +44,7 @@ export class PathfindingActor extends Actor {
       const targetDist  = Math.hypot( target.x - this.x, target.y - this.y ) - this.info.size - ( target.info?.size ?? 0 );
 
       this.goalAngle = targetAngle;
-      this.goalSpeed = target == this.wanderTarget ? this.info.wander.speed : this.info.maxSpeed;
+      this.goalSpeed = target == this.attackTarget ? this.info.maxSpeed : this.info.moveSpeed;
 
       const inFront = Entity.firstRayHit( 
         this.x, this.y, Math.cos( this.angle ), Math.sin( this.angle ), 
@@ -107,32 +104,32 @@ export class PathfindingActor extends Actor {
   }
   
   draw( ctx ) {
-    // if ( this.target ) {
-    //   ctx.save();
+    if ( this.moveTarget ) {
+      ctx.save();
 
-    //   ctx.strokeStyle = 'orange';
-    //   ctx.setLineDash( [ 4, 2 ] );
+      ctx.strokeStyle = 'orange';
+      ctx.setLineDash( [ 4, 2 ] );
       
-    //   ctx.beginPath();
-    //   ctx.moveTo( this.target.x, this.target.y );
-    //   ctx.lineTo( this.x, this.y );
-    //   ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo( this.moveTarget.x, this.moveTarget.y );
+      ctx.lineTo( this.x, this.y );
+      ctx.stroke();
       
-    //   ctx.restore();
-    // }
+      ctx.restore();
+    }
 
-    // if ( this.#debug.waypoints ) {
-    //   ctx.strokeStyle = 'yellow';
-    //   this.#debug.waypoints.forEach( line => line.draw( ctx ) );
+    if ( this.#debug.waypoints ) {
+      ctx.strokeStyle = 'yellow';
+      this.#debug.waypoints.forEach( line => line.draw( ctx ) );
 
-    //   if ( this.#debug.cone ) {
-    //     ctx.fillStyle = '#ff02';
-    //     ctx.beginPath();
-    //     ctx.moveTo( this.x, this.y );
-    //     ctx.arc( this.x, this.y, 100, this.#debug.cone.left, this.#debug.cone.right );
-    //     ctx.fill();
-    //   }
-    // }
+      if ( this.#debug.cone ) {
+        ctx.fillStyle = '#ff02';
+        ctx.beginPath();
+        ctx.moveTo( this.x, this.y );
+        ctx.arc( this.x, this.y, 100, this.#debug.cone.left, this.#debug.cone.right );
+        ctx.fill();
+      }
+    }
 
     // this.cell?.drawShaded( ctx, 'green' );
     // this.path?.forEach( cell => cell.drawShaded( ctx, 'orange' ) );

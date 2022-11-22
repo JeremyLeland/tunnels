@@ -26,6 +26,25 @@ export class World {
     this.#cellMap.mergeConvex();
   }
 
+  getRandomLocation( x, y, radius, size ) {
+    for ( let tries = 0; tries < 10; tries ++ ) {
+      const angle = ( Math.random() - 0.5 ) * Math.PI * 2;
+      const location = {
+        x: x + Math.cos( angle ) * radius,
+        y: y + Math.sin( angle ) * radius,
+      };
+      const cell = this.#cellMap.cellAt( location.x, location.y );
+
+      // TODO: Use size to make sure location will not place actor outside of cell
+      //       For now, use center of cell and hope for the best
+
+      if ( cell ) {
+        // return { x: cell.x, y: cell.y };
+        return location;
+      }
+    }
+  }
+
   getPathBetween( start, end ) {
     const startCell = this.#cellMap.cellAt( start.x, start.y );
     const endCell = this.#cellMap.cellAt( end.x, end.y );
