@@ -1,0 +1,57 @@
+<title>Dodge incoming Entities</title>
+<link rel="stylesheet" href="../grid.css">
+
+<body></body>
+
+<script type="module">
+
+  import { Game } from '../../src/Game.js';
+  import { World } from '../../src/World.js';
+
+  const game = new Game();
+  game.start();
+
+  const json = {
+    entities: [
+      { type: "alien", x: 300, y: 300 },
+      { type: "alien", x: 400, y: 300 },
+      // { type: "alien", x: 400, y: 400 },
+      // { type: "alien", x: 300, y: 400 },
+    ],
+    walls: [
+      [ [ 20, 20 ], [ 20, 780 ], [ 780, 780 ], [ 780, 20 ] ],
+      // [ [ 200, 600 ], [ 400, 500 ], [ 400, 650 ] ],
+      // [ [ 500, 500 ], [ 700, 300 ], [ 700, 500 ] ],
+    ]
+  };
+
+  // for ( let i = 0; i < 10; i ++ ) {
+  //   json.entities.push( { type: "alien", x: 100 + Math.random() * 600, y: 100 + Math.random() * 600 } );
+  // }
+
+  const world = new World( json );
+  
+  const player = world.entities[ 1 ];
+  player.timeUntilWander = 10000;
+  player.moveTarget = { x: 500, y: 300 };
+
+  const other = world.entities[ 2 ];
+  other.timeUntilWander = 10000;
+  other.moveTarget = { x: 200, y: 300 };
+  
+  game.update = ( dt ) => {
+    world.update( dt );
+  };
+
+  game.draw = ( ctx ) => {
+    world.draw( ctx );
+  };
+
+  document.addEventListener( 'mousedown', e => {
+    const x = e.clientX - game.scroll.x;
+    const y = e.clientY - game.scroll.y;
+
+    player.moveTarget = { x: x, y: y };
+  } );
+
+</script>

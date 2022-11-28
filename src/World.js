@@ -77,31 +77,6 @@ export class World {
           if ( 0 <= hit.time && hit.time < closestHit.time ) {
             closestHit = hit;
           }
-
-          // Avoidance
-          // TODO: What if it's a target? (e.g. do aliens avoid marines if they are persuing another target?)
-          const aAvoidsB = A.info.avoids?.includes( B.info.type );
-          const bAvoidsA = B.info.avoids?.includes( A.info.type );
-
-          if ( aAvoidsB || bAvoidsA ) {
-            const points = A.getClosestPoints( B );
-
-            const angle = Math.atan2( points.closestB.y - points.closestA.y, points.closestB.x - points.closestA.x );
-            const dist  = points.distance;
-    
-            const AVOID_DIST = 10;  // TODO: specify this somewhere else?
-            const repulsion = Math.max( 0, 1 - dist / AVOID_DIST );
-    
-            if ( aAvoidsB ) {
-              A.avoidVector.x -= Math.cos( angle ) * repulsion;
-              A.avoidVector.y -= Math.sin( angle ) * repulsion;
-            }
-    
-            if ( bAvoidsA ) {
-              B.avoidVector.x += Math.cos( angle ) * repulsion;
-              B.avoidVector.y += Math.sin( angle ) * repulsion;
-            }
-          }
         }
       }
       

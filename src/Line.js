@@ -238,9 +238,6 @@ export class Line {
     const thisDY = this.y2 - this.y1;
     const D = ( dy * thisDX - dx * thisDY );
 
-    // TODO: Need to account for edges with radius -- see how we did this in pong Wall
-    // Just return all the info like in pong wall (including time, position, normal)
-
     const ux = this.x1 - x;
     const uy = this.y1 - y;
 
@@ -248,6 +245,11 @@ export class Line {
 
     return ( 0 <= us && us <= 1 ) ? ( thisDX * uy - thisDY * ux ) / D : Infinity;
   }
+
+  // getLineHit( other, dx, dy ) {
+  //   // see if already colliding?
+  //   // check all four points
+  // }
 
   // Based on: https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
   // See also: http://paulbourke.net/geometry/pointlineplane/

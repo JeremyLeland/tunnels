@@ -1,6 +1,6 @@
 import { Line } from './Line.js';
 
-const DEBUG_BOUNDING = false;
+const DEBUG_BOUNDING = true;
 
 export class Entity {
   x = 0;
@@ -39,7 +39,7 @@ export class Entity {
 
   hitWith( hit ) {
     hit.entities.forEach( e => {
-      if ( e != this ) {
+      if ( e != this && e.info.damage > 0 ) {
         this.life -= e.info.damage;
 
         if ( this.info.hit ) {
@@ -151,6 +151,7 @@ export class Entity {
   getHit( other ) {
     let closestHit = { time: Infinity };
 
+    // TODO: Maybe this check should happen in World instead?
     if ( this.info.hit?.types?.includes( other.info.type ) || 
          other.info.hit?.types?.includes( this.info.type ) ) {
       

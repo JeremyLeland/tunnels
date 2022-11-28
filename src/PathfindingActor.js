@@ -100,7 +100,7 @@ export class PathfindingActor extends Actor {
       }
     }
 
-    super.update( dt );
+    super.update( dt, world );
   }
   
   draw( ctx ) {
