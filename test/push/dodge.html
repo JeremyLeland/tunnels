@@ -13,10 +13,12 @@
 
   const json = {
     entities: [
+      { type: "alien", x: 310, y: 105 },
+      { type: "alien", x: 410, y:  95 },
       { type: "alien", x: 300, y: 300 },
       { type: "alien", x: 400, y: 300 },
-      // { type: "alien", x: 400, y: 400 },
-      // { type: "alien", x: 300, y: 400 },
+      { type: "alien", x: 300, y: 495 },
+      { type: "alien", x: 400, y: 505 },
     ],
     walls: [
       [ [ 20, 20 ], [ 20, 780 ], [ 780, 780 ], [ 780, 20 ] ],
@@ -25,9 +27,9 @@
     ]
   };
 
-  // for ( let i = 0; i < 10; i ++ ) {
-  //   json.entities.push( { type: "alien", x: 100 + Math.random() * 600, y: 100 + Math.random() * 600 } );
-  // }
+  for ( let i = 0; i < 10; i ++ ) {
+    json.entities.push( { type: "alien", x: 100 + Math.random() * 600, y: 100 + Math.random() * 600 } );
+  }
 
   const world = new World( json );
   
@@ -35,9 +37,9 @@
   player.timeUntilWander = 10000;
   player.moveTarget = { x: 500, y: 300 };
 
-  const other = world.entities[ 2 ];
-  other.timeUntilWander = 10000;
-  other.moveTarget = { x: 200, y: 300 };
+  // const other = world.entities[ 2 ];
+  // other.timeUntilWander = 10000;
+  // other.moveTarget = { x: 200, y: 300 };
   
   game.update = ( dt ) => {
     world.update( dt );
@@ -47,11 +49,30 @@
     world.draw( ctx );
   };
 
+  // world.update( 10 );
+  // game.redraw();
+
   document.addEventListener( 'mousedown', e => {
     const x = e.clientX - game.scroll.x;
     const y = e.clientY - game.scroll.y;
 
     player.moveTarget = { x: x, y: y };
+
+    // player.x = x;
+    // player.y = y;
+
+    // world.update( 10 );
+    // game.redraw();
   } );
+
+  // document.addEventListener( 'mousemove', e => {
+  //   const x = e.clientX - game.scroll.x;
+  //   const y = e.clientY - game.scroll.y;
+
+  //   player.angle = Math.atan2( y - player.y, x - player.x );
+
+  //   world.update( 10 );
+  //   game.redraw();
+  // } );
 
 </script>
