@@ -54,19 +54,26 @@ export class Actor extends Entity {
     avoidList.forEach( other => {
       const p = this.getClosestPoints( other );
       const angle = Math.atan2( p.closestB.y - p.closestA.y, p.closestB.x - p.closestA.x );
-      const repulsion = Math.max( 0, 1 - p.distance / AVOID_DIST );
+      const repulsion = 1 - p.distance / AVOID_DIST;
 
-      avoidVectors.push( {
-        x: -Math.cos( angle ) * repulsion,
-        y: -Math.sin( angle ) * repulsion,
-      } );
-
-      // TODO: base this on their avoid cone somehow?
-      if ( Math.abs( Util.deltaAngle( this.angle, angle ) ) < 1 ) {  // TODO: what angle range?
+      if ( repulsion > 0 ) {
         avoidVectors.push( {
-          x:  Math.sin( angle ) * repulsion,
-          y: -Math.cos( angle ) * repulsion,
+          x: -Math.cos( angle ) * repulsion,
+          y: -Math.sin( angle ) * repulsion,
+          src: other, // DEBUG
         } );
+
+        if ( other.dx != 0 || other.dy != 0 ) {
+          // If we are heading straight toward this entity, try to dodge around it
+          // TODO: base this on their avoid cone somehow?
+          if ( Math.abs( Util.deltaAngle( this.angle, angle ) ) < 1 ) {  // TODO: what angle range?
+            dodgeVectors.push( {
+              x:  Math.sin( angle ) * repulsion,
+              y: -Math.cos( angle ) * repulsion,
+              src: other,
+            } );
+          }
+        }
       }
     } );
 
@@ -105,9 +112,25 @@ export class Actor extends Entity {
     //   drawVector( ctx, this.x, this.y, this.#debug.goalVector );
     // }
 
-    // this.#debug.avoidVectors?.forEach( avoidVector => {
-    //   ctx.strokeStyle = 'yellow';
+    // const colors = [ 'red', 'orange', 'yellow', 'green', 'blue', 'purple' ];
+
+    // this.#debug.avoidVectors?.forEach( ( avoidVector, index ) => {
+    //   ctx.strokeStyle = colors[ index ];//'yellow';
     //   drawVector( ctx, this.x, this.y, avoidVector );
+
+    //   // DEBUG: clarify source
+    //   ctx.save();
+
+    //   const src = avoidVector.src;
+    //   ctx.beginPath();
+    //   // ctx.arc( src.x, src.y, src.info.size, 0, Math.PI * 2 );
+    //   ctx.moveTo( this.x, this.y );
+    //   ctx.lineTo( src.x, src.y );
+
+    //   ctx.setLineDash( [ 4, 2 ] );
+    //   ctx.stroke(); 
+
+    //   ctx.restore();
     // } );
 
     // this.#debug.dodgeVectors?.forEach( dodgeVector => {

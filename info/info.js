@@ -28,6 +28,11 @@ export const GunInfo = {
   }
 }
 
+// NOTE: Currently, bullets have 1 life and actors do 1 damage
+//       The actors can't hit each other, so this only applies
+//       when a bullet hits and actor. This should destroy bullets
+//       on impact without Bullet-specific logic
+
 export const BulletInfo = {
   bite: {
     type: 'attack',
@@ -162,8 +167,8 @@ export const ActorInfo = {
   alien: {
     type: 'alien',
     life: 100,
-    damage: 0,
-    moveSpeed: 0.05,
+    damage: 1,
+    moveSpeed: 0.02,
     maxSpeed: 0.08,
     turnSpeed: 0.008,
     accelSpeed: 0.0005,
@@ -177,8 +182,8 @@ export const ActorInfo = {
     targets: [ 'marine' ],
     targetRange: 200,
     wander: {
-      radius: 500,
-      time: 10000,
+      radius: 100,
+      time: 5000,
     },
     guns: [ {
       gunInfoKey: 'bite',

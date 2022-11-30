@@ -104,32 +104,34 @@ export class PathfindingActor extends Actor {
   }
   
   draw( ctx ) {
-    if ( this.moveTarget ) {
-      ctx.save();
+    // if ( this.moveTarget ) {
+    //   ctx.save();
 
-      ctx.strokeStyle = 'orange';
-      ctx.setLineDash( [ 4, 2 ] );
+    //   ctx.strokeStyle = 'orange';
+    //   ctx.setLineDash( [ 4, 2 ] );
       
-      ctx.beginPath();
-      ctx.moveTo( this.moveTarget.x, this.moveTarget.y );
-      ctx.lineTo( this.x, this.y );
-      ctx.stroke();
+    //   ctx.beginPath();
+    //   ctx.moveTo( this.moveTarget.x, this.moveTarget.y );
+    //   ctx.lineTo( this.x, this.y );
+    //   ctx.stroke();
       
-      ctx.restore();
-    }
+    //   ctx.restore();
+    // }
 
-    if ( this.#debug.waypoints ) {
-      ctx.strokeStyle = 'yellow';
-      this.#debug.waypoints.forEach( line => line.draw( ctx ) );
+    // if ( this.#debug.waypoints ) {
+    //   ctx.strokeStyle = 'yellow';
+    //   this.#debug.waypoints.forEach( line => line.draw( ctx ) );
 
-      if ( this.#debug.cone ) {
-        ctx.fillStyle = '#ff02';
-        ctx.beginPath();
-        ctx.moveTo( this.x, this.y );
-        ctx.arc( this.x, this.y, 100, this.#debug.cone.left, this.#debug.cone.right );
-        ctx.fill();
-      }
-    }
+    //   if ( this.#debug.cone ) {
+    //     ctx.fillStyle = '#ff02';
+    //     ctx.beginPath();
+    //     ctx.moveTo( this.x, this.y );
+    //     ctx.arc( this.x, this.y, 100, this.#debug.cone.left, this.#debug.cone.right );
+    //     ctx.fill();
+    //   }
+
+    //   this.#debug.waypoints = null;   // TODO: clear somewhere else?
+    // }
 
     // this.cell?.drawShaded( ctx, 'green' );
     // this.path?.forEach( cell => cell.drawShaded( ctx, 'orange' ) );
