@@ -129,8 +129,17 @@ export class Entity {
       } );
     } );
 
+    // If there is a collision, give us the one with smallest overlap
+    // Otherwise, give us the closest distance 
     return lineComps.reduce(
-      ( closest, pos ) => pos.distance < closest.distance ? pos : closest
+      ( closest, pos ) => {
+        if ( pos.distance < 0 && closest.distance < 0 ) {
+          return pos.distance > closest.distance ? pos : closest;
+        }
+        else {
+          return pos.distance < closest.distance ? pos : closest;
+        }
+      }
     );
   }
 

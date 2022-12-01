@@ -94,10 +94,16 @@ export class Line {
           y: y1 + ( y2 - y1 ) * uA,
         };
 
+        // If lines are colliding, return the distance that line A impinges on line B
+        // (should be a negative number)
+        const dist1 = ( a.x1 - b.x1 ) * b.normal.x + ( a.y1 - b.y1 ) * b.normal.y;
+        const dist2 = ( a.x2 - b.x1 ) * b.normal.x + ( a.y2 - b.y1 ) * b.normal.y;
+
         return {
           closestA: intersection,
           closestB: intersection,
-          distance: 0,
+          angle: Math.PI + b.normal.angle,
+          distance: Math.min( dist1, dist2 ),
         }
       }
     }
@@ -144,8 +150,7 @@ export class Line {
     return {
       closestA: { x: Ax, y: Ay },
       closestB: { x: Bx, y: By },
-      // TODO: Take into account whether we are on wrong side of line (and make dist negative?)
-      //       Need to make sure we don't count Entities that are way beyond the line as being "inside"
+      angle:    Math.atan2( By - Ay, Bx - Ax ),
       distance: Math.hypot( Bx - Ax, By - Ay ),
     }
   }

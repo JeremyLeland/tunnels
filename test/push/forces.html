@@ -6,65 +6,34 @@
 <script type="module">
 
   import { Game } from '../../src/Game.js';
-  import { Entity } from '../../src/Entity.js';
-  import { Wall } from '../../src/Wall.js';
-
-  import { ActorInfo } from '../../info/info.js';
+  import { World } from '../../src/World.js';
   
   const game = new Game();
   game.start();
 
-  const AVOID_DIST = 20;
-  
-  const entities = [
-    new Wall( [ [ 200, 600 ], [ 400, 500 ], [ 400, 650 ] ] ),
-    new Wall( [ [ 500, 500 ], [ 700, 300 ], [ 700, 500 ] ] ),
-    new Entity( { x: 300, y: 300, angle: 0 }, ActorInfo.marine ),
-    new Entity( { x: 400, y: 300, angle: 1 }, ActorInfo.marine ),
-    new Entity( { x: 400, y: 400, angle: 2 }, ActorInfo.marine ),
-    new Entity( { x: 300, y: 400, angle: 3 }, ActorInfo.marine ),
-  ];
+  const json = {
+    entities: [
+      { x: 300, y: 300, angle: 0, type: 'marine' },
+      { x: 400, y: 300, angle: 1, type: 'marine' },
+      { x: 400, y: 400, angle: 2, type: 'marine' },
+      { x: 300, y: 400, angle: 3, type: 'marine' },
+    ],
+    walls: [
+      [ [ 200, 600 ], [ 400, 500 ], [ 400, 650 ] ],
+      [ [ 500, 500 ], [ 700, 300 ], [ 700, 500 ] ],
+    ],
+  };
 
-  const player = entities[ 2 ];
+  const world = new World( json );
+
+  const player = world.entities[ 2 ];
   
   game.update = ( dt ) => {
-    entities.forEach( e => e.update( dt ) );
+    world.update( dt );
   };
 
   game.draw = ( ctx ) => {
-    entities.forEach( e => {
-      e.draw( ctx );
-
-      e.dx = 0;
-      e.dy = 0;
-    } );
-
-    for ( let i = 0; i < entities.length; i ++ ) {
-      for ( let j = i + 1; j < entities.length; j ++ ) {
-        const A = entities[ i ];
-        const B = entities[ j ];
-        const points = A.getClosestPoints( B );
-
-        const angle = Math.atan2( points.closestB.y - points.closestA.y, points.closestB.x - points.closestA.x );
-        const dist  = points.distance;
-
-        const repulsion = Math.max( 0, 1 - dist / AVOID_DIST );
-
-        const speedA = A.info.maxSpeed * repulsion;
-        A.dx -= Math.cos( angle ) * speedA;
-        A.dy -= Math.sin( angle ) * speedA;
-
-        const speedB = B.info.maxSpeed * repulsion;
-        B.dx += Math.cos( angle ) * speedB;
-        B.dy += Math.sin( angle ) * speedB;
-
-        ctx.beginPath();
-        ctx.moveTo( points.closestA.x, points.closestA.y );
-        ctx.lineTo( points.closestB.x, points.closestB.y );
-        ctx.strokeStyle = `rgba( 0, 255, 0, ${ repulsion } )`;
-        ctx.stroke();
-      }
-    }
+    world.draw( ctx );
   };
 
   document.addEventListener( 'mousemove', e => {

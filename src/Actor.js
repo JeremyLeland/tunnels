@@ -41,9 +41,11 @@ export class Actor extends Entity {
     // Avoid other entities
     const avoidList = world.entities.filter( e => this != e && this.info.avoids.includes( e.info.type ) );
 
+    // TODO: Is this the right way to account for speeding up and slowing down?
+    //       Currently multiplying by various speeds at every vector, maybe this can be done once later?
     const goalVector = {
-      x: Math.cos( this.angle ),
-      y: Math.sin( this.angle ),
+      x: Math.cos( this.angle ) * this.speed,
+      y: Math.sin( this.angle ) * this.speed,
     };
 
     const avoidVectors = [];
@@ -53,23 +55,22 @@ export class Actor extends Entity {
 
     avoidList.forEach( other => {
       const p = this.getClosestPoints( other );
-      const angle = Math.atan2( p.closestB.y - p.closestA.y, p.closestB.x - p.closestA.x );
-      const repulsion = 1 - p.distance / AVOID_DIST;
+      const repulsion = 1 - /*Math.max( 0,*/ p.distance /*)*/ / AVOID_DIST;
 
       if ( repulsion > 0 ) {
         avoidVectors.push( {
-          x: -Math.cos( angle ) * repulsion,
-          y: -Math.sin( angle ) * repulsion,
+          x: -Math.cos( p.angle ) * repulsion * this.info.maxSpeed,
+          y: -Math.sin( p.angle ) * repulsion * this.info.maxSpeed,
           src: other, // DEBUG
         } );
 
         if ( other.dx != 0 || other.dy != 0 ) {
           // If we are heading straight toward this entity, try to dodge around it
           // TODO: base this on their avoid cone somehow?
-          if ( Math.abs( Util.deltaAngle( this.angle, angle ) ) < 1 ) {  // TODO: what angle range?
+          if ( Math.abs( Util.deltaAngle( this.angle, p.angle ) ) < 1 ) {  // TODO: what angle range?
             dodgeVectors.push( {
-              x:  Math.sin( angle ) * repulsion,
-              y: -Math.cos( angle ) * repulsion,
+              x:  Math.sin( p.angle ) * repulsion * this.info.maxSpeed,
+              y: -Math.cos( p.angle ) * repulsion * this.info.maxSpeed,
               src: other,
             } );
           }
@@ -90,13 +91,15 @@ export class Actor extends Entity {
     } );
     
     const moveLength = Math.hypot( moveVector.x, moveVector.y );
-    if ( moveLength > 1 ) {
-      moveVector.x /= moveLength;
-      moveVector.y /= moveLength;
+    if ( moveLength > this.info.maxSpeed ) {
+      moveVector.x /= moveLength / this.info.maxSpeed;
+      moveVector.y /= moveLength / this.info.maxSpeed;
     }
-      
-    this.dx = moveVector.x * this.speed;
-    this.dy = moveVector.y * this.speed;
+    
+    // TODO: How to handle speeding up and slowing down? (if at all?)
+    // Maybe we should just make repulsion forces more powerful than movement forces? Could be some tweaking here...
+    this.dx = moveVector.x;
+    this.dy = moveVector.y;
 
     super.update( dt );
 
@@ -115,22 +118,23 @@ export class Actor extends Entity {
     // const colors = [ 'red', 'orange', 'yellow', 'green', 'blue', 'purple' ];
 
     // this.#debug.avoidVectors?.forEach( ( avoidVector, index ) => {
-    //   ctx.strokeStyle = colors[ index ];//'yellow';
+    //   // ctx.strokeStyle = colors[ index ];
+    //   ctx.strokeStyle = 'yellow';
     //   drawVector( ctx, this.x, this.y, avoidVector );
 
     //   // DEBUG: clarify source
-    //   ctx.save();
+    //   // ctx.save();
 
-    //   const src = avoidVector.src;
-    //   ctx.beginPath();
-    //   // ctx.arc( src.x, src.y, src.info.size, 0, Math.PI * 2 );
-    //   ctx.moveTo( this.x, this.y );
-    //   ctx.lineTo( src.x, src.y );
+    //   // const src = avoidVector.src;
+    //   // ctx.beginPath();
+    //   // // ctx.arc( src.x, src.y, src.info.size, 0, Math.PI * 2 );
+    //   // ctx.moveTo( this.x, this.y );
+    //   // ctx.lineTo( src.x, src.y );
 
-    //   ctx.setLineDash( [ 4, 2 ] );
-    //   ctx.stroke(); 
+    //   // ctx.setLineDash( [ 4, 2 ] );
+    //   // ctx.stroke(); 
 
-    //   ctx.restore();
+    //   // ctx.restore();
     // } );
 
     // this.#debug.dodgeVectors?.forEach( dodgeVector => {

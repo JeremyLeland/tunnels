@@ -38,29 +38,21 @@
 
     output.innerHTML = JSON.stringify( compare );
 
-    if ( compare.intersection ) {
-      ctx.beginPath();
-      ctx.arc( compare.intersection.x, compare.intersection.y, 2, 0, Math.PI * 2 );
-      ctx.fillStyle = 'red';
-      ctx.fill();
-    }
-    else {
-      ctx.beginPath();
-      ctx.moveTo( compare.closestA.x, compare.closestA.y );
-      ctx.lineTo( compare.closestB.x, compare.closestB.y );
-      ctx.strokeStyle = 'cyan';
-      ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo( compare.closestA.x, compare.closestA.y );
+    ctx.lineTo( compare.closestB.x, compare.closestB.y );
+    ctx.strokeStyle = 'cyan';
+    ctx.stroke();
 
-      ctx.beginPath();
-      ctx.arc( compare.closestA.x, compare.closestA.y, 2, 0, Math.PI * 2 );
-      ctx.fillStyle = 'green';
-      ctx.fill();
+    ctx.beginPath();
+    ctx.arc( compare.closestA.x, compare.closestA.y, 2, 0, Math.PI * 2 );
+    ctx.fillStyle = 'green';
+    ctx.fill();
 
-      ctx.beginPath();
-      ctx.arc( compare.closestB.x, compare.closestB.y, 2, 0, Math.PI * 2 );
-      ctx.fillStyle = 'blue';
-      ctx.fill();
-    }
+    ctx.beginPath();
+    ctx.arc( compare.closestB.x, compare.closestB.y, 2, 0, Math.PI * 2 );
+    ctx.fillStyle = 'blue';
+    ctx.fill();
   }
   
 </script>
