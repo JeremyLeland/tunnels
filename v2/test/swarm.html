@@ -1,0 +1,65 @@
+<title>Swarm of Aliens</title>
+<link rel="stylesheet" href="../grid.css">
+
+<script type="module">
+  import { AnimatedCanvas } from '../src/AnimatedCanvas.js';
+  import { Entity, Constants } from '../src/Entity.js';
+  import { EntitySimulator } from './EntitySimulator.js';
+  import { ValuesPanel } from './ValuesPanel.js';
+
+  Entity.DebugBounds = true;
+  Entity.DebugNavigation = true;
+
+  const AlienInfo = {
+    type: 'alien',
+    moveSpeed: 0.02,
+    maxSpeed: 0.08,
+    turnSpeed: 0.008,
+    accelSpeed: 0.005,
+    boundingPoints: [
+      [ -1,  0 ],
+      [  1, -1 ],
+      [  1,  1 ],
+    ],
+    drawPaths: [ {
+      fillStyle: 'green',
+      path: new Path2D( 'M -1 0 L 0.75 -1 A 0.5 1 0 0 1 0.75 1 Z' ),
+    } ],
+  };
+
+  const entities = [
+    new Entity( { x: 200, y: 200, size: 10, goalAngle: 0, goalSpeed: 0.1 }, AlienInfo ),
+    new Entity( { x: 200, y: 230, size: 10, goalAngle: 0, goalSpeed: 0.1 }, AlienInfo ),
+    new Entity( { x: 230, y: 200, size: 10, goalAngle: 0, goalSpeed: 0.1 }, AlienInfo ),
+    new Entity( { x: 230, y: 230, size: 10, goalAngle: 0, goalSpeed: 0.1 }, AlienInfo ),
+  ];
+
+  
+  new ValuesPanel( Constants ).valueChanged = refresh;
+  new EntitySimulator( entities ).onInput = refresh;
+
+  const canvas = new AnimatedCanvas();
+
+  canvas.update = ( dt ) => {
+    entities.forEach( e => {
+      e.targetGoal = { x: 500, y: 500 };
+      e.update( dt, entities );
+    } );
+  };
+  
+  canvas.draw = ( ctx ) => {
+    entities.forEach( e => e.draw( ctx ) );
+  };
+
+  function refresh() {
+    canvas.update( 0 );
+    canvas.redraw();
+  }
+  refresh();
+
+  document.addEventListener( 'keydown', ( e ) => {
+    canvas.update( 30 );
+    canvas.redraw();
+  } );
+  
+</script>
