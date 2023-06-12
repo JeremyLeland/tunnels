@@ -47,6 +47,10 @@ export class Entity {
       this.boundingLines = new BoundingLines( this.info.boundingPoints );
       this.boundingLines.update( this );
     }
+
+    if ( this.info.maxSpeed ) {
+      this.speed = 0;
+    }
   }
 
   update( dt, alignEntities ) {
@@ -58,13 +62,12 @@ export class Entity {
 
       this.align( alignEntities );
 
-      // TODO: Slow down instead of turning dramatically
-      // Break goal vector into forward and side components
+      // TODO: Break goal vector into forward and side components
       // Adjust speed based on forward component, angle based on side component?
 
       // Differentiate between our actual goal and adjustments that are being made for alignment purposes
       // That is, we shouldn't turn completely around just because someone is infront of us
-      // But we should turn completely around if our new goal is behind us
+      // But we should turn completely around if our new goal is behind us 
 
       // TODO: Accelerate/decelerate turns?
       // So we slow down as we get closer?
@@ -74,17 +77,16 @@ export class Entity {
       this.angle += Math.sign( goalTurn ) * turn;
       this.angle = Util.fixAngle( this.angle );
 
+      const goalSpeed = this.info.maxSpeed * ( 1 - Math.abs( goalTurn ) / Math.PI );
+
       // TODO: Differentiate between goal speed (accel/decel) and max speed (clamping)
       // So we slow to a smooth stop?
+      const goalAccel = goalSpeed - this.speed;
+      const accel = Math.min( Math.abs( goalAccel ), this.info.accelSpeed * dt );
+      this.speed += Math.sign( goalAccel ) * accel;
 
-      this.dx += Math.cos( this.angle ) * this.info.accelSpeed * dt;
-      this.dy += Math.sin( this.angle ) * this.info.accelSpeed * dt;
-
-      const vel = Math.hypot( this.dx, this.dy );
-      if ( vel > this.goalSpeed ) {
-        this.dx *= this.goalSpeed / vel;
-        this.dy *= this.goalSpeed / vel;
-      }
+      this.dx = Math.cos( this.angle ) * this.speed * dt;
+      this.dy = Math.sin( this.angle ) * this.speed * dt;
 
       this.x += this.dx * dt;
       this.y += this.dy * dt;
