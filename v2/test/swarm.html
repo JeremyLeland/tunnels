@@ -12,9 +12,10 @@
 
   const AlienInfo = {
     type: 'alien',
-    maxSpeed: 0.002,
-    turnSpeed: 0.008,
-    accelSpeed: 0.005,
+    maxMoveSpeed: 0.002,
+    maxTurnSpeed: 0.005,
+    moveAccel: 0.005,
+    turnAccel: 0.00001,
     boundingPoints: [
       [ -1,  0 ],
       [  1, -1 ],
@@ -27,10 +28,10 @@
   };
 
   const entities = [
-    new Entity( { x: 200, y: 200, size: 10, goalAngle: 0 }, AlienInfo ),
-    new Entity( { x: 200, y: 250, size: 10, goalAngle: 0 }, AlienInfo ),
-    new Entity( { x: 250, y: 200, size: 10, goalAngle: 0 }, AlienInfo ),
-    new Entity( { x: 250, y: 250, size: 10, goalAngle: 0 }, AlienInfo ),
+    new Entity( { x: 200, y: 200, size: 10, angle: -2, goalAngle: 0 }, AlienInfo ),
+    // new Entity( { x: 200, y: 250, size: 10, goalAngle: 0 }, AlienInfo ),
+    // new Entity( { x: 250, y: 200, size: 10, goalAngle: 0 }, AlienInfo ),
+    // new Entity( { x: 250, y: 250, size: 10, goalAngle: 0 }, AlienInfo ),
   ];
 
   
