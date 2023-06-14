@@ -1,0 +1,64 @@
+<title>Swarm of Aliens</title>
+<link rel="stylesheet" href="../grid.css">
+
+<script type="module">
+  import { AnimatedCanvas } from '../src/AnimatedCanvas.js';
+  import { Entity, Constants } from '../src/Entity.js';
+  import { ValuesPanel } from './ValuesPanel.js';
+
+  Entity.DebugBounds = true;
+  Entity.DebugNavigation = true;
+
+  const AlienInfo = {
+    type: 'alien',
+    // maxMoveSpeed: 0.002,
+    maxTurnSpeed: 0.008,
+    // moveAccel: 0.005,
+    turnAccel: 0.0001,
+    boundingPoints: [
+      [ -1,  0 ],
+      [  1, -1 ],
+      [  1,  1 ],
+    ],
+    drawPaths: [ {
+      fillStyle: 'green',
+      path: new Path2D( 'M -1 0 L 0.75 -1 A 0.5 1 0 0 1 0.75 1 Z' ),
+    } ],
+  };
+
+  const entities = [
+    new Entity( { x: 200, y: 200, size: 20, angle: 0 }, AlienInfo ),
+  ];
+
+  
+  new ValuesPanel( AlienInfo );
+
+  const canvas = new AnimatedCanvas();
+
+  let mouseX = 300, mouseY = 100;
+
+  canvas.update = ( dt ) => {
+    entities.forEach( e => {
+      e.targetGoal = { x: mouseX, y: mouseY };
+      e.update( dt, entities );
+    } );
+  };
+  
+  canvas.draw = ( ctx ) => {
+    entities.forEach( e => e.draw( ctx ) );
+  };
+
+  canvas.start();
+
+  document.addEventListener( 'mousedown', ( e ) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  } );
+
+  // document.addEventListener( 'mousemove', ( e ) => {
+  //   mouseX = e.clientX;
+  //   mouseY = e.clientY;
+  // } );
+
+  
+</script>

@@ -48,8 +48,12 @@ export class Entity {
       this.boundingLines.update( this );
     }
 
-    if ( this.info.maxSpeed ) {
-      this.speed = 0;
+    if ( this.info.maxTurnSpeed ) {
+      this.turnSpeed = 0;
+    }
+
+    if ( this.info.maxMoveSpeed ) {
+      this.moveSpeed = 0;
     }
   }
 
@@ -73,23 +77,43 @@ export class Entity {
       // So we slow down as we get closer?
 
       const goalTurn = Util.deltaAngle( this.angle, this.goalAngle );
-      const turn = Math.min( Math.abs( goalTurn ), this.info.turnSpeed * dt );
-      this.angle += Math.sign( goalTurn ) * turn;
-      this.angle = Util.fixAngle( this.angle );
 
-      const goalSpeed = this.info.maxSpeed * ( 1 - Math.abs( goalTurn ) / Math.PI );
+      // TODO: Increase/decrease turnSpeed to match how far we need to turn
+      // FIXME: Need to figure out stop distance (how long does it take to slow down?)
+      //        and start slowing down then
 
-      // TODO: Differentiate between goal speed (accel/decel) and max speed (clamping)
-      // So we slow to a smooth stop?
-      const goalAccel = goalSpeed - this.speed;
-      const accel = Math.min( Math.abs( goalAccel ), this.info.accelSpeed * dt );
-      this.speed += Math.sign( goalAccel ) * accel;
+      // Braking distance = v^2 / 2ug   (u=friction, g=gravity)
+      // We'll use turnAccel in place of ug
 
-      this.dx = Math.cos( this.angle ) * this.speed * dt;
-      this.dy = Math.sin( this.angle ) * this.speed * dt;
+      const turnStop = Math.sign( this.turnSpeed ) * Math.pow( this.turnSpeed, 2 ) / ( 2 * this.info.turnAccel );
 
-      this.x += this.dx * dt;
-      this.y += this.dy * dt;
+      // TODO: Allow partial turnAccel (only accel as much as we need to -- don't be jittery with fast accels)
+
+      if ( goalTurn < turnStop )   this.turnSpeed -= this.info.turnAccel * dt;
+      if ( turnStop < goalTurn )   this.turnSpeed += this.info.turnAccel * dt;
+
+      // TODO: Max speed
+
+      // const goalTurnSpeed = Math.abs( goalTurn ) / dt;
+      // this.turnSpeed += Math.sign( goalTurnSpeed ) * this.info.turnAccel
+
+      this.angle = Util.fixAngle( this.angle + this.turnSpeed * dt );
+
+      if ( this.moveSpeed ) {
+        const goalMoveSpeed = this.info.maxMoveSpeed * ( 1 - Math.abs( goalTurn ) / Math.PI );
+        
+        // TODO: Differentiate between goal speed (accel/decel) and max speed (clamping)
+        // So we slow to a smooth stop?
+        const goalMoveAccel = goalMoveSpeed - this.moveSpeed;
+        const moveAccel = Math.min( Math.abs( goalMoveAccel ), this.info.moveAccel * dt );
+        this.moveSpeed += Math.sign( goalMoveAccel ) * moveAccel;
+        
+        this.dx = Math.cos( this.angle ) * this.moveSpeed * dt;
+        this.dy = Math.sin( this.angle ) * this.moveSpeed * dt;
+        
+        this.x += this.dx * dt;
+        this.y += this.dy * dt;
+      }
     }
     else {
       this.dAngle += this.ddAngle * dt;
@@ -329,11 +353,11 @@ export class Entity {
       ctx.save();
       ctx.translate( this.x, this.y );
 
-      ctx.fillStyle = 'rgba( 0, 100, 0, 0.5 )';
-      ctx.beginPath();
-      ctx.moveTo( 0, 0 );
-      ctx.arc( 0, 0, this.size, 0, Math.PI * 2 );
-      ctx.fill();
+      // ctx.fillStyle = 'rgba( 0, 100, 0, 0.5 )';
+      // ctx.beginPath();
+      // ctx.moveTo( 0, 0 );
+      // ctx.arc( 0, 0, this.size, 0, Math.PI * 2 );
+      // ctx.fill();
 
       ctx.fillStyle = 'rgba( 100, 100, 100, 0.1 )';
       ctx.beginPath();
