@@ -83,14 +83,14 @@ export class Entity {
         
         // Braking distance = v^2 / 2ug   (u=friction, g=gravity -- we'll use turnAccel in place of ug )
         const turnStopDist = Math.sign( this.turnSpeed ) * Math.pow( this.turnSpeed, 2 ) / ( 2 * this.info.turnAccel );
-        
-        const goalSpeed = ( goalTurnDist - turnStopDist ) / dt;
-        if ( goalTurnDist < turnStopDist ) {
-          this.turnSpeed = Math.max( goalSpeed, this.turnSpeed - this.info.turnAccel * dt );
+        const goalTurnSpeed = ( goalTurnDist - turnStopDist ) / dt;
+
+        if ( goalTurnSpeed < this.turnSpeed ) {
+          this.turnSpeed = Math.max( goalTurnSpeed, this.turnSpeed - this.info.turnAccel * dt );
           this.turnSpeed = Math.max( -this.info.maxTurnSpeed, this.turnSpeed );
         }
-        if ( turnStopDist < goalTurnDist ) {
-          this.turnSpeed = Math.min( goalSpeed, this.turnSpeed + this.info.turnAccel * dt );
+        else if ( this.turnSpeed < goalTurnSpeed ) {
+          this.turnSpeed = Math.min( goalTurnSpeed, this.turnSpeed + this.info.turnAccel * dt );
           this.turnSpeed = Math.min( this.info.maxTurnSpeed, this.turnSpeed );
         }
         
@@ -98,8 +98,16 @@ export class Entity {
         // const goalSpeed = ( goalTurnDist - turnStopDist ) / dt;
         // const accel = Math.min( Math.abs( goalSpeed - this.turnSpeed ), this.info.turnAccel * dt );
         // this.turnSpeed += Math.sign( goalSpeed ) * accel;
-        
-        this.angle = Util.fixAngle( this.angle + this.turnSpeed * dt );
+
+        // TODO: Trying to keep us from overshooting, but it doesn't seem to work...we still jiggle a bit
+        if ( goalTurnDist < 0 ) {
+          this.angle += Math.max( goalTurnDist, this.turnSpeed * dt );
+          this.angle = Util.fixAngle( this.angle );
+        }
+        else if ( 0 < goalTurnDist ) {
+          this.angle += Math.min( goalTurnDist, this.turnSpeed * dt );
+          this.angle = Util.fixAngle( this.angle );
+        }
       }
 
       //
