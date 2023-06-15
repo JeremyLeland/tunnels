@@ -78,7 +78,7 @@ export class Entity {
       // Turn
       //
 
-      if ( this.info.turnAccel ) {   
+      // if ( this.info.turnAccel ) {   
         const goalTurnDist = Util.deltaAngle( this.angle, this.goalAngle );
         
         // Braking distance = v^2 / 2ug   (u=friction, g=gravity -- we'll use turnAccel in place of ug )
@@ -108,27 +108,37 @@ export class Entity {
           this.angle += Math.min( goalTurnDist, this.turnSpeed * dt );
           this.angle = Util.fixAngle( this.angle );
         }
-      }
+      // }
 
       //
       // Move
       //
 
-      if ( this.info.moveAccel ) {
-        const goalMoveSpeed = this.info.maxMoveSpeed * ( 1 - Math.abs( goalTurnDist ) / Math.PI );
+      // if ( this.info.moveAccel ) {
+
+        // TODO: Determine speed based on angle to target (not just angle to goal)
+        // If goalAngle is different enough from angle to target, we might just wait for others to move 
+
+        // Full speed if straight ahead, stopped if more than right angle
+        const goalMoveSpeed = this.info.maxMoveSpeed * Math.max( 0, ( 1 - Math.abs( goalTurnDist ) / ( Math.PI / 2 ) ) );
         
         // TODO: Differentiate between goal speed (accel/decel) and max speed (clamping)
         // So we slow to a smooth stop?
-        const goalMoveAccel = goalMoveSpeed - this.moveSpeed;
-        const moveAccel = Math.min( Math.abs( goalMoveAccel ), this.info.moveAccel * dt );
-        this.moveSpeed += Math.sign( goalMoveAccel ) * moveAccel;
+        if ( goalMoveSpeed < this.moveSpeed ) {
+          this.moveSpeed = Math.max( goalMoveSpeed, this.moveSpeed - this.info.moveAccel * dt );
+          this.moveSpeed = Math.max( 0, this.moveSpeed );
+        }
+        else if ( this.moveSpeed < goalMoveSpeed ) {
+          this.moveSpeed = Math.min( goalMoveSpeed, this.moveSpeed + this.info.moveAccel * dt );
+          this.moveSpeed = Math.min( this.info.maxMoveSpeed, this.moveSpeed );
+        }
         
         this.dx = Math.cos( this.angle ) * this.moveSpeed * dt;
         this.dy = Math.sin( this.angle ) * this.moveSpeed * dt;
         
         this.x += this.dx * dt;
         this.y += this.dy * dt;
-      }
+      // }
     }
     else {
       this.dAngle += this.ddAngle * dt;
