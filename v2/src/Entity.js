@@ -82,6 +82,7 @@ export class Entity {
         const goalTurnDist = Util.deltaAngle( this.angle, this.goalAngle );
         
         // Braking distance = v^2 / 2ug   (u=friction, g=gravity -- we'll use turnAccel in place of ug )
+        // TODO: Why does 2 work here, but we need 0.125 below?
         const turnStopDist = Math.sign( this.turnSpeed ) * Math.pow( this.turnSpeed, 2 ) / ( 2 * this.info.turnAccel );
         const goalTurnSpeed = ( goalTurnDist - turnStopDist ) / dt;
 
@@ -116,11 +117,21 @@ export class Entity {
 
       // if ( this.info.moveAccel ) {
 
-        // TODO: Determine speed based on angle to target (not just angle to goal)
-        // If goalAngle is different enough from angle to target, we might just wait for others to move 
-
         // Full speed if straight ahead, stopped if more than right angle
-        const goalMoveSpeed = this.info.maxMoveSpeed * Math.max( 0, ( 1 - Math.abs( goalTurnDist ) / ( Math.PI / 2 ) ) );
+        // TODO: Determine speed based on angle to target (not just angle to goal)
+        // If goalAngle is different enough from angle to target, we might just wait for others to move
+        const speedModifier = Math.max( 0, ( 1 - Math.abs( goalTurnDist ) / ( Math.PI / 2 ) ) );
+
+
+        const goalMoveDist = Math.max( 0, Math.hypot( this.goal.x - this.x, this.goal.y - this.y ) - this.size );
+
+        const moveStopDist = Math.pow( this.moveSpeed, 2 ) / ( 0.125 * /*2 **/ this.info.moveAccel );
+
+      
+        
+        // TODO: Include braking code from above
+        const goalMoveSpeed = //goalMoveDist < this.size ? 0 :    // do we still need this check?
+          speedModifier * ( goalMoveDist - moveStopDist ) / dt;
         
         // TODO: Differentiate between goal speed (accel/decel) and max speed (clamping)
         // So we slow to a smooth stop?
