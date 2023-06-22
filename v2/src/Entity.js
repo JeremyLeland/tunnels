@@ -39,6 +39,8 @@ export class Entity {
 
   createdEntities = [];
 
+  #debug = {};
+
   constructor( values, info ) {
     Object.assign( this, values );
     this.info = info;
@@ -64,22 +66,27 @@ export class Entity {
     if ( this.goal ) {
       this.goalAngle = Math.atan2( this.goal.y - this.y, this.goal.x - this.x );
 
-      this.align( alignEntities );
+      this.alignAngle = this.getAlignAngle( alignEntities );
 
-      // TODO: Break goal vector into forward and side components
-      // Adjust speed based on forward component, angle based on side component?
 
       // Differentiate between our actual goal and adjustments that are being made for alignment purposes
       // That is, we shouldn't turn completely around just because someone is infront of us
-      // But we should turn completely around if our new goal is behind us 
+      // But we should turn completely around if our new goal is behind us
 
+      // TODO: Add alignment back in to avoid rubberbanding
+      // TODO: Don't turn either if it's far from goal
+
+      // Don't bother going too far out of our way, just wait
+      const outOfWayModifier = Math.max( 0, 
+        ( 1 - Math.abs( Util.deltaAngle( this.goalAngle, this.alignAngle ) ) / ( Math.PI / 2 ) )
+      );
 
       //
       // Turn
       //
 
       // if ( this.info.turnAccel ) {   
-        const goalTurnDist = Util.deltaAngle( this.angle, this.goalAngle );
+        const goalTurnDist = outOfWayModifier * Util.deltaAngle( this.angle, this.alignAngle );
         
         // Braking distance = v^2 / 2ug   (u=friction, g=gravity -- we'll use turnAccel in place of ug )
         // TODO: Why does 2 work here, but we need 0.125 below?
@@ -118,12 +125,12 @@ export class Entity {
       // if ( this.info.moveAccel ) {
 
         // Full speed if straight ahead, stopped if more than right angle
-        // TODO: Determine speed based on angle to target (not just angle to goal)
-        // If goalAngle is different enough from angle to target, we might just wait for others to move
-        const speedModifier = Math.max( 0, ( 1 - Math.abs( goalTurnDist ) / ( Math.PI / 2 ) ) );
+        
+        const speedModifier = Math.max( 0, ( 1 - Math.abs( goalTurnDist ) / ( Math.PI / 2 ) ) ) *
+          outOfWayModifier;
 
 
-        const goalMoveDist = Math.max( 0, Math.hypot( this.goal.x - this.x, this.goal.y - this.y ) - this.size );
+        const goalMoveDist = speedModifier * Math.max( 0, Math.hypot( this.goal.x - this.x, this.goal.y - this.y ) - this.size );
 
         const moveStopDist = Math.pow( this.moveSpeed, 2 ) / ( 0.125 * /*2 **/ this.info.moveAccel );
 
@@ -131,7 +138,7 @@ export class Entity {
         
         // TODO: Include braking code from above
         const goalMoveSpeed = //goalMoveDist < this.size ? 0 :    // do we still need this check?
-          speedModifier * ( goalMoveDist - moveStopDist ) / dt;
+          ( goalMoveDist - moveStopDist ) / dt;
         
         // TODO: Differentiate between goal speed (accel/decel) and max speed (clamping)
         // So we slow to a smooth stop?
@@ -169,12 +176,13 @@ export class Entity {
     this.isAlive = this.life > 0 && this.lifeSpan > 0;
   }
 
-  align( others ) {
-    this.vectors = [];
+  // TODO: Get align angle (separate from goal angle) for later comparison
+  getAlignAngle( others ) {
+    const vectors = [];
 
     if ( this.goalAngle ) {
       const targetWeight = Constants.TargetWeight;
-      this.vectors.push( {
+      vectors.push( {
         x: Math.cos( this.goalAngle ) * targetWeight,
         y: Math.sin( this.goalAngle ) * targetWeight,
         color: 'gray',
@@ -193,7 +201,7 @@ export class Entity {
         // Seems like dividing by number of ships could mitigate that
         
         const avoidWeight = Constants.AvoidWeight * Math.max( 0, Constants.AvoidDistance / dist - 1 );
-        this.vectors.push( {
+        vectors.push( {
           x: -Math.cos( angle ) * avoidWeight,
           y: -Math.sin( angle ) * avoidWeight,
           color: 'red',
@@ -202,7 +210,7 @@ export class Entity {
         // const alignWeight = Constants.AlignWeight / dist;
         // const averageAngle = this.angle + Util.deltaAngle( this.angle, other.angle ) / 2;
         
-        // this.vectors.push ( {
+        // vectors.push ( {
         //   x: Math.cos( averageAngle ) * alignWeight,
         //   y: Math.sin( averageAngle ) * alignWeight,
         //   color: 'yellow',
@@ -210,8 +218,15 @@ export class Entity {
       }
     } );
     
-    this.totalVector = this.vectors.reduce( ( a, b ) => ( { x: a.x + b.x, y: a.y + b.y } ), { x: 0, y: 0 } );
-    this.goalAngle = Math.atan2( this.totalVector.y, this.totalVector.x );
+    const totalVector = vectors.reduce( ( a, b ) => ( { x: a.x + b.x, y: a.y + b.y } ), { x: 0, y: 0 } );
+
+    this.#debug.align ??= {};
+    this.#debug.align.vectors = vectors;
+    this.#debug.align.totalVector = totalVector;
+
+    return Math.atan2( totalVector.y, totalVector.x );
+
+    // this.goalAngle = Math.atan2( this.totalVector.y, this.totalVector.x );
   }
 
   getOffsetPosition( offset ) {
@@ -407,8 +422,10 @@ export class Entity {
       ctx.lineTo( Math.cos( this.goalAngle ) * Constants.UIScale, Math.sin( this.goalAngle ) * Constants.UIScale );
       ctx.stroke();
 
-      drawVector( this.totalVector, ctx, 'white' );
-      this.vectors?.forEach( v => drawVector( v, ctx, v.color ) );
+      if ( this.#debug.align ) {
+        drawVector( this.#debug.align.totalVector, ctx, 'white' );
+        this.#debug.align.vectors?.forEach( v => drawVector( v, ctx, v.color ) );
+      }
 
       ctx.restore();
     }

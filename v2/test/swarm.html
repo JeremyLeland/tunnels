@@ -12,10 +12,10 @@
 
   const AlienInfo = {
     type: 'alien',
-    maxMoveSpeed: 0.002,
+    maxMoveSpeed: 0.005,
     maxTurnSpeed: 0.005,
-    moveAccel: 0.005,
-    turnAccel: 0.00001,
+    moveAccel: 0.00002,
+    turnAccel: 0.00002,
     boundingPoints: [
       [ -1,  0 ],
       [  1, -1 ],
@@ -28,15 +28,13 @@
   };
 
   const entities = [
-    new Entity( { x: 200, y: 200, size: 10, angle: -2, goalAngle: 0 }, AlienInfo ),
-    // new Entity( { x: 200, y: 250, size: 10, goalAngle: 0 }, AlienInfo ),
-    // new Entity( { x: 250, y: 200, size: 10, goalAngle: 0 }, AlienInfo ),
-    // new Entity( { x: 250, y: 250, size: 10, goalAngle: 0 }, AlienInfo ),
+    new Entity( { x: 200, y: 200, size: 10, angle: 0 }, AlienInfo ),
+    new Entity( { x: 230, y: 200, size: 10, angle: 0 }, AlienInfo ),
+    new Entity( { x: 200, y: 230, size: 10, angle: 0 }, AlienInfo ),
   ];
 
-  
-  new ValuesPanel( Constants ).valueChanged = refresh;
-  new EntitySimulator( entities ).onInput = refresh;
+  // new ValuesPanel( Constants ).valueChanged = refresh;
+  // new EntitySimulator( entities ).onInput = refresh;
 
   const canvas = new AnimatedCanvas();
 
@@ -50,6 +48,8 @@
   canvas.draw = ( ctx ) => {
     entities.forEach( e => e.draw( ctx ) );
   };
+
+  // canvas.start();
 
   function refresh() {
     canvas.update( 0 );
