@@ -5,6 +5,7 @@ export const Constants = {
   TargetWeight: 0.25,
   AvoidDistance: 40,
   AvoidWeight: 4,
+  AlignDistance: 40,
   AlignWeight: 5,
   UIScale: 100,
   Debug: false,
@@ -17,7 +18,7 @@ export class Entity {
   x = 0;
   y = 0;
   angle = 0;
-  size = 1;
+  size = 0;
 
   dx = 0;
   dy = 0;
@@ -45,9 +46,8 @@ export class Entity {
     Object.assign( this, values );
     this.info = info;
 
-    if ( this.info.boundingPoints ) {
-      this.boundingLines = new BoundingLines( this.info.boundingPoints );
-      this.boundingLines.update( this );
+    if ( !this.size ) {
+      this.size = this.info.minSize + ( this.info.maxSize - this.info.minSize ) * Math.random();
     }
 
     if ( this.info.maxTurnSpeed ) {
@@ -56,6 +56,11 @@ export class Entity {
 
     if ( this.info.maxMoveSpeed ) {
       this.moveSpeed = 0;
+    }
+
+    if ( this.info.boundingPoints ) {
+      this.boundingLines = new BoundingLines( this.info.boundingPoints );
+      this.boundingLines.update( this );
     }
   }
 
@@ -207,7 +212,7 @@ export class Entity {
           color: 'red',
         } );
         
-        // const alignWeight = Constants.AlignWeight / dist;
+        // const alignWeight = Constants.AlignWeight * Math.max( 0, Constants.AlignDistance / dist - 1 );
         // const averageAngle = this.angle + Util.deltaAngle( this.angle, other.angle ) / 2;
         
         // vectors.push ( {
