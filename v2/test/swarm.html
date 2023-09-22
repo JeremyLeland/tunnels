@@ -2,7 +2,7 @@
 <link rel="stylesheet" href="../grid.css">
 
 <script type="module">
-  import { AnimatedCanvas } from '../src/AnimatedCanvas.js';
+  import { Canvas } from '../src/common/Canvas.js';
   import { Entity, Constants } from '../src/Entity.js';
   import { EntitySimulator } from './EntitySimulator.js';
   import { ValuesPanel } from './ValuesPanel.js';
@@ -13,13 +13,13 @@
   const AlienInfo = {
     type: 'alien',
     
-    maxMoveSpeed: 0.005,
+    maxMoveSpeed: 0.0005,
     maxTurnSpeed: 0.005,
-    moveAccel: 0.00002,
+    moveAccel: 0.000002,
     turnAccel: 0.00002,
 
-    minSize: 8,
-    maxSize: 12,
+    minSize: 0.8,
+    maxSize: 1.2,
     boundingPoints: [
       [ -1,  0 ],
       [  1, -1 ],
@@ -37,8 +37,8 @@
   for ( let r = 0; r < 4; r ++ ) {
     for ( let c = 0; c < 4; c ++ ) {
       entities.push( new Entity( {
-        x: 200 + c * 30, 
-        y: 200 + r * 30,
+        x: 2 + c * 0.30, 
+        y: 2 + r * 0.30,
         angle: 0,
       }, AlienInfo ) );
     }
@@ -47,9 +47,10 @@
   // new ValuesPanel( Constants ).valueChanged = refresh;
   // new EntitySimulator( entities ).onInput = refresh;
 
-  const canvas = new AnimatedCanvas();
+  const canvas = new Canvas();
 
-  let mouseX = 500, mouseY = 500;
+  let mouseX = 15, mouseY = 15;
+  const SIZE = 40;
 
   canvas.update = ( dt ) => {
     entities.forEach( e => {
@@ -59,6 +60,9 @@
   };
   
   canvas.draw = ( ctx ) => {
+    ctx.scale( 1 / SIZE, 1 / SIZE );
+    ctx.lineWidth = SIZE / canvas.scale;
+
     entities.forEach( e => e.draw( ctx ) );
   };
 
@@ -84,9 +88,9 @@
 
   canvas.start();
 
-  document.addEventListener( 'mousemove', ( e ) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
+  document.addEventListener( 'pointerdown', ( e ) => {
+    mouseX = Math.round( SIZE * e.offsetX / canvas.scale );
+    mouseY = Math.round( SIZE * e.offsetY / canvas.scale );
   } );
   
 </script>

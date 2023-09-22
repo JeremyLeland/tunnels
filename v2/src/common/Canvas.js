@@ -4,12 +4,16 @@ export class Canvas {
   #reqId;
 
   constructor( canvas ) {
-    this.canvas = canvas ?? document.createElement( 'canvas' );
-    this.canvas.oncontextmenu = () => { return false };
-
-    if ( !canvas ) {
+    this.canvas = canvas;
+    
+    if ( !this.canvas ) {
+      this.canvas = document.createElement( 'canvas' );
+      this.canvas.style.width = '100%';
+      this.canvas.style.height = '100%';
       document.body.appendChild( this.canvas );
     }
+    
+    this.canvas.oncontextmenu = () => { return false };
     
     this.ctx = this.canvas.getContext( '2d' /*, { alpha: false }*/ );
 
