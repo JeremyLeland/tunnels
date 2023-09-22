@@ -23,16 +23,16 @@ export class Line {
     ctx.beginPath();
     ctx.moveTo( this.x1, this.y1 );
     ctx.lineTo( this.x2, this.y2 );
-    ctx.lineWidth = 1;
+    // ctx.lineWidth = 1;
     ctx.stroke();
 
     const midX = ( this.x1 + this.x2 ) / 2;
     const midY = ( this.y1 + this.y2 ) / 2;
-    const NORM_LEN = 10;
+    const NORM_LEN = 1;
     ctx.beginPath();
     ctx.moveTo( midX, midY );
     ctx.lineTo( midX + this.normal.x * NORM_LEN, midY + this.normal.y * NORM_LEN );
-    ctx.lineWidth = 0.5;
+    // ctx.lineWidth = 0.5;
     ctx.stroke();
   }
 

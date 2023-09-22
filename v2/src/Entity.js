@@ -3,11 +3,11 @@ import * as Util from "./Util.js";
 
 export const Constants = {
   TargetWeight: 0.25,
-  AvoidDistance: 40,
+  AvoidDistance: 4,
   AvoidWeight: 4,
-  AlignDistance: 40,
+  AlignDistance: 4,
   AlignWeight: 5,
-  UIScale: 100,
+  UIScale: 1,
   Debug: false,
 };
 
@@ -384,7 +384,7 @@ export class Entity {
       ctx.fillStyle = e.fillStyle;
       ctx.fill( e.path );
       ctx.strokeStyle = 'black';
-      ctx.lineWidth = 1 / this.size;
+      // ctx.lineWidth = 1 / this.size;
       ctx.stroke( e.path );
     } );
 
@@ -401,7 +401,7 @@ export class Entity {
         ctx.beginPath();
         ctx.moveTo( this.goal.x, this.goal.y );
         ctx.lineTo( this.x, this.y );
-        ctx.setLineDash( [ 5, 5 ] );
+        ctx.setLineDash( [ 0.2, 0.2 ] );
         ctx.stroke();
         ctx.setLineDash( [] );
       }
@@ -450,7 +450,7 @@ function drawVector( vector, ctx, color = 'white' ) {
     ctx.lineTo( x, y );
     ctx.stroke();
     
-    const HEAD_LENGTH = 5;
+    const HEAD_LENGTH = 0.2;
     const HEAD_WIDTH = 2.5;
     ctx.beginPath();
     ctx.moveTo( x, y );

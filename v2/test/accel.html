@@ -1,8 +1,26 @@
 <title>Acceleration-based Turning and Movement</title>
 <link rel="stylesheet" href="../grid.css">
 
+
+<style>
+  body {
+    width: 100%;
+    height: 100%;
+  }
+  canvas {
+    width: 100%;
+    height: 100%;
+  }
+</style>
+
+<body>
+  <!-- <div style="width: 100%; height: 100%"> -->
+    <canvas id='canvas'></canvas>
+  <!-- </div> -->
+</body>
+
 <script type="module">
-  import { AnimatedCanvas } from '../src/AnimatedCanvas.js';
+  import { Canvas } from '../src/common/Canvas.js';
   import { Entity, Constants } from '../src/Entity.js';
   import { ValuesPanel } from './ValuesPanel.js';
 
@@ -11,9 +29,9 @@
 
   const AlienInfo = {
     type: 'alien',
-    maxMoveSpeed: 0.01,
+    maxMoveSpeed: 0.001,
     maxTurnSpeed: 0.005,
-    moveAccel: 0.00002,
+    moveAccel: 0.000002,
     turnAccel: 0.00002,
     boundingPoints: [
       [ -1,  0 ],
@@ -27,15 +45,16 @@
   };
 
   const entities = [
-    new Entity( { x: 200, y: 200, size: 20, angle: 0 }, AlienInfo ),
+    new Entity( { x: 10, y: 10, size: 1, angle: 0 }, AlienInfo ),
   ];
 
   
   new ValuesPanel( AlienInfo );
 
-  const canvas = new AnimatedCanvas();
+  const canvas = new Canvas( document.getElementById( 'canvas' ) );
 
-  let mouseX = 300, mouseY = 100;
+  let mouseX = 15, mouseY = 15;
+  const SIZE = 30;
 
   canvas.update = ( dt ) => {
     entities.forEach( e => {
@@ -45,20 +64,17 @@
   };
   
   canvas.draw = ( ctx ) => {
+    ctx.scale( 1 / SIZE, 1 / SIZE );
+    ctx.lineWidth = SIZE / canvas.scale;
+
     entities.forEach( e => e.draw( ctx ) );
   };
 
   canvas.start();
 
-  document.addEventListener( 'mousedown', ( e ) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
+  document.addEventListener( 'pointerdown', ( e ) => {
+    mouseX = Math.round( SIZE * e.offsetX / canvas.scale );
+    mouseY = Math.round( SIZE * e.offsetY / canvas.scale );
   } );
-
-  // document.addEventListener( 'mousemove', ( e ) => {
-  //   mouseX = e.clientX;
-  //   mouseY = e.clientY;
-  // } );
-
   
 </script>

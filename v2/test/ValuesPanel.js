@@ -2,6 +2,8 @@ export class ValuesPanel {
   constructor( values ) {
     const panelUI = document.createElement( 'div' );
     panelUI.style.position = 'absolute';
+    panelUI.style.left = 0;
+    panelUI.style.top = 0;
     panelUI.style.display = 'grid';
 
     let labelLength = 0, valueLength = 0;
